@@ -6,8 +6,9 @@
     "dev": "nuxt",
     "build": "nuxt build",
     "start": "nuxt start",
-    "generate": "nuxt generate",
-    "deploy": "gh-pages -d dist",
+    "generate": "rm -rf dist; nuxt generate",
+    "deploy": "gh-pages -d dist --dotfiles",
+    "gh-pages-help": "gh-pages --help",
     "lint:js": "eslint --ext \".js,.vue\" --ignore-path .gitignore .",
     "lint": "yarn lint:js"
   },
