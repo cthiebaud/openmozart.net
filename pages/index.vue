@@ -7,12 +7,10 @@
 <script>
 export default {
   mounted() {
-    this.init() // method1 will execute at pageload
+    this.init()
   },
   methods: {
     init() {
-      // eslint-disable-next-line no-console
-      console.log('inited')
       document
         .getElementById('portrait-image')
         .addEventListener('load', function () {
@@ -30,7 +28,6 @@ body {
   position: relative;
 }
 canvas {
-  background-color: #ccc;
   display: block;
   position: absolute;
   top: 0;

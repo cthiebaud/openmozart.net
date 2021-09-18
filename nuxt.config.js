@@ -5,6 +5,10 @@ export default {
   // Target: https://go.nuxtjs.dev/config-target
   target: 'static',
 
+  server: {
+    port: process.env.PORT || 5000 // default: 3000
+  },
+
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
     title: 'openmozart.net',
