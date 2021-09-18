@@ -54,36 +54,6 @@
     img.parentNode.replaceChild(canvas, img)
   }
 
-  ClosePixelation.prototype.fit = function (contains) {
-    return (
-      parentWidth,
-      parentHeight,
-      childWidth,
-      childHeight,
-      scale = 1,
-      offsetX = 0.5,
-      offsetY = 0.5
-    ) => {
-      const childRatio = childWidth / childHeight
-      const parentRatio = parentWidth / parentHeight
-      let width = parentWidth * scale
-      let height = parentHeight * scale
-
-      if (contains ? childRatio > parentRatio : childRatio < parentRatio) {
-        height = width / childRatio
-      } else {
-        width = height * childRatio
-      }
-
-      return {
-        width,
-        height,
-        offsetX: (parentWidth - width) * offsetX,
-        offsetY: (parentHeight - height) * offsetY
-      }
-    }
-  }
-
   ClosePixelation.prototype.render = function (options) {
     this.options = options
 
@@ -118,16 +88,19 @@
 
     // option defaults
     const res = opts.resolution || { cx: 16, cy: 16 }
-    const size = opts.size || { cx: res.cx, cy: res.cy }
+    const size = opts.size || { cx: Math.ceil(res.cx_), cy: Math.ceil(res.cy_) }
     const alpha = opts.alpha || 1
     const offset = opts.offset || 0
     let offsetX = 0
     let offsetY = 0
-    const cols = w / res.cx + 1
-    const rows = h / res.cy + 1
+    const cols = w / res.cx_ + 1
+    const rows = h / res.cy_ + 1
     const halfSize = { cx: size.cx / 2, cy: size.cy / 2 }
     const diamondSize = size.cx / Math.SQRT2
     const halfDiamondSize = diamondSize / 2
+
+    // console.log('opts.resolution', opts.resolution)
+    // console.log('w', w, 'cols', cols, "res.cx_", res.cx_, 'h', h, 'rows', rows, "res.cy_", res.cy_, )
 
     if (isObject(offset)) {
       offsetX = offset.x || 0
@@ -139,15 +112,20 @@
       offsetX = offsetY = offset
     }
 
-    let row, col, x, y, pixelY, pixelX, pixelIndex, red, green, blue, pixelAlpha
+    // console.log('res', res)
 
+    let row, col, x_, y_, x, y, pixelY, pixelX, pixelIndex, red, green, blue, pixelAlpha
+    let i = 0
     for (row = 0; row < rows; row++) {
-      y = (row - 0.5) * res.cy + offsetY
+      y_ = (row - 0.5) * res.cy_
+      y = Math.round(y_) + offsetY
+      // console.log('row', row, 'y', y)
       // normalize y so shapes around edges get color
       pixelY = Math.max(Math.min(y, h - 1), 0)
 
       for (col = 0; col < cols; col++) {
-        x = (col - 0.5) * res.cx + offsetX
+        x_ = (col - 0.5) * res.cx_ 
+        x = Math.round(x_ )+ offsetX
         // normalize x so shapes around edges get color
         pixelX = Math.max(Math.min(x, w - 1), 0)
         pixelIndex = (pixelX + pixelY * w) * 4
@@ -180,10 +158,19 @@
             break
           default:
             // square
-            ctx.fillRect(x - halfSize.cx, y - halfSize.cy, size.cx, size.cy)
+            ctx.fillRect(x_ - halfSize.cx, y_ - halfSize.cy, size.cx, size.cy)
+            // eslint-disable-next-line no-constant-condition
+            if (false && (col + 1 ) % Math.round(cols) === 0) {
+              ctx.strokeStyle = 'white'
+              ctx.textAlign = 'right'
+              ctx.font = '12px monospace'
+              ctx.strokeText(i, x_, y_)
+            }
+            i++
         } // switch
       } // col
     } // row
+    console.log(i)
   }
 
   // enable img.closePixelate
