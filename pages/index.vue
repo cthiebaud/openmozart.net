@@ -8,7 +8,7 @@ export default {}
 
 <style>
 body {
-  background: url(/jpegs/Mozart-Lange.jpg) no-repeat center center;
+  background: url(/jpegs/Mozart-Lange-darker.jpg) no-repeat center center;
   background-size: cover;
   overflow: hidden;
 }
