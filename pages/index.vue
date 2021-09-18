@@ -16,7 +16,7 @@ export default {
         .addEventListener('load', function () {
           document
             .getElementById('portrait-image')
-            .closePixelate([{ resolution: 16 }])
+            .closePixelate([{ resolution: { cx: 14, cy: 18 } }])
         })
     }
   }
@@ -27,7 +27,8 @@ export default {
 body {
   position: relative;
 }
-canvas {
+canvas,
+img {
   display: block;
   position: absolute;
   top: 0;
