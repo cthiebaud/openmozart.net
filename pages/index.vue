@@ -1,5 +1,5 @@
 <template>
-  <main class="vh-100">
+  <main class="vh-100" style="background-color: #1B0B03;">
     <img id="portrait-image" src="/jpegs/Mozart-Lange-darker.jpg" />
   </main>
 </template>
@@ -11,12 +11,13 @@ export default {
   },
   methods: {
     init() {
-      const rowscols = this.getRowsCols(window.innerWidth, window.innerHeight)
       // eslint-disable-next-line no-console
-      console.log(rowscols)
+      // console.log(rowscols)
+      const _this = this
       document
         .getElementById('portrait-image')
-        .addEventListener('load', function () {
+        .addEventListener('load', function (e) {
+          const rowscols = _this.getRowsCols(this.width, this.height)
           document.getElementById('portrait-image').closePixelate([
             {
               resolution: rowscols
@@ -58,14 +59,16 @@ export default {
 
       const theRatio = ratios[i]
       // eslint-disable-next-line no-console
-      console.log('theRatio', theRatio)
+      // console.log('theRatio', theRatio)
       function mulitpleOfTwo(n) {
         return Math.round(n/2)* 2      }
       const x = theRatio.x * theWord.length
       const y = theRatio.y
-      const cx = mulitpleOfTwo(w / x)
-      const cy = mulitpleOfTwo(h / y)
-      return { x, y, cx, cy }
+      const cx_ =(w / x)
+      const cy_ = (h / y)
+      const cx = mulitpleOfTwo(cx_)
+      const cy = mulitpleOfTwo(cy_)
+      return { x, y, cx, cy, cx_, cy_}
     },
     // https://www.freecodecamp.org/news/how-to-factorialize-a-number-in-javascript-9263c89a4b38/
     factorialize(num) {
