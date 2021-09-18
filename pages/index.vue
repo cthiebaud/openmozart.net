@@ -18,7 +18,7 @@ export default {
         .addEventListener('load', function () {
           document
             .getElementById('portrait-image')
-            .closePixelate([{ resolution: 16 }])
+            .closePixelate([{ resolution: 48 }])
         })
     }
   }
