@@ -60,6 +60,10 @@ export default {
       {
         src: 'https://cdn.jsdelivr.net/npm/bootstrap@latest/dist/js/bootstrap.min.js',
         type: 'text/javascript'
+      },
+      {
+        type: 'text/javascript',
+        src: '/js/close-pixelate.js'
       }
     ]
   },
