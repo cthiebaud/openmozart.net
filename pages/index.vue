@@ -27,8 +27,7 @@ export default {
 body {
   position: relative;
 }
-canvas,
-img {
+canvas {
   display: block;
   position: absolute;
   top: 0;
