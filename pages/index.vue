@@ -1,5 +1,5 @@
 <template>
-  <main class="vh-100" style="background-color: #160804">
+  <main class="vh-100" style="background-color: #160804" @click="onClick">
     <img id="portrait-image" src="/jpegs/Mozart-Lange-darker.jpg" />
   </main>
 </template>
@@ -12,32 +12,54 @@ export default {
     const shuffle = this.shuffleArray([...Array(factorial).keys()])
     const fontFamily = 'monospace'
     const textSize = 20
+    const theObject = {}
     return {
       word,
       factorial,
       shuffle,
       fontFamily,
-      textSize
+      textSize,
+      theObject
     }
   },
   mounted() {
     this.init()
   },
   methods: {
+    onClick(pointerEvent) {
+      // eslint-disable-next-line no-console
+      console.log('clicked!', pointerEvent)
+      this.shuffle = this.shuffleArray([...Array(this.factorial).keys()])
+      this.myMethod()
+    },
+    myMethod(img) {
+      const options = {
+        resolution: this.calcResolution, // { cx: grain, cy: grain, cx_: grain, cy_: grain },
+        word: this.word,
+        fontFamily: this.fontFamily,
+        wordAsArray: this.word.split(''),
+        shape: this.letter
+      }
+      this.textSize = undefined
+      if (img) {
+        this.theObject = img.closePixelate(options)
+      } else {
+        this.theObject.render(options)
+      }
+      return this.theObject
+    },
     init() {
       const _this = this
+
       document
         .getElementById('portrait-image')
         .addEventListener('load', function (e) {
+          // eslint-disable-next-line no-console
+          console.log('loaded!', this)
           // const grain = 16
-          _this.textSize = undefined
-          document.getElementById('portrait-image').closePixelate({
-            resolution: _this.calcResolution, // { cx: grain, cy: grain, cx_: grain, cy_: grain },
-            word: _this.word,
-            fontFamily: _this.fontFamily,
-            wordAsArray: _this.word.split(''),
-            shape: _this.letter
-          })
+          _this.myMethod(this)
+          // eslint-disable-next-line no-console
+          console.log('loaded!', this, this.theObject)
         })
     },
     // https://stackoverflow.com/a/54018834/1070215
