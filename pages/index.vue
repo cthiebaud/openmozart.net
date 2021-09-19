@@ -17,17 +17,16 @@ export default {
       document
         .getElementById('portrait-image')
         .addEventListener('load', function (e) {
-          const rowscols = _this.getRowsCols(this.width, this.height)
           document.getElementById('portrait-image').closePixelate([
             {
-              resolution: rowscols
+              resolution: _this.getRowsCols,
+              word: "MOZART"
             }
           ])
         })
     },
-    getRowsCols(w, h) {
-      const theWord = 'MOZART'
-      const factorial = this.factorialize(theWord.length)
+    getRowsCols(word, eW, eH, wW, wH) {
+      const factorial = this.factorialize(word.length)
       const divisorsList = this.getDivisorsList(factorial)
       const ratios = divisorsList.map((x) => {
         return {
@@ -43,7 +42,7 @@ export default {
       }
       const boxRatio = box.cx / box.cy
 
-      const targetRatoi = w / boxRatio / h
+      const targetRatoi = wW / boxRatio / wH
 
       let i = this.binarySearch(
         ratios.map((r) => r.ratio),
@@ -62,16 +61,17 @@ export default {
       // console.log('theRatio', theRatio)
       function mulitpleOfTwo(n) {
         return Math.round(n/2)* 2      }
-      const x = theRatio.x * theWord.length
+      const x = theRatio.x * word.length
       const y = theRatio.y
-      const cx_ =(w / x)
-      const cy_ = (h / y)
+      const cx_ =(wW / x)
+      const cy_ = (wH / y)
       const cx = mulitpleOfTwo(cx_)
       const cy = mulitpleOfTwo(cy_)
       return { x, y, cx, cy, cx_, cy_}
     },
     // https://www.freecodecamp.org/news/how-to-factorialize-a-number-in-javascript-9263c89a4b38/
     factorialize(num) {
+      if (typeof num === "undefined") return undefined
       if (num < 0) return -1
       else if (num === 0) return 1
       else {
@@ -126,6 +126,7 @@ canvas {
   bottom: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: 50% 50%;
 }
 </style>

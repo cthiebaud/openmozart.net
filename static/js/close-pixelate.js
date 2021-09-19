@@ -11,7 +11,8 @@
 
 /* jshint asi: true, browser: true, eqeqeq: true, forin: false, immed: false, newcap: true, noempty: true, strict: true, undef: true */
 
-;(function (window) {
+;
+(function (window) {
   //
   'use strict'
 
@@ -27,6 +28,13 @@
   function isObject(obj) {
     return Object.prototype.toString.call(obj) === '[object Object]'
   }
+
+  // https://stackoverflow.com/a/55785839/1070215
+  const isFunction = (value) =>
+    value &&
+    (Object.prototype.toString.call(value) === '[object Function]' ||
+      typeof value === 'function' ||
+      value instanceof Function)
 
   // check for canvas support
   const canvas = document.createElement('canvas')
@@ -85,16 +93,32 @@
     const ctx = this.ctx
     const imgData = this.imgData
 
+    let res
+    if (isFunction(opts.resolution) && opts.word) {
+      const metrics = ctx.measureText(opts.word)
+      res = opts.resolution(opts.word, metrics.width, metrics.height, w, h)
+    } else {
+      res = opts.resolution || {
+        cx: 16,
+        cy: 16
+      }
+    }
+
     // option defaults
-    const res = opts.resolution || { cx: 16, cy: 16 }
-    const size = opts.size || { cx: Math.ceil(res.cx_), cy: Math.ceil(res.cy_) }
+    const size = opts.size || {
+      cx: Math.ceil(res.cx_),
+      cy: Math.ceil(res.cy_)
+    }
     const alpha = opts.alpha || 1
     const offset = opts.offset || 0
     let offsetX = 0
     let offsetY = 0
     const cols = w / res.cx_ + 1
     const rows = h / res.cy_ + 1
-    const halfSize = { cx: size.cx / 2, cy: size.cy / 2 }
+    const halfSize = {
+      cx: size.cx / 2,
+      cy: size.cy / 2
+    }
     const diamondSize = size.cx / Math.SQRT2
     const halfDiamondSize = diamondSize / 2
 
@@ -110,20 +134,24 @@
 
     let row, col, x_, y_, x, y, pixelY, pixelX, pixelIndex
 
-    let i = 0
+    const markers = []
     for (row = 0; row < rows; row++) {
-      y_ = (row - 0.5) * res.cy_
+      y_ = (row /* - 0.5 */ ) * res.cy_
       y = Math.round(y_) + offsetY
       // normalize y so shapes around edges get color
       pixelY = Math.max(Math.min(y, h - 1), 0)
 
       for (col = 0; col < cols; col++) {
-        x_ = (col - 0.5) * res.cx_
+        x_ = (col /* - 0.5 */ ) * res.cx_
         x = Math.round(x_) + offsetX
         // normalize x so shapes around edges get color
         pixelX = Math.max(Math.min(x, w - 1), 0)
 
-        const rgb = { r: 0, g: 0, b: 0 }
+        const rgb = {
+          r: 0,
+          g: 0,
+          b: 0
+        }
         let count = 0
         for (let Y = 0; Y < res.cy; Y++) {
           for (let X = 0; X < res.cy; X++) {
@@ -140,7 +168,8 @@
         rgb.r = Math.round(Math.sqrt(rgb.r / count))
         rgb.g = Math.round(Math.sqrt(rgb.g / count))
         rgb.b = Math.round(Math.sqrt(rgb.b / count))
-        ctx.fillStyle = 'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',' + alpha + ')'
+        ctx.fillStyle =
+          'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',' + alpha + ')'
 
         switch (opts.shape) {
           case 'circle':
@@ -163,20 +192,37 @@
             break
           default:
             // square
-            ctx.fillRect(x_ - halfSize.cx, y_ - halfSize.cy, size.cx, size.cy)
-            // eslint-disable-next-line no-constant-condition
-            if (false && (col + 1) % Math.round(cols) === 0) {
-              ctx.strokeStyle = 'white'
-              ctx.textAlign = 'right'
-              ctx.font = '12px monospace'
-              ctx.strokeText(i, x_, y_)
+            /* beautify ignore:start */
+            /* beautify ignore:end */
+            // four corners
+            if (
+              (row === 0 || (row + 1) % Math.round(rows) === 0) &&
+              (col === 0 || (col + 1) % Math.round(cols) === 0)
+            ) {
+              markers.push({
+                text: row + "x" + col,
+                textAlign: col === 0 ? 'left' : 'right',
+                x: col * res.cx_,
+                y: row * res.cy_
+              })
             }
-            i++
+            ctx.fillRect(x_ - halfSize.cx, y_ - halfSize.cy, size.cx, size.cy)
         } // switch
       } // col
     } // row
-    // eslint-disable-next-line no-console
-    console.log(i)
+    ctx.save();
+    ctx.translate(0, size.cy);
+    // ctx.scale(.9, .9);
+    ctx.fillStyle = 'white'
+    ctx.font = '32px monospace'
+
+    markers.forEach(m => {
+      // eslint-disable-next-line no-console
+      console.log(m)
+      ctx.textAlign = m.textAlign
+      ctx.fillText(m.text, m.x + (m.x === 0 ? 1 : -1), m.y + (m.y === 0 ? 2 : - size.cy - 2))
+    })
+    ctx.restore();
   }
 
   // enable img.closePixelate
