@@ -1,29 +1,101 @@
 <template>
-  <main class="vh-100" style="background-color: #060507">
+  <main class="vh-100" style="background-color: #060507"> 
     <img id="portrait-image" src="/jpegs/Mozart-Lange-darker.jpg" />
   </main>
 </template>
 
 <script>
 export default {
+  data() {
+    const word = 'MOZART'
+    const factorial = this.factorialize(word.length)
+    const shuffle = this.shuffleArray([...Array(factorial).keys()])
+    return {
+      word,
+      factorial,
+      shuffle
+    }
+  },
   mounted() {
     this.init()
   },
   methods: {
     init() {
-      // eslint-disable-next-line no-console
-      // console.log(rowscols)
       const _this = this
       document
         .getElementById('portrait-image')
         .addEventListener('load', function (e) {
           // const grain = 16
           document.getElementById('portrait-image').closePixelate({
-            resolution: _this.calcResolution, // { cx: grain, cy: grain, cx_: grain, cy_: grain }, 
-            word: 'Mozart',
-            shape: 'circle'
+            resolution: _this.calcResolution, // { cx: grain, cy: grain, cx_: grain, cy_: grain },
+            word: _this.word,
+            wordAsArray: _this.word.split(''),
+            shape: _this.letter
           })
         })
+    },
+    // https://stackoverflow.com/a/54018834/1070215
+    pickPermutation(wordAsArray, factorial, nth) {
+      if (factorial < nth) {
+        // eslint-disable-next-line no-console
+        console.log(
+          `n (${nth}) cannot be larger than factorial (${factorial}) !!!`
+        )
+        return []
+        /*
+        throw new Error(
+          `n (${nth}) cannot be larger than factorial (${factorial}) !!!`
+        )}
+        */
+      }
+      // https://stackoverflow.com/a/44079852/1070215
+      /*
+        Let S be a copy of the initial string, 
+        L the length of that string and 
+        P the number of permutations (L!). 
+        T will be the n-th permutation of S, constructed step-by-step.
+        Example: S = "ABCD", L = 4, and P = 24. Let's take n = 15 for the example. T should be "CBDA" at the end.
+
+        Set P = P/L. 
+        Compute divmod(n, P), 
+        let q be the quotient (n/P) and 
+        r the remainder (n%P). 
+        Remove the q-th letter from S and append it to T. 
+        Set n = r, 
+        decrement L, 
+        and repeat until L = 0.
+      */
+      let n = nth
+      const S = [...wordAsArray]
+      const T = []
+      let P = factorial
+      let r, q, removed
+      while (S.length > 0) {
+        P /= S.length
+        r = n % P
+        q = (n - r) / P
+        removed = S.splice(q, 1)[0]
+        T.push(removed)
+        n = r
+      }
+      return T
+    },
+    letter(ctx, word, factorial, i, row, col, x, y, cx, cy, previousResult) {
+      let anagram = previousResult
+      if (typeof anagram === 'undefined' || anagram.length === 0) {
+        const random = this.shuffle[i / word.length]
+        anagram = this.pickPermutation(
+          word,
+          factorial,
+          random
+        )
+        if (random === 0) {
+          anagram = new Array(this.word.length).fill(' ');
+        }
+      }
+      const letter = anagram.shift()
+      ctx.fillText(letter, x, y + cy, cx)
+      return anagram
     },
     calcResolution(word, eW, eH, wW, wH) {
       const factorial = this.factorialize(word.length)
@@ -37,12 +109,8 @@ export default {
       })
 
       const wordRatio = eW / eH
-      // eslint-disable-next-line no-console
-      console.log('wordRatio', wordRatio)
 
       const targetRatio = wW / wH / wordRatio
-      // eslint-disable-next-line no-console
-      console.log('targetRatio', targetRatio)
 
       let i = this.binarySearch(
         ratios.map((r) => r.ratio),
@@ -57,8 +125,6 @@ export default {
       }
 
       const theRatio = ratios[i]
-      // eslint-disable-next-line no-console
-      // console.log('theRatio', theRatio)
       function mulitpleOfTwo(n) {
         return Math.round(n / 2) * 2
       }
@@ -68,7 +134,7 @@ export default {
       const cy_ = wH / y
       const cx = mulitpleOfTwo(cx_)
       const cy = mulitpleOfTwo(cy_)
-      return { x, y, cx, cy, cx_, cy_ }
+      return { x, y, cx, cy, cx_, cy_, factorial }
     },
     // https://www.freecodecamp.org/news/how-to-factorialize-a-number-in-javascript-9263c89a4b38/
     factorialize(num) {
@@ -109,6 +175,23 @@ export default {
         return midpoint + this.binarySearch(arr.slice(midpoint), target)
       }
       return midpoint
+    },
+    // http://stackoverflow.com/questions/20789373/shuffle-array-in-ng-repeat-angular
+    // -> Fisher–Yates shuffle algorithm
+    shuffleArray(array) {
+      let m = array.length
+      let t
+      let i
+      // While there remain elements to shuffle
+      while (m) {
+        // Pick a remaining element…
+        i = Math.floor(Math.random() * m--)
+        // And swap it with the current element.
+        t = array[m]
+        array[m] = array[i]
+        array[i] = t
+      }
+      return array
     }
   }
 }

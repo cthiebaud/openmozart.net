@@ -24,7 +24,7 @@
 
   // check for canvas support
   const canvas = document.createElement('canvas')
-  const isCanvasSupported = canvas.getContext && canvas.getContext('2d')
+  const isCanvasSupported = canvas.getContext && canvas.getContext('2d', {alpha: false}) // https://stackoverflow.com/a/28161474/1070215
 
   // don't proceed if canvas is no supported
   if (!isCanvasSupported) {
@@ -103,6 +103,8 @@
     let row, col, x_, y_, x, y, pixelY, pixelX, pixelIndex
 
     const markers = []
+    let i = 0
+    let shapeResult 
     for (row = 0; row < rows; row++) {
       y_ = row * res.cy_
       y = Math.round(y_)
@@ -161,20 +163,23 @@
           context.restore();
         }
 
-        switch (opts.shape) {
-          case 'circle':
-            ctx.beginPath()
-            ctx.arc(x + halfSize.cx, y + halfSize.cy, Math.min(halfSize.cx, halfSize.cy) - .666, 0, Math.PI * 2, true)
-            ctx.fill()
-            ctx.closePath()
-            break
-          case 'diamond':
-            drawDiamond(ctx, x, y, size.cx, size.cy)
-            break
-          default:
-            ctx.fillRect(x_, y_, size.cx, size.cy)
-        } // switch
-
+        if (isFunction(opts.shape) && opts.word) {
+          shapeResult = opts.shape(ctx, opts.wordAsArray, res.factorial, i, row, col, x_, y_, size.cx, size.cy, shapeResult)
+        } else {
+          switch (opts.shape) {
+            case 'circle':
+              ctx.beginPath()
+              ctx.arc(x + halfSize.cx, y + halfSize.cy, Math.min(halfSize.cx, halfSize.cy) - .666, 0, Math.PI * 2, true)
+              ctx.fill()
+              ctx.closePath()
+              break
+            case 'diamond':
+              drawDiamond(ctx, x, y, size.cx, size.cy)
+              break
+            default:
+              ctx.fillRect(x_, y_, size.cx, size.cy)
+          } // switch
+        }
         if (
           (row === 0 || (row + 1) % Math.round(rows) === 0) &&
           (col === 0 || (col + 1) % Math.round(cols) === 0)
@@ -185,6 +190,7 @@
             y: row * res.cy_
           })
         }
+        i++
       } // col
     } // row
     ctx.save();
@@ -192,8 +198,6 @@
     ctx.font = '20px monospace'
 
     markers.forEach(m => {
-      // eslint-disable-next-line no-console
-      console.log(m)
       ctx.textAlign = m.x === 0 ? 'left' : 'right'
       ctx.fillText(m.text,
         m.x + (m.x === 0 ? 0 : res.cx_),
