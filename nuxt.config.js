@@ -12,44 +12,76 @@ export default {
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
     title: 'openmozart.net',
-    meta: [
-      { charset: 'utf-8' },
-      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { hid: 'description', name: 'description', content: '' },
-      { name: 'format-detection', content: 'telephone=no' },
+    meta: [{
+        charset: 'utf-8'
+      },
+      {
+        name: 'viewport',
+        content: 'width=device-width, initial-scale=1'
+      },
+      {
+        hid: 'description',
+        name: 'description',
+        content: ''
+      },
+      {
+        name: 'format-detection',
+        content: 'telephone=no'
+      },
       // https://realfavicongenerator.net/
-      { name: 'apple-mobile-web-app-title', content: 'openmozart' },
-      { name: 'application-name', content: 'openmozart' },
-      { name: 'msapplication-TileColor', content: '#060507' },
-      { name: 'msapplication-config', content: '/favicon/browserconfig.xml?v=2' },
-      { name: 'theme-color', content: '#060507' }
+      {
+        name: 'apple-mobile-web-app-title',
+        content: 'openmozart'
+      },
+      {
+        name: 'application-name',
+        content: 'openmozart'
+      },
+      {
+        name: 'msapplication-TileColor',
+        content: '#160804'
+      },
+      {
+        name: 'msapplication-config',
+        content: '/favicon/browserconfig.xml?v=3'
+      },
+      {
+        name: 'theme-color',
+        content: '#160804'
+      }
     ],
     link: [
       // https://realfavicongenerator.net/
       {
         rel: 'apple-touch-icon',
         sizes: '180x180',
-        href: '/favicon/apple-touch-icon.png?v=2'
+        href: '/favicon/apple-touch-icon.png?v=3'
       },
       {
         rel: 'icon',
         type: 'image/png',
         sizes: '32x32',
-        href: '/favicon/favicon-32x32.png?v=2'
+        href: '/favicon/favicon-32x32.png?v=3'
       },
       {
         rel: 'icon',
         type: 'image/png',
         sizes: '16x16',
-        href: '/favicon/favicon-16x16.png?v=2'
+        href: '/favicon/favicon-16x16.png?v=3'
       },
-      { rel: 'manifest', href: '/favicon/site.webmanifest?v=2' },
+      {
+        rel: 'manifest',
+        href: '/favicon/site.webmanifest?v=3'
+      },
       {
         rel: 'mask-icon',
-        href: '/favicon/safari-pinned-tab.svg?v=2',
-        color: '#060507'
+        href: '/favicon/safari-pinned-tab.svg?v=3',
+        color: '#160804'
       },
-      { rel: 'shortcut icon', href: '/favicon/favicon.ico?v=2' },
+      {
+        rel: 'shortcut icon',
+        href: '/favicon/favicon.ico?v=3'
+      },
       //
       {
         rel: 'stylesheet',
@@ -57,8 +89,7 @@ export default {
         href: 'https://cdn.jsdelivr.net/npm/bootstrap@latest/dist/css/bootstrap.min.css'
       }
     ],
-    script: [
-      {
+    script: [{
         src: 'https://cdn.jsdelivr.net/npm/@popperjs/core@latest/dist/umd/popper.min.js',
         type: 'text/javascript'
       },

@@ -1,5 +1,5 @@
 <template>
-  <main class="vh-100" style="background-color: #060507"> 
+  <main class="vh-100" style="background-color: #160804">
     <img id="portrait-image" src="/jpegs/Mozart-Lange-darker.jpg" />
   </main>
 </template>
@@ -7,13 +7,17 @@
 <script>
 export default {
   data() {
-    const word = 'MOZART'
+    const word = 'MOZART' // 'МОЦАРТ' // 'モーツァルト'
     const factorial = this.factorialize(word.length)
     const shuffle = this.shuffleArray([...Array(factorial).keys()])
+    const fontFamily = 'monospace'
+    const textSize = 20
     return {
       word,
       factorial,
-      shuffle
+      shuffle,
+      fontFamily,
+      textSize
     }
   },
   mounted() {
@@ -26,9 +30,11 @@ export default {
         .getElementById('portrait-image')
         .addEventListener('load', function (e) {
           // const grain = 16
+          _this.textSize = undefined
           document.getElementById('portrait-image').closePixelate({
             resolution: _this.calcResolution, // { cx: grain, cy: grain, cx_: grain, cy_: grain },
             word: _this.word,
+            fontFamily: _this.fontFamily,
             wordAsArray: _this.word.split(''),
             shape: _this.letter
           })
@@ -80,20 +86,33 @@ export default {
       }
       return T
     },
-    letter(ctx, word, factorial, i, row, col, x, y, cx, cy, previousResult) {
+    letter(ctx, word, factorial, i, x, y, cx, cy, previousResult) {
+      // https://stackoverflow.com/a/56922947/1070215
+      function getFontSizeToFit(text, fontFamily) {
+        ctx.font = `bold 1px ${fontFamily} `
+        const metrics = ctx.measureText(text)
+        const w = metrics.width
+        // https://stackoverflow.com/a/46950087/1070215
+        const fontHeight =
+          metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent
+        // const actualHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+        return Math.min(cx / w, cy / fontHeight)
+      }
+
       let anagram = previousResult
       if (typeof anagram === 'undefined' || anagram.length === 0) {
         const random = this.shuffle[i / word.length]
-        anagram = this.pickPermutation(
-          word,
-          factorial,
-          random
-        )
+        anagram = this.pickPermutation(word, factorial, random)
         if (random === 0) {
-          anagram = new Array(this.word.length).fill(' ');
+          anagram = new Array(this.word.length).fill(' ')
         }
       }
       const letter = anagram.shift()
+      if (!this.textSize) {
+        this.textSize = getFontSizeToFit(letter, this.fontFamily)
+      }
+      ctx.font = `bold ${this.textSize}px ${this.fontFamily}`
+
       ctx.fillText(letter, x, y + cy, cx)
       return anagram
     },
