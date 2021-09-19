@@ -28,8 +28,6 @@
     return Object.prototype.toString.call(obj) === '[object Object]'
   }
 
-  const console = window.console
-
   // check for canvas support
   const canvas = document.createElement('canvas')
   const isCanvasSupported = canvas.getContext && canvas.getContext('2d')
@@ -68,6 +66,7 @@
       this.imgData = this.ctx.getImageData(0, 0, w, h).data
     } catch (error) {
       if (console) {
+        // eslint-disable-next-line no-console
         console.error(error)
       }
       return
@@ -99,9 +98,6 @@
     const diamondSize = size.cx / Math.SQRT2
     const halfDiamondSize = diamondSize / 2
 
-    // console.log('opts.resolution', opts.resolution)
-    // console.log('w', w, 'cols', cols, "res.cx_", res.cx_, 'h', h, 'rows', rows, "res.cy_", res.cy_, )
-
     if (isObject(offset)) {
       offsetX = offset.x || 0
       offsetY = offset.y || 0
@@ -112,30 +108,39 @@
       offsetX = offsetY = offset
     }
 
-    // console.log('res', res)
+    let row, col, x_, y_, x, y, pixelY, pixelX, pixelIndex
 
-    let row, col, x_, y_, x, y, pixelY, pixelX, pixelIndex, red, green, blue, pixelAlpha
     let i = 0
     for (row = 0; row < rows; row++) {
       y_ = (row - 0.5) * res.cy_
       y = Math.round(y_) + offsetY
-      // console.log('row', row, 'y', y)
       // normalize y so shapes around edges get color
       pixelY = Math.max(Math.min(y, h - 1), 0)
 
       for (col = 0; col < cols; col++) {
-        x_ = (col - 0.5) * res.cx_ 
-        x = Math.round(x_ )+ offsetX
+        x_ = (col - 0.5) * res.cx_
+        x = Math.round(x_) + offsetX
         // normalize x so shapes around edges get color
         pixelX = Math.max(Math.min(x, w - 1), 0)
-        pixelIndex = (pixelX + pixelY * w) * 4
-        red = imgData[pixelIndex + 0]
-        green = imgData[pixelIndex + 1]
-        blue = imgData[pixelIndex + 2]
-        pixelAlpha = alpha * (imgData[pixelIndex + 3] / 255)
 
-        ctx.fillStyle =
-          'rgba(' + red + ',' + green + ',' + blue + ',' + pixelAlpha + ')'
+        const rgb = { r: 0, g: 0, b: 0 }
+        let count = 0
+        for (let Y = 0; Y < res.cy; Y++) {
+          for (let X = 0; X < res.cy; X++) {
+            pixelIndex = (pixelX + X + (pixelY + Y) * w) * 4
+            // https://sighack.com/post/averaging-rgb-colors-the-right-way
+            rgb.r += imgData[pixelIndex] * imgData[pixelIndex]
+            rgb.g += imgData[pixelIndex + 1] * imgData[pixelIndex + 1]
+            rgb.b += imgData[pixelIndex + 2] * imgData[pixelIndex + 2]
+            count++
+          }
+        }
+
+        // ~~ used to floor values
+        rgb.r = Math.round(Math.sqrt(rgb.r / count))
+        rgb.g = Math.round(Math.sqrt(rgb.g / count))
+        rgb.b = Math.round(Math.sqrt(rgb.b / count))
+        ctx.fillStyle = 'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',' + alpha + ')'
 
         switch (opts.shape) {
           case 'circle':
@@ -160,7 +165,7 @@
             // square
             ctx.fillRect(x_ - halfSize.cx, y_ - halfSize.cy, size.cx, size.cy)
             // eslint-disable-next-line no-constant-condition
-            if (false && (col + 1 ) % Math.round(cols) === 0) {
+            if (false && (col + 1) % Math.round(cols) === 0) {
               ctx.strokeStyle = 'white'
               ctx.textAlign = 'right'
               ctx.font = '12px monospace'
@@ -170,6 +175,7 @@
         } // switch
       } // col
     } // row
+    // eslint-disable-next-line no-console
     console.log(i)
   }
 
