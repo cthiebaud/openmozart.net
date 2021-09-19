@@ -20,7 +20,8 @@ export default {
           document.getElementById('portrait-image').closePixelate([
             {
               resolution: _this.getRowsCols,
-              word: "MOZART"
+              word: "MOZART",
+              shape: 'diamond'
             }
           ])
         })
@@ -126,7 +127,7 @@ canvas {
   bottom: 0;
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
   object-position: 50% 50%;
 }
 </style>
