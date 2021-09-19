@@ -13,21 +13,7 @@
 
 ;
 (function (window) {
-  //
   'use strict'
-
-  // util vars
-  const TWO_PI = Math.PI * 2
-  const QUARTER_PI = Math.PI * 0.25
-
-  // utility functions
-  function isArray(obj) {
-    return Object.prototype.toString.call(obj) === '[object Array]'
-  }
-
-  function isObject(obj) {
-    return Object.prototype.toString.call(obj) === '[object Object]'
-  }
 
   // https://stackoverflow.com/a/55785839/1070215
   const isFunction = (value) =>
@@ -73,18 +59,14 @@
     try {
       this.imgData = this.ctx.getImageData(0, 0, w, h).data
     } catch (error) {
-      if (console) {
-        // eslint-disable-next-line no-console
-        console.error(error)
-      }
+      // eslint-disable-next-line no-console
+      console.error(error)
       return
     }
 
     this.ctx.clearRect(0, 0, w, h)
 
-    for (let i = 0, len = options.length; i < len; i++) {
-      this.renderClosePixels(options[i])
-    }
+    this.renderClosePixels(options)
   }
 
   ClosePixelation.prototype.renderClosePixels = function (opts) {
@@ -96,7 +78,8 @@
     let res
     if (isFunction(opts.resolution) && opts.word) {
       const metrics = ctx.measureText(opts.word)
-      res = opts.resolution(opts.word, metrics.width, metrics.height, w, h)
+      const actualHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+      res = opts.resolution(opts.word, metrics.width, actualHeight, w, h)
     } else {
       res = opts.resolution || {
         cx: 16,
@@ -110,16 +93,12 @@
       cy: Math.ceil(res.cy_)
     }
     const alpha = opts.alpha || 1
-    const cols = w / res.cx_ /* + 1 */
-    const rows = h / res.cy_ /* + 1 */
+    const cols = w / res.cx_
+    const rows = h / res.cy_
     const halfSize = {
       cx: size.cx / 2,
       cy: size.cy / 2
     }
-    const diamondSizeCX = size.cx / Math.SQRT2
-    const halfDiamondSizeCX = diamondSizeCX / 2
-    const diamondSizeCY = size.cy / Math.SQRT2
-    const halfDiamondSizeCY = diamondSizeCY / 2
 
     let row, col, x_, y_, x, y, pixelY, pixelX, pixelIndex
 
@@ -185,7 +164,7 @@
         switch (opts.shape) {
           case 'circle':
             ctx.beginPath()
-            ctx.arc(x + halfSize.cx, y + halfSize.cy, Math.min(halfSize.cx, halfSize.cy), 0, TWO_PI, true)
+            ctx.arc(x + halfSize.cx, y + halfSize.cy, Math.min(halfSize.cx, halfSize.cy) - .666, 0, Math.PI * 2, true)
             ctx.fill()
             ctx.closePath()
             break
@@ -193,8 +172,9 @@
             drawDiamond(ctx, x, y, size.cx, size.cy)
             break
           default:
-            ctx.fillRect(x_ /* - halfSize.cx */ , y_ /* - halfSize.cy */ , size.cx, size.cy)
+            ctx.fillRect(x_, y_, size.cx, size.cy)
         } // switch
+
         if (
           (row === 0 || (row + 1) % Math.round(rows) === 0) &&
           (col === 0 || (col + 1) % Math.round(cols) === 0)
@@ -215,13 +195,10 @@
       // eslint-disable-next-line no-console
       console.log(m)
       ctx.textAlign = m.x === 0 ? 'left' : 'right'
-      // ctx.fillRect(m.x, m.y, res.cx, res.cy)
-      /* beautify ignore:start */
-      ctx.fillText(m.text, 
+      ctx.fillText(m.text,
         m.x + (m.x === 0 ? 0 : res.cx_),
         m.y + res.cy_
       )
-      /* beautify ignore:end */
     })
     ctx.restore();
   }

@@ -1,5 +1,5 @@
 <template>
-  <main class="vh-100" style="background-color: #1B0B03;">
+  <main class="vh-100" style="background-color: #060507">
     <img id="portrait-image" src="/jpegs/Mozart-Lange-darker.jpg" />
   </main>
 </template>
@@ -17,16 +17,15 @@ export default {
       document
         .getElementById('portrait-image')
         .addEventListener('load', function (e) {
-          document.getElementById('portrait-image').closePixelate([
-            {
-              resolution: _this.getRowsCols,
-              word: "MOZART",
-              shape: 'diamond'
-            }
-          ])
+          // const grain = 16
+          document.getElementById('portrait-image').closePixelate({
+            resolution: _this.calcResolution, // { cx: grain, cy: grain, cx_: grain, cy_: grain }, 
+            word: 'Mozart',
+            shape: 'circle'
+          })
         })
     },
-    getRowsCols(word, eW, eH, wW, wH) {
+    calcResolution(word, eW, eH, wW, wH) {
       const factorial = this.factorialize(word.length)
       const divisorsList = this.getDivisorsList(factorial)
       const ratios = divisorsList.map((x) => {
@@ -37,21 +36,21 @@ export default {
         }
       })
 
-      const box = {
-        cx: 534.25,
-        cy: 151
-      }
-      const boxRatio = box.cx / box.cy
+      const wordRatio = eW / eH
+      // eslint-disable-next-line no-console
+      console.log('wordRatio', wordRatio)
 
-      const targetRatoi = wW / boxRatio / wH
+      const targetRatio = wW / wH / wordRatio
+      // eslint-disable-next-line no-console
+      console.log('targetRatio', targetRatio)
 
       let i = this.binarySearch(
         ratios.map((r) => r.ratio),
-        targetRatoi
+        targetRatio
       )
       if (i < ratios.length - 1) {
-        const r1 = Math.abs(targetRatoi - ratios[i].ratio)
-        const r2 = Math.abs(targetRatoi - ratios[i + 1].ratio)
+        const r1 = Math.abs(targetRatio - ratios[i].ratio)
+        const r2 = Math.abs(targetRatio - ratios[i + 1].ratio)
         if (r2 < r1) {
           i++
         }
@@ -61,18 +60,19 @@ export default {
       // eslint-disable-next-line no-console
       // console.log('theRatio', theRatio)
       function mulitpleOfTwo(n) {
-        return Math.round(n/2)* 2      }
+        return Math.round(n / 2) * 2
+      }
       const x = theRatio.x * word.length
       const y = theRatio.y
-      const cx_ =(wW / x)
-      const cy_ = (wH / y)
+      const cx_ = wW / x
+      const cy_ = wH / y
       const cx = mulitpleOfTwo(cx_)
       const cy = mulitpleOfTwo(cy_)
-      return { x, y, cx, cy, cx_, cy_}
+      return { x, y, cx, cy, cx_, cy_ }
     },
     // https://www.freecodecamp.org/news/how-to-factorialize-a-number-in-javascript-9263c89a4b38/
     factorialize(num) {
-      if (typeof num === "undefined") return undefined
+      if (typeof num === 'undefined') return undefined
       if (num < 0) return -1
       else if (num === 0) return 1
       else {

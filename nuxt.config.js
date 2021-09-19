@@ -18,37 +18,38 @@ export default {
       { hid: 'description', name: 'description', content: '' },
       { name: 'format-detection', content: 'telephone=no' },
       // https://realfavicongenerator.net/
-      { name: 'msapplication-TileColor', content: '#59260b' },
-      { name: 'msapplication-config', content: '/favicon/browserconfig.xml' },
-      { name: 'theme-color', content: '#59260b' }
+      { name: 'apple-mobile-web-app-title', content: 'openmozart' },
+      { name: 'application-name', content: 'openmozart' },
+      { name: 'msapplication-TileColor', content: '#060507' },
+      { name: 'msapplication-config', content: '/favicon/browserconfig.xml?v=2' },
+      { name: 'theme-color', content: '#060507' }
     ],
     link: [
-      // { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
       // https://realfavicongenerator.net/
       {
         rel: 'apple-touch-icon',
         sizes: '180x180',
-        href: '/favicon/apple-touch-icon.png'
+        href: '/favicon/apple-touch-icon.png?v=2'
       },
       {
         rel: 'icon',
         type: 'image/png',
         sizes: '32x32',
-        href: '/favicon/favicon-32x32.png'
+        href: '/favicon/favicon-32x32.png?v=2'
       },
       {
         rel: 'icon',
         type: 'image/png',
         sizes: '16x16',
-        href: '/favicon/favicon-16x16.png'
+        href: '/favicon/favicon-16x16.png?v=2'
       },
-      { rel: 'manifest', href: '/favicon/site.webmanifest' },
+      { rel: 'manifest', href: '/favicon/site.webmanifest?v=2' },
       {
         rel: 'mask-icon',
-        href: '/favicon/safari-pinned-tab.svg',
-        color: '#59260b'
+        href: '/favicon/safari-pinned-tab.svg?v=2',
+        color: '#060507'
       },
-      { rel: 'shortcut icon', href: '/favicon/favicon.ico' },
+      { rel: 'shortcut icon', href: '/favicon/favicon.ico?v=2' },
       //
       {
         rel: 'stylesheet',
