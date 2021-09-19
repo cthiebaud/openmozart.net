@@ -110,42 +110,31 @@
       cy: Math.ceil(res.cy_)
     }
     const alpha = opts.alpha || 1
-    const offset = opts.offset || 0
-    let offsetX = 0
-    let offsetY = 0
-    const cols = w / res.cx_ + 1
-    const rows = h / res.cy_ + 1
+    const cols = w / res.cx_ /* + 1 */
+    const rows = h / res.cy_ /* + 1 */
     const halfSize = {
       cx: size.cx / 2,
       cy: size.cy / 2
     }
-    const diamondSize = size.cx / Math.SQRT2
-    const halfDiamondSize = diamondSize / 2
-
-    if (isObject(offset)) {
-      offsetX = offset.x || 0
-      offsetY = offset.y || 0
-    } else if (isArray(offset)) {
-      offsetX = offset[0] || 0
-      offsetY = offset[1] || 0
-    } else {
-      offsetX = offsetY = offset
-    }
+    const diamondSizeCX = size.cx / Math.SQRT2
+    const halfDiamondSizeCX = diamondSizeCX / 2
+    const diamondSizeCY = size.cy / Math.SQRT2
+    const halfDiamondSizeCY = diamondSizeCY / 2
 
     let row, col, x_, y_, x, y, pixelY, pixelX, pixelIndex
 
     const markers = []
     for (row = 0; row < rows; row++) {
-      y_ = (row /* - 0.5 */ ) * res.cy_
-      y = Math.round(y_) + offsetY
+      y_ = row * res.cy_
+      y = Math.round(y_)
       // normalize y so shapes around edges get color
-      pixelY = Math.max(Math.min(y, h - 1), 0)
+      pixelY = Math.max(Math.min(y, h - res.cy), 0)
 
       for (col = 0; col < cols; col++) {
-        x_ = (col /* - 0.5 */ ) * res.cx_
-        x = Math.round(x_) + offsetX
+        x_ = col * res.cx_
+        x = Math.round(x_)
         // normalize x so shapes around edges get color
-        pixelX = Math.max(Math.min(x, w - 1), 0)
+        pixelX = Math.max(Math.min(x, w - res.cx), 0)
 
         const rgb = {
           r: 0,
@@ -154,7 +143,7 @@
         }
         let count = 0
         for (let Y = 0; Y < res.cy; Y++) {
-          for (let X = 0; X < res.cy; X++) {
+          for (let X = 0; X < res.cx; X++) {
             pixelIndex = (pixelX + X + (pixelY + Y) * w) * 4
             // https://sighack.com/post/averaging-rgb-colors-the-right-way
             rgb.r += imgData[pixelIndex] * imgData[pixelIndex]
@@ -171,56 +160,68 @@
         ctx.fillStyle =
           'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',' + alpha + ')'
 
+        function drawDiamond(context, x, y, width, height) {
+          context.save();
+          context.beginPath();
+          context.moveTo(x, y);
+
+          // top left edge
+          context.lineTo(x - width / 2, y + height / 2);
+
+          // bottom left edge
+          context.lineTo(x, y + height);
+
+          // bottom right edge
+          context.lineTo(x + width / 2, y + height / 2);
+
+          // closing the path automatically creates
+          // the top right edge
+          context.closePath();
+
+          context.fill();
+          context.restore();
+        }
+
         switch (opts.shape) {
           case 'circle':
             ctx.beginPath()
-            ctx.arc(x, y, halfSize.cx, halfSize.cy, TWO_PI, true)
+            ctx.arc(x + halfSize.cx, y + halfSize.cy, Math.min(halfSize.cx, halfSize.cy), 0, TWO_PI, true)
             ctx.fill()
             ctx.closePath()
             break
           case 'diamond':
-            ctx.save()
-            ctx.translate(x, y)
-            ctx.rotate(QUARTER_PI)
-            ctx.fillRect(
-              -halfDiamondSize,
-              -halfDiamondSize,
-              diamondSize,
-              diamondSize
-            )
-            ctx.restore()
+            drawDiamond(ctx, x, y, size.cx, size.cy)
             break
           default:
-            // square
-            /* beautify ignore:start */
-            /* beautify ignore:end */
-            // four corners
-            if (
-              (row === 0 || (row + 1) % Math.round(rows) === 0) &&
-              (col === 0 || (col + 1) % Math.round(cols) === 0)
-            ) {
-              markers.push({
-                text: row + "x" + col,
-                textAlign: col === 0 ? 'left' : 'right',
-                x: col * res.cx_,
-                y: row * res.cy_
-              })
-            }
-            ctx.fillRect(x_ - halfSize.cx, y_ - halfSize.cy, size.cx, size.cy)
+            ctx.fillRect(x_ /* - halfSize.cx */ , y_ /* - halfSize.cy */ , size.cx, size.cy)
         } // switch
+        if (
+          (row === 0 || (row + 1) % Math.round(rows) === 0) &&
+          (col === 0 || (col + 1) % Math.round(cols) === 0)
+        ) {
+          markers.push({
+            text: (row + 1) + "x" + (col + 1),
+            x: col * res.cx_,
+            y: row * res.cy_
+          })
+        }
       } // col
     } // row
     ctx.save();
-    ctx.translate(0, size.cy);
-    // ctx.scale(.9, .9);
-    ctx.fillStyle = 'white'
-    ctx.font = '32px monospace'
+    ctx.fillStyle = 'azure'
+    ctx.font = '20px monospace'
 
     markers.forEach(m => {
       // eslint-disable-next-line no-console
       console.log(m)
-      ctx.textAlign = m.textAlign
-      ctx.fillText(m.text, m.x + (m.x === 0 ? 1 : -1), m.y + (m.y === 0 ? 2 : - size.cy - 2))
+      ctx.textAlign = m.x === 0 ? 'left' : 'right'
+      // ctx.fillRect(m.x, m.y, res.cx, res.cy)
+      /* beautify ignore:start */
+      ctx.fillText(m.text, 
+        m.x + (m.x === 0 ? 0 : res.cx_),
+        m.y + res.cy_
+      )
+      /* beautify ignore:end */
     })
     ctx.restore();
   }
