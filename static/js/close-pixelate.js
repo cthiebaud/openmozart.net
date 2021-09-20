@@ -35,7 +35,7 @@
 
   function ClosePixelation(img, options) {
     this.img = img
-    // creat canvas
+    // create canvas
     const canvas = (this.canvas = document.createElement('canvas'))
     this.ctx = canvas.getContext('2d')
     // copy attributes from img to canvas
@@ -92,12 +92,12 @@
 
     // option defaults
     const size = opts.size || {
-      cx: Math.ceil(res.cx_),
-      cy: Math.ceil(res.cy_)
+      cx: Math.ceil(res.cx),
+      cy: Math.ceil(res.cy)
     }
     const alpha = opts.alpha || 1
-    const cols = w / res.cx_
-    const rows = h / res.cy_
+    const cols = w / res.cx
+    const rows = h / res.cy
     const halfSize = {
       cx: size.cx / 2,
       cy: size.cy / 2
@@ -109,13 +109,13 @@
     let i = 0
     let shapeResult
     for (row = 0; row < rows; row++) {
-      y_ = row * res.cy_
+      y_ = row * res.cy
       y = Math.round(y_)
       // normalize y so shapes around edges get color
       pixelY = Math.max(Math.min(y, h - res.cy), 0)
 
       for (col = 0; col < cols; col++) {
-        x_ = col * res.cx_
+        x_ = col * res.cx
         x = Math.round(x_)
         // normalize x so shapes around edges get color
         pixelX = Math.max(Math.min(x, w - res.cx), 0)
@@ -137,31 +137,25 @@
           }
         }
 
-        // ~~ used to floor values
+        // floor values
         rgb.r = Math.round(Math.sqrt(rgb.r / count))
         rgb.g = Math.round(Math.sqrt(rgb.g / count))
         rgb.b = Math.round(Math.sqrt(rgb.b / count))
-        ctx.fillStyle =
-          'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',' + alpha + ')'
+        ctx.fillStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},${alpha})`
 
         function drawDiamond(context, x, y, width, height) {
           context.save();
           context.beginPath();
           context.moveTo(x, y);
-
           // top left edge
           context.lineTo(x - width / 2, y + height / 2);
-
           // bottom left edge
           context.lineTo(x, y + height);
-
           // bottom right edge
           context.lineTo(x + width / 2, y + height / 2);
-
           // closing the path automatically creates
           // the top right edge
           context.closePath();
-
           context.fill();
           context.restore();
         }
@@ -189,8 +183,8 @@
         ) {
           markers.push({
             text: (col + 1) + "·" + (row + 1),
-            x: col * res.cx_,
-            y: row * res.cy_
+            x: col * res.cx,
+            y: row * res.cy
           })
         }
         i++
@@ -198,14 +192,13 @@
     } // row
     ctx.save();
     ctx.fillStyle = 'azure'
-    ctx.font = `bold 20px ${opts.fontFamily} `
-
+    ctx.font = `bold 20px monospace`
     markers.forEach(m => {
       ctx.textAlign = m.x === 0 ? 'left' : 'right'
       ctx.textBaseline = m.y === 0 ? 'top' : 'bottom';
       ctx.fillText(m.text,
-        m.x + (m.x !== 0 ? res.cx - 2: 0 ),
-        m.y + (m.y !== 0 ? res.cy : 0 )
+        m.x + (m.x !== 0 ? res.cx - 2 : 0),
+        m.y + (m.y !== 0 ? res.cy : 0)
       )
     })
     ctx.restore();
@@ -219,4 +212,5 @@
 
   // put in global namespace
   window.ClosePixelation = ClosePixelation
+
 })(window)

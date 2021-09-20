@@ -1,5 +1,10 @@
 <template>
-  <main class="vh-100" style="background-color: #160804" @click="onClick">
+  <main
+    class="vh-100"
+    :style="`background-color: ${backgroundColor}`"
+    @click="onClick"
+  >
+    <!--  -->
     <img id="portrait-image" src="/jpegs/Mozart-Lange-darker.jpg" />
   </main>
 </template>
@@ -8,59 +13,53 @@
 export default {
   data() {
     const word = 'MOZART' // 'МОЦАРТ' // 'モーツァルト'
+    const backgroundColor = '#160804'
     const factorial = this.factorialize(word.length)
-    const shuffle = this.shuffleArray([...Array(factorial).keys()])
     const fontFamily = 'monospace'
+    const shuffle = this.shuffleArray([...Array(factorial).keys()])
     const textSize = 20
-    const theObject = {}
+    const theCanvas = {}
     return {
       word,
+      backgroundColor,
       factorial,
-      shuffle,
       fontFamily,
+      shuffle,
       textSize,
-      theObject
+      theCanvas
     }
   },
   mounted() {
     this.init()
   },
   methods: {
-    onClick(pointerEvent) {
-      // eslint-disable-next-line no-console
-      console.log('clicked!', pointerEvent)
-      this.shuffle = this.shuffleArray([...Array(this.factorial).keys()])
-      this.myMethod()
-    },
-    myMethod(img) {
-      const options = {
-        resolution: this.calcResolution, // { cx: grain, cy: grain, cx_: grain, cy_: grain },
-        word: this.word,
-        fontFamily: this.fontFamily,
-        wordAsArray: this.word.split(''),
-        shape: this.letter
-      }
-      this.textSize = undefined
-      if (img) {
-        this.theObject = img.closePixelate(options)
-      } else {
-        this.theObject.render(options)
-      }
-      return this.theObject
-    },
     init() {
       const _this = this
-
       document
         .getElementById('portrait-image')
         .addEventListener('load', function (e) {
-          // eslint-disable-next-line no-console
-          console.log('loaded!', this)
-          // const grain = 16
-          _this.myMethod(this)
-          // eslint-disable-next-line no-console
-          console.log('loaded!', this, this.theObject)
+          _this.createOrRedrawCanvas(this)
         })
+    },
+    onClick(pointerEvent) {
+      this.shuffle = this.shuffleArray([...Array(this.factorial).keys()])
+      this.createOrRedrawCanvas()
+    },
+    createOrRedrawCanvas(img) {
+      // const grain = 18
+      const options = {
+        resolution: this.calcResolution, // { cx: grain, cy: grain, cx_: grain, cy_: grain }, //
+        word: this.word,
+        fontFamily: this.fontFamily,
+        wordAsArray: this.word.split(''),
+        shape: this.drawLetter // 'diamond' //
+      }
+      this.textSize = undefined
+      if (img) {
+        this.theCanvas = img.closePixelate(options)
+      } else {
+        this.theCanvas.render(options)
+      }
     },
     // https://stackoverflow.com/a/54018834/1070215
     pickPermutation(wordAsArray, factorial, nth) {
@@ -108,9 +107,10 @@ export default {
       }
       return T
     },
-    letter(ctx, word, factorial, i, x, y, cx, cy, previousResult) {
+    drawLetter(ctx, word, factorial, i, x, y, cx, cy, previousResult) {
       // https://stackoverflow.com/a/56922947/1070215
       function getFontSizeToFit(text, fontFamily) {
+        ctx.save()
         ctx.font = `bold 1px ${fontFamily} `
         const metrics = ctx.measureText(text)
         const w = metrics.width
@@ -118,6 +118,7 @@ export default {
         const fontHeight =
           metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent
         // const actualHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+        ctx.restore()
         return Math.min(cx / w, cy / fontHeight)
       }
 
@@ -126,7 +127,8 @@ export default {
         const random = this.shuffle[i / word.length]
         anagram = this.pickPermutation(word, factorial, random)
         if (random === 0) {
-          anagram = new Array(this.word.length).fill(' ')
+          // hide the root word
+          anagram = new Array(this.word.length).fill('\u00B7') // · https://www.compart.com/en/unicode/U+00B7
         }
       }
       const letter = anagram.shift()
@@ -134,7 +136,6 @@ export default {
         this.textSize = getFontSizeToFit(letter, this.fontFamily)
       }
       ctx.font = `bold ${this.textSize}px ${this.fontFamily}`
-
       ctx.fillText(letter, x, y + cy, cx)
       return anagram
     },
@@ -150,32 +151,19 @@ export default {
       })
 
       const wordRatio = eW / eH
-
       const targetRatio = wW / wH / wordRatio
 
-      let i = this.binarySearch(
+      const good = this.binarySearch(
         ratios.map((r) => r.ratio),
         targetRatio
       )
-      if (i < ratios.length - 1) {
-        const r1 = Math.abs(targetRatio - ratios[i].ratio)
-        const r2 = Math.abs(targetRatio - ratios[i + 1].ratio)
-        if (r2 < r1) {
-          i++
-        }
-      }
 
-      const theRatio = ratios[i]
-      function mulitpleOfTwo(n) {
-        return Math.round(n / 2) * 2
-      }
+      const theRatio = ratios[good]
       const x = theRatio.x * word.length
       const y = theRatio.y
-      const cx_ = wW / x
-      const cy_ = wH / y
-      const cx = mulitpleOfTwo(cx_)
-      const cy = mulitpleOfTwo(cy_)
-      return { x, y, cx, cy, cx_, cy_, factorial }
+      const cx = wW / x
+      const cy = wH / y
+      return { x, y, cx, cy, factorial }
     },
     // https://www.freecodecamp.org/news/how-to-factorialize-a-number-in-javascript-9263c89a4b38/
     factorialize(num) {
