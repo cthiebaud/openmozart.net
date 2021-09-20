@@ -161,7 +161,7 @@
         }
 
         if (isFunction(opts.shape) && opts.word) {
-          shapeResult = opts.shape(ctx, opts.wordAsArray, res.factorial, i, x_, y_, size.cx, size.cy, shapeResult)
+          shapeResult = opts.shape(ctx, opts.wordAsArray, res, i, x_, y_, size.cx, size.cy, shapeResult)
         } else {
           switch (opts.shape) {
             case 'circle':
@@ -190,18 +190,22 @@
         i++
       } // col
     } // row
-    ctx.save();
-    ctx.fillStyle = 'azure'
-    ctx.font = `bold 20px monospace`
-    markers.forEach(m => {
-      ctx.textAlign = m.x === 0 ? 'left' : 'right'
-      ctx.textBaseline = m.y === 0 ? 'top' : 'bottom';
-      ctx.fillText(m.text,
-        m.x + (m.x !== 0 ? res.cx - 2 : 0),
-        m.y + (m.y !== 0 ? res.cy : 0)
-      )
-    })
-    ctx.restore();
+
+    // eslint-disable-next-line no-constant-condition
+    if (false) {
+      ctx.save();
+      ctx.fillStyle = 'azure'
+      ctx.font = `bold 20px monospace`
+      markers.forEach(m => {
+        ctx.textAlign = m.x === 0 ? 'left' : 'right'
+        ctx.textBaseline = m.y === 0 ? 'top' : 'bottom';
+        ctx.fillText(m.text,
+          m.x + (m.x !== 0 ? res.cx - 2 : 0),
+          m.y + (m.y !== 0 ? res.cy : 0)
+        )
+      })
+      ctx.restore();
+    }
 
   }
 
