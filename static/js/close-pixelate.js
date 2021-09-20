@@ -161,7 +161,7 @@
         }
 
         if (isFunction(opts.shape) && opts.word) {
-          shapeResult = opts.shape(ctx, opts.wordAsArray, res.factorial, i, x_, y_, size.cx, size.cy, shapeResult)
+          shapeResult = opts.shape(ctx, opts.wordAsArray, res, i, x_, y_, size.cx, size.cy, shapeResult)
         } else {
           switch (opts.shape) {
             case 'circle':
