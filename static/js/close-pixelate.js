@@ -190,18 +190,22 @@
         i++
       } // col
     } // row
-    ctx.save();
-    ctx.fillStyle = 'azure'
-    ctx.font = `bold 20px monospace`
-    markers.forEach(m => {
-      ctx.textAlign = m.x === 0 ? 'left' : 'right'
-      ctx.textBaseline = m.y === 0 ? 'top' : 'bottom';
-      ctx.fillText(m.text,
-        m.x + (m.x !== 0 ? res.cx - 2 : 0),
-        m.y + (m.y !== 0 ? res.cy : 0)
-      )
-    })
-    ctx.restore();
+
+    // eslint-disable-next-line no-constant-condition
+    if (false) {
+      ctx.save();
+      ctx.fillStyle = 'azure'
+      ctx.font = `bold 20px monospace`
+      markers.forEach(m => {
+        ctx.textAlign = m.x === 0 ? 'left' : 'right'
+        ctx.textBaseline = m.y === 0 ? 'top' : 'bottom';
+        ctx.fillText(m.text,
+          m.x + (m.x !== 0 ? res.cx - 2 : 0),
+          m.y + (m.y !== 0 ? res.cy : 0)
+        )
+      })
+      ctx.restore();
+    }
 
   }
 
