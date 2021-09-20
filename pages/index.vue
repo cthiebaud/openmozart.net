@@ -13,17 +13,21 @@
 export default {
   data() {
     const word = 'MOZART' // 'МОЦАРТ' // 'モーツァルト'
+    const wordAsArray = word.split('')
     const backgroundColor = '#160804'
     const factorial = this.factorialize(word.length)
     const fontFamily = 'monospace'
     const shuffle = this.shuffleArray([...Array(factorial).keys()])
     const textSize = 20
     const theCanvas = {}
+    const match = { boundary: undefined, candidate: [] }
     return {
       word,
+      wordAsArray,
       backgroundColor,
       factorial,
       fontFamily,
+      match,
       shuffle,
       textSize,
       theCanvas
@@ -107,6 +111,38 @@ export default {
       }
       return T
     },
+    testIfMatch(letter, i) {
+      function display(match) {
+        const ret = []
+        for (let i = 0; i < match.candidate.length; i++) {
+          if (i === match.boundary) {
+            ret.push('|')
+          }
+          ret.push(match.candidate[i])
+        }
+        return ret.join('')
+      }
+      function reset(match) {
+        match.candidate.splice(0, match.candidate.length)
+        match.boundary = undefined
+      }
+      if (i % this.word.length === 0) {
+        this.match.boundary = this.match.candidate.length
+      }
+      this.match.candidate.push(letter)
+      let index = 0
+      for (; index < this.match.candidate.length; index++) {
+        if (this.match.candidate[index] !== this.wordAsArray[index]) {
+          reset(this.match)
+          break
+        }
+      }
+      if (index === this.wordAsArray.length) {
+        // eslint-disable-next-line no-console
+        console.log('hourrah!', display(this.match))
+        reset(this.match)
+      }
+    },
     drawLetter(ctx, word, factorial, i, x, y, cx, cy, previousResult) {
       // https://stackoverflow.com/a/56922947/1070215
       function getFontSizeToFit(text, fontFamily) {
@@ -137,6 +173,7 @@ export default {
       }
       ctx.font = `bold ${this.textSize}px ${this.fontFamily}`
       ctx.fillText(letter, x, y + cy, cx)
+      this.testIfMatch(letter, i)
       return anagram
     },
     calcResolution(word, eW, eH, wW, wH) {
