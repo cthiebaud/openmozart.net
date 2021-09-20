@@ -20,6 +20,7 @@ export default {
     const shuffle = this.shuffleArray([...Array(factorial).keys()])
     const textSize = 20
     const theCanvas = {}
+    const matches = { horz: [], vert: [] }
     const match = { boundary: undefined, candidate: [] }
     return {
       word,
@@ -28,6 +29,7 @@ export default {
       factorial,
       fontFamily,
       match,
+      matches,
       shuffle,
       textSize,
       theCanvas
@@ -111,14 +113,14 @@ export default {
       }
       return T
     },
-    testIfMatch(letter, i) {
-      function display(match) {
+    testIfMatch(letter, index) {
+      function display(word, boundary) {
         const ret = []
-        for (let i = 0; i < match.candidate.length; i++) {
-          if (i === match.boundary) {
+        for (let i = 0; i < word.length; i++) {
+          if (i === boundary % word.length) {
             ret.push('|')
           }
-          ret.push(match.candidate[i])
+          ret.push(word[i])
         }
         return ret.join('')
       }
@@ -126,20 +128,21 @@ export default {
         match.candidate.splice(0, match.candidate.length)
         match.boundary = undefined
       }
-      if (i % this.word.length === 0) {
-        this.match.boundary = this.match.candidate.length
+      if (index % this.word.length === 0) {
+        this.match.boundary = index + this.match.candidate.length
       }
       this.match.candidate.push(letter)
-      let index = 0
-      for (; index < this.match.candidate.length; index++) {
-        if (this.match.candidate[index] !== this.wordAsArray[index]) {
+      let i = 0
+      for (; i < this.match.candidate.length; i++) {
+        if (this.match.candidate[i] !== this.wordAsArray[i]) {
           reset(this.match)
           break
         }
       }
-      if (index === this.wordAsArray.length) {
+      if (i === this.wordAsArray.length) {
         // eslint-disable-next-line no-console
-        console.log('hourrah!', display(this.match))
+        console.log('hourrah!', display(this.word, this.match.boundary))
+        this.matches.horz = this.match.boundary
         reset(this.match)
       }
     },
