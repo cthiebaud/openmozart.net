@@ -17,7 +17,7 @@ export default {
     const fontFamily = 'monospace'
     const textSize = 20
     const theCanvas = {}
-    const matches = { horz: [], vert: []}
+    const matches = { horz: [], vert: [] }
     const shuffle = undefined
     return {
       word,
@@ -43,7 +43,7 @@ export default {
   methods: {
     init() {
       const _this = this
-      this.shuffle = this.doShuffle(this.factorial, this.matches)
+      this.shuffle = this.doShuffle(this.factorial)
       document
         .getElementById('portrait-image')
         .addEventListener('load', function (e) {
@@ -72,7 +72,7 @@ export default {
       return shuffle
     },
     onClick(pointerEvent) {
-      this.shuffle = this.doShuffle(this.factorial, this.matches)
+      this.shuffle = this.doShuffle(this.factorial)
       this.createOrRedrawCanvas()
     },
     createOrRedrawCanvas(img) {
@@ -137,7 +137,7 @@ export default {
       }
       return T
     },
-    storeMatches() {
+    storeMatches(ratio) {
       // eslint-disable-next-line no-console
       console.log('RAZ matches at start of storeMatches')
       this.matches.horz.splice(0, this.matches.horz.length)
@@ -147,19 +147,29 @@ export default {
       for (let i = 0; i < this.wordAsArray.length * this.factorial; i++) {
         if (anagram.length === 0) {
           const random = this.shuffle[i / this.wordAsArray.length]
-          anagram = this.pickPermutation(this.wordAsArray, this.factorial, random)
+          anagram = this.pickPermutation(
+            this.wordAsArray,
+            this.factorial,
+            random
+          )
           if (random === 0) {
             // hide the root word
             anagram = new Array(this.wordAsArray.length).fill('\u00B7') // · https://www.compart.com/en/unicode/U+00B7
           }
         }
         const letter = anagram.shift()
-        const matchBoundary = this.testIfMatch(this.wordAsArray, letter, i, match)
+        const matchBoundary = this.testIfMatch(
+          this.wordAsArray,
+          letter,
+          i,
+          match
+        )
         if (matchBoundary) {
           this.matches.horz.push(matchBoundary)
           // eslint-disable-next-line no-console
           console.log('added match!', this.matches.horz)
         }
+        // verts
       }
     },
     testIfMatch: (wordAsArray, letter, index, match) => {
@@ -222,27 +232,27 @@ export default {
         }
       }
       const letter = anagram.shift()
+
       if (!this.textSize) {
         this.textSize = getFontSizeToFit(letter, this.fontFamily)
+        ctx.font = `bold ${this.textSize}px ${this.fontFamily}`
       }
-      ctx.font = `bold ${this.textSize}px ${this.fontFamily}`
-      
-      // eslint-disable-next-line no-console
-      // console.log('drawing letter!')
+
       if (this.matches.horz.length) {
         for (let b = 0; b < this.matches.horz.length; b++) {
           const boundary = this.matches.horz[b]
           if (boundary <= i && i < boundary + this.word.length) {
-            ctx.save()
-            ctx.fillStyle = 'rgba(255,0,0,0.45)'
-            ctx.fillRect(x - 4, y + 2, cx, cy)
-            if (i % word.length === 0) {
-              // eslint-disable-next-line no-console
-              console.log('found match!')
+            if (boundary === i) {
+              ctx.save()
+              ctx.fillStyle = 'rgba(255,0,0,0.5)'
+              ctx.fillRect(x - 3, y + 4, cx * this.word.length - 1, cy - 2)
+              ctx.restore()
+            } else if (i % word.length === 0) {
+              ctx.save()
               ctx.fillStyle = 'black'
-              ctx.fillRect(x - 3, y, 1, cy+2)
+              ctx.fillRect(x - 3, y + 1, 1, cy + 1)
+              ctx.restore()
             }
-            ctx.restore()
           }
         }
       }
@@ -268,13 +278,14 @@ export default {
         targetRatio
       )
 
-      const theRatio = ratios[good]
-      const x = theRatio.x * word.length
-      const y = theRatio.y
+      
+      const x = ratios[good].x * word.length
+      const y = ratios[good].y
       const cx = wW / x
       const cy = wH / y
-      this.storeMatches()
-      return { x, y, cx, cy, factorial }
+      const theRatio = { x, y, cx, cy, factorial }
+      this.storeMatches(theRatio)
+      return theRatio
     },
     // https://www.freecodecamp.org/news/how-to-factorialize-a-number-in-javascript-9263c89a4b38/
     factorialize(num) {
