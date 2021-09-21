@@ -11,22 +11,24 @@
 
 /* jshint asi: true, browser: true, eqeqeq: true, forin: false, immed: false, newcap: true, noempty: true, strict: true, undef: true */
 
-;
-(function (window) {
+;(function (window) {
   'use strict'
 
   // https://stackoverflow.com/a/55785839/1070215
-  const isFunction = (value) =>
-    value &&
-    (Object.prototype.toString.call(value) === '[object Function]' ||
-      typeof value === 'function' ||
-      value instanceof Function)
+  // prettier-ignore
+  const isFunction = (value) => value && (
+    Object.prototype.toString.call(value) === '[object Function]' || 
+    typeof value === 'function' || 
+    value instanceof Function
+  )
 
   // check for canvas support
   const canvas = document.createElement('canvas')
-  const isCanvasSupported = canvas.getContext && canvas.getContext('2d', {
-    alpha: false
-  }) // https://stackoverflow.com/a/28161474/1070215
+  const isCanvasSupported =
+    canvas.getContext &&
+    canvas.getContext('2d', {
+      alpha: false
+    }) // https://stackoverflow.com/a/28161474/1070215
 
   // don't proceed if canvas is no supported
   if (!isCanvasSupported) {
@@ -81,7 +83,7 @@
     if (isFunction(opts.resolution) && opts.word) {
       ctx.font = '20px monospace'
       const metrics = ctx.measureText(opts.word)
-      const actualHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+      const actualHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent
       res = opts.resolution(opts.word, metrics.width, actualHeight, w, h)
     } else {
       res = opts.resolution || {
@@ -144,20 +146,20 @@
         ctx.fillStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},${alpha})`
 
         function drawDiamond(context, x, y, width, height) {
-          context.save();
-          context.beginPath();
-          context.moveTo(x, y);
+          context.save()
+          context.beginPath()
+          context.moveTo(x, y)
           // top left edge
-          context.lineTo(x - width / 2, y + height / 2);
+          context.lineTo(x - width / 2, y + height / 2)
           // bottom left edge
-          context.lineTo(x, y + height);
+          context.lineTo(x, y + height)
           // bottom right edge
-          context.lineTo(x + width / 2, y + height / 2);
+          context.lineTo(x + width / 2, y + height / 2)
           // closing the path automatically creates
           // the top right edge
-          context.closePath();
-          context.fill();
-          context.restore();
+          context.closePath()
+          context.fill()
+          context.restore()
         }
 
         if (isFunction(opts.shape) && opts.word) {
@@ -166,7 +168,14 @@
           switch (opts.shape) {
             case 'circle':
               ctx.beginPath()
-              ctx.arc(x + halfSize.cx, y + halfSize.cy, Math.min(halfSize.cx, halfSize.cy) - .666, 0, Math.PI * 2, true)
+              // prettier-ignore
+              ctx.arc(
+                x + halfSize.cx, 
+                y + halfSize.cy, 
+                Math.min(halfSize.cx, halfSize.cy) - 0.666, 
+                0,
+                Math.PI * 2,
+                true)
               ctx.fill()
               ctx.closePath()
               break
@@ -177,12 +186,11 @@
               ctx.fillRect(x_, y_, size.cx, size.cy)
           } // switch
         }
-        if (
-          (row === 0 || (row + 1) % Math.round(rows) === 0) &&
-          (col === 0 || (col + 1) % Math.round(cols) === 0)
-        ) {
+        // prettier-ignore
+        if ((row === 0 || (row + 1) % Math.round(rows) === 0) && 
+            (col === 0 || (col + 1) % Math.round(cols) === 0)) {
           markers.push({
-            text: (col + 1) + "·" + (row + 1),
+            text: col + 1 + '·' + (row + 1),
             x: col * res.cx,
             y: row * res.cy
           })
@@ -193,20 +201,19 @@
 
     // eslint-disable-next-line no-constant-condition
     if (false) {
-      ctx.save();
+      ctx.save()
       ctx.fillStyle = 'azure'
       ctx.font = `bold 20px monospace`
-      markers.forEach(m => {
+      markers.forEach((m) => {
         ctx.textAlign = m.x === 0 ? 'left' : 'right'
-        ctx.textBaseline = m.y === 0 ? 'top' : 'bottom';
-        ctx.fillText(m.text,
-          m.x + (m.x !== 0 ? res.cx - 2 : 0),
-          m.y + (m.y !== 0 ? res.cy : 0)
-        )
+        ctx.textBaseline = m.y === 0 ? 'top' : 'bottom'
+        // prettier-ignore
+        ctx.fillText(m.text, 
+          m.x + (m.x !== 0 ? res.cx - 2 : 0), 
+          m.y + (m.y !== 0 ? res.cy     : 0))
       })
-      ctx.restore();
+      ctx.restore()
     }
-
   }
 
   // enable img.closePixelate
@@ -216,5 +223,4 @@
 
   // put in global namespace
   window.ClosePixelation = ClosePixelation
-
 })(window)

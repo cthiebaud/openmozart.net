@@ -1,9 +1,5 @@
 <template>
-  <main
-    class="vh-100"
-    :style="`background-color: ${backgroundColor}`"
-    @click="onClick"
-  >
+  <main class="vh-100" :style="`background-color: ${backgroundColor}`" @click="onClick">
     <!--  -->
     <img id="portrait-image" src="/jpegs/Mozart-Lange-darker.jpg" />
   </main>
@@ -44,11 +40,9 @@ export default {
     init() {
       const _this = this
       this.shuffle = this.doShuffle(this.factorial)
-      document
-        .getElementById('portrait-image')
-        .addEventListener('load', function (e) {
-          _this.createOrRedrawCanvas(this)
-        })
+      document.getElementById('portrait-image').addEventListener('load', function (e) {
+        _this.createOrRedrawCanvas(this)
+      })
     },
     doShuffle: (factorial) => {
       // http://stackoverflow.com/questions/20789373/shuffle-array-in-ng-repeat-angular
@@ -71,7 +65,7 @@ export default {
       const shuffle = shuffleArray([...Array(factorial).keys()])
       return shuffle
     },
-    onClick(pointerEvent) {
+    onClick() {
       this.shuffle = this.doShuffle(this.factorial)
       this.createOrRedrawCanvas()
     },
@@ -95,9 +89,7 @@ export default {
     pickPermutation: (wordAsArray, factorial, nth) => {
       if (factorial < nth) {
         // eslint-disable-next-line no-console
-        console.log(
-          `n (${nth}) cannot be larger than factorial (${factorial}) !!!`
-        )
+        console.log(`n (${nth}) cannot be larger than factorial (${factorial}) !!!`)
         return []
         /*
         throw new Error(
@@ -147,23 +139,15 @@ export default {
       for (let i = 0; i < this.wordAsArray.length * this.factorial; i++) {
         if (anagram.length === 0) {
           const random = this.shuffle[i / this.wordAsArray.length]
-          anagram = this.pickPermutation(
-            this.wordAsArray,
-            this.factorial,
-            random
-          )
+          anagram = this.pickPermutation(this.wordAsArray, this.factorial, random)
           if (random === 0) {
             // hide the root word
-            anagram = new Array(this.wordAsArray.length).fill('\u00B7') // · https://www.compart.com/en/unicode/U+00B7
+            // \u00B7 is '·' (https://www.compart.com/en/unicode/U+00B7)
+            anagram = new Array(this.wordAsArray.length).fill('\u00B7')
           }
         }
         const letter = anagram.shift()
-        const matchBoundary = this.testIfMatch(
-          this.wordAsArray,
-          letter,
-          i,
-          match
-        )
+        const matchBoundary = this.testIfMatch(this.wordAsArray, letter, i, match)
         if (matchBoundary) {
           this.matches.horz.push(matchBoundary)
           // eslint-disable-next-line no-console
@@ -215,26 +199,19 @@ export default {
         const metrics = ctx.measureText(text)
         const w = metrics.width
         // https://stackoverflow.com/a/46950087/1070215
-        const fontHeight =
-          metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent
+        const fontHeight = metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent
         // eslint-disable-next-line no-constant-condition
         if (false) {
-          const actualHeight =
-            metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent
+          const actualHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent
+          // prettier-ignore
           // eslint-disable-next-line no-console
           console.log(
-            'fontHeight',
-            fontHeight,
-            '= fontBoundingBoxAscent',
-            metrics.fontBoundingBoxAscent,
-            '+ fontBoundingBoxDescent',
-            metrics.fontBoundingBoxDescent,
-            'actualHeight',
-            actualHeight,
-            'fontBoundingBoxAscent',
-            metrics.actualBoundingBoxAscent,
-            'fontBoundingBoxAscent',
-            metrics.actualBoundingBoxDescent
+            'fontHeight'                , fontHeight, 
+            '= ( fontBoundingBoxAscent' , metrics.fontBoundingBoxAscent,
+            '+ fontBoundingBoxDescent )', metrics.fontBoundingBoxDescent,
+            'actualHeight'              , actualHeight,
+            '= ( fontBoundingBoxAscent' , metrics.actualBoundingBoxAscent,
+            '+ fontBoundingBoxAscent )' , metrics.actualBoundingBoxDescent
           )
         }
         ctx.restore()
