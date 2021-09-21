@@ -57,7 +57,10 @@
     const w = (this.width = this.canvas.width = this.img.width)
     const h = (this.height = this.canvas.height = this.img.height)
     // draw image on canvas
+    this.ctx.save()
+    this.ctx.filter = "brightness(120%)";
     this.ctx.drawImage(this.img, 0, 0, w, h)
+    this.ctx.restore()
     // get imageData
 
     try {
