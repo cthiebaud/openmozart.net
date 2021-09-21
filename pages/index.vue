@@ -217,7 +217,26 @@ export default {
         // https://stackoverflow.com/a/46950087/1070215
         const fontHeight =
           metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent
-        // const actualHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+        // eslint-disable-next-line no-constant-condition
+        if (false) {
+          const actualHeight =
+            metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent
+          // eslint-disable-next-line no-console
+          console.log(
+            'fontHeight',
+            fontHeight,
+            '= fontBoundingBoxAscent',
+            metrics.fontBoundingBoxAscent,
+            '+ fontBoundingBoxDescent',
+            metrics.fontBoundingBoxDescent,
+            'actualHeight',
+            actualHeight,
+            'fontBoundingBoxAscent',
+            metrics.actualBoundingBoxAscent,
+            'fontBoundingBoxAscent',
+            metrics.actualBoundingBoxDescent
+          )
+        }
         ctx.restore()
         return Math.min(cx / w, cy / fontHeight)
       }
@@ -245,18 +264,20 @@ export default {
             if (boundary === i) {
               ctx.save()
               ctx.fillStyle = 'rgba(255,0,0,0.5)'
-              ctx.fillRect(x - 3, y + 4, cx * this.word.length - 1, cy - 2)
+              ctx.fillRect(x, y, cx * this.word.length - 1, cy - 1)
               ctx.restore()
             } else if (i % word.length === 0) {
               ctx.save()
               ctx.fillStyle = 'black'
-              ctx.fillRect(x - 3, y + 1, 1, cy + 1)
+              ctx.fillRect(x, y, 1, cy)
               ctx.restore()
             }
           }
         }
       }
-      ctx.fillText(letter, x, y + cy, cx)
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'bottom'
+      ctx.fillText(letter, x + cx / 2, y + cy, cx)
       return anagram
     },
     calcResolution(word, eW, eH, wW, wH) {
@@ -278,7 +299,6 @@ export default {
         targetRatio
       )
 
-      
       const x = ratios[good].x * word.length
       const y = ratios[good].y
       const cx = wW / x
@@ -346,5 +366,7 @@ canvas {
   height: 100%;
   object-fit: cover;
   object-position: 50% 50%;
+  transform: scale(0.98);
+  background-color: transparent;
 }
 </style>
