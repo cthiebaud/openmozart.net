@@ -290,10 +290,10 @@ export default {
         ctx.font = `bold ${this.textSize}px ${this.fontFamily}`
 
         // SHADOW
-        ctx.shadowColor = '#572010'
-        ctx.shadowOffsetX = 0.5
+        ctx.shadowColor = '#E6E877'
+        ctx.shadowOffsetX = 1
         // ctx.shadowOffsetY = 0
-        // ctx.shadowBlur = .5
+        ctx.shadowBlur = 1
       }
 
       // do not display matches in the last column
@@ -305,7 +305,7 @@ export default {
               if (boundary === i) {
                 ctx.save()
                 ctx.fillStyle = 'rgba(255, 255, 0,0.8)'
-                ctx.fillRect(x, y - 2, cx * this.word.length - 1, cy - 1)
+                ctx.fillRect(x, y - 2, cx * this.word.length - 2, cy - 1)
                 ctx.restore()
               } else if (i % word.length === 0) {
                 ctx.save()
@@ -325,7 +325,7 @@ export default {
             if (boundary === i) {
               ctx.save()
               ctx.fillStyle = 'rgba(255, 255, 0,0.8)'
-              ctx.fillRect(x, y - 3, cx, cy * this.word.length - 1)
+              ctx.fillRect(x, y - 3, cx-1, cy * this.word.length - 1)
               ctx.restore()
             }
           }
@@ -424,6 +424,6 @@ canvas {
   object-fit: cover;
   object-position: 50% 50%;
   transform: scale(0.98);
-  background-color: transparent;
+  background-color: white;
 }
 </style>
