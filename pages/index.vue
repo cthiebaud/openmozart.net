@@ -133,7 +133,7 @@ export default {
     },
     vertical(r) {
       // eslint-disable-next-line no-console
-      const candidate = []
+      const match = { boundary: undefined, candidate: [] }
       for (let col = 0; col < this.theRatio.x; col++) {
         for (let row = 0; row < this.theRatio.y; row++) {
           const i = col + row * this.theRatio.x
@@ -142,7 +142,13 @@ export default {
           const random = this.shuffle[j]
           const permut = this.pickPermutation(this.wordAsArray, this.factorial, random)
           const letter = permut[k]
-          candidate.push(letter)
+          match.boundary = match.boundary || i
+          const matchBoundary = this.testIfMatch(this.wordAsArray, match, letter)
+          if (matchBoundary) {
+            this.matches.vert.push(matchBoundary)
+            // eslint-disable-next-line no-console
+            console.log('added VERTICAL match!', this.matches.vert)
+          }
         }
       }
     },
@@ -176,7 +182,7 @@ export default {
         if (matchBoundary) {
           this.matches.horz.push(matchBoundary)
           // eslint-disable-next-line no-console
-          console.log('added match!', this.matches.horz)
+          console.log('added HORIZONTAL match!', this.matches.horz)
         }
         // verts
       }
@@ -274,6 +280,26 @@ export default {
           }
         }
       }
+
+      if (this.matches.vert.length) {
+        for (let b = 0; b < this.matches.vert.length; b++) {
+          const boundary = this.matches.vert[b]
+          if (boundary <= i && i < boundary + this.word.length) {
+            if (boundary === i) {
+              ctx.save()
+              ctx.fillStyle = 'rgba(255,0,0,0.5)'
+              ctx.fillRect(x, y, cx - 1, cy * this.word.length - 1)
+              ctx.restore()
+            } else if (i % word.length === 0) {
+              ctx.save()
+              ctx.fillStyle = 'black'
+              ctx.fillRect(x, y, cx, 1)
+              ctx.restore()
+            }
+          }
+        }
+      }
+
       ctx.textAlign = 'center'
       ctx.textBaseline = 'bottom'
       ctx.fillText(letter, x + cx / 2, y + cy, cx)
@@ -366,6 +392,6 @@ canvas {
   object-fit: cover;
   object-position: 50% 50%;
   transform: scale(0.98);
-  background-color: white;
+  background-color: #160804;
 }
 </style>
