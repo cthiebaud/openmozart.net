@@ -1,18 +1,18 @@
 <template>
   <main class="vh-100" :style="`background-color: ${backgroundColor}`" @click="onClick">
     <!--  -->
-    <img id="portrait-image" src="/jpegs/ricard.jpg" />
+    <img id="portrait-image" src="/jpegs/Mozart-Lange-darker.jpg" />
   </main>
 </template>
 
 <script>
-/* _eslint-disable no-unused-expressions, no-unused-vars, no-sequences, eqeqeq, no-console */
+/* eslint-disable no-unused-expressions, no-unused-vars, no-sequences, eqeqeq, no-console */
 
 export default {
   data() {
-    const word = 'RICARD'
-    const backgroundColor = 'white'
-    const filter = "brightness(100%)"
+    const word = 'MOZART'
+    const backgroundColor = '#160804'
+    const filter = 'brightness(120%)'
     const fontFamily = 'monospace'
     const matches = { horz: [], vert: [] }
     const intervalID = undefined
@@ -256,14 +256,14 @@ export default {
       // https://stackoverflow.com/a/56922947/1070215
       function getFontSizeToFit(text, fontFamily) {
         ctx.save()
-        ctx.font = `bold 1px ${fontFamily} `
+        ctx.font = `1px ${fontFamily} `
         const metrics = ctx.measureText(text)
         const w = metrics.width
         // https://stackoverflow.com/a/46950087/1070215
         const fontHeight = metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent
+        const actualHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent
         // eslint-disable-next-line no-constant-condition
         if (false) {
-          const actualHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent
           // prettier-ignore
           // eslint-disable-next-line no-console
           console.log(
@@ -276,7 +276,7 @@ export default {
           )
         }
         ctx.restore()
-        return Math.min(cx / w, cy / fontHeight)
+        return Math.min(cx + 2 / w, cy + 2 / actualHeight)
       }
 
       let anagram = previousResult
@@ -287,13 +287,13 @@ export default {
 
       if (!this.textSize) {
         this.textSize = getFontSizeToFit(letter, this.fontFamily)
-        ctx.font = `bold ${this.textSize}px ${this.fontFamily}`
+        ctx.font = `${this.textSize}px ${this.fontFamily}`
 
         // SHADOW
-        ctx.shadowColor = '#E6E877'
-        ctx.shadowOffsetX = 1
+        ctx.shadowColor = '#572010'
+        ctx.shadowOffsetX = 0.5
         // ctx.shadowOffsetY = 0
-        ctx.shadowBlur = 1
+        // ctx.shadowBlur = .5
       }
 
       // do not display matches in the last column
@@ -304,12 +304,12 @@ export default {
             if (boundary <= i && i < boundary + this.word.length) {
               if (boundary === i) {
                 ctx.save()
-                ctx.fillStyle = 'rgba(255, 255, 0,0.8)'
-                ctx.fillRect(x, y - 2, cx * this.word.length - 2, cy - 1)
+                ctx.fillStyle = 'rgba(255, 0, 0, 0.8)'
+                ctx.fillRect(x, y - 2, cx * this.word.length - 1, cy - 1)
                 ctx.restore()
               } else if (i % word.length === 0) {
                 ctx.save()
-                ctx.fillStyle = 'white'
+                ctx.fillStyle = 'black'
                 ctx.fillRect(x, y - 2, 1, cy - 1)
                 ctx.restore()
               }
@@ -324,8 +324,8 @@ export default {
           if (boundary <= i && i < boundary + this.word.length) {
             if (boundary === i) {
               ctx.save()
-              ctx.fillStyle = 'rgba(255, 255, 0,0.8)'
-              ctx.fillRect(x, y - 3, cx-1, cy * this.word.length - 1)
+              ctx.fillStyle = 'rgba(255, 0, 0, 0.5)'
+              ctx.fillRect(x, y - 3, cx, cy * this.word.length - 1)
               ctx.restore()
             }
           }
@@ -424,6 +424,6 @@ canvas {
   object-fit: cover;
   object-position: 50% 50%;
   transform: scale(0.98);
-  background-color: white;
+  background-color: #160804;
 }
 </style>
