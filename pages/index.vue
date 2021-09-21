@@ -88,6 +88,17 @@ export default {
       }
     },
     // https://stackoverflow.com/a/54018834/1070215
+    pickShuffledPermutation(nth) {
+      const shuffled = this.shuffle[Math.floor(nth)]
+      if (shuffled === 0) {
+        // hide the root word
+        // \u00B7 is '·' (https://www.compart.com/en/unicode/U+00B7)
+        return new Array(this.wordAsArray.length).fill('\u00B7')
+      } else {
+        return this.pickPermutation(this.wordAsArray, this.factorial, shuffled)
+      }
+    },
+    // https://stackoverflow.com/a/54018834/1070215
     pickPermutation: (wordAsArray, factorial, nth) => {
       if (factorial < nth) {
         // eslint-disable-next-line no-console
@@ -137,10 +148,9 @@ export default {
       for (let col = 0; col < this.theRatio.x; col++) {
         for (let row = 0; row < this.theRatio.y; row++) {
           const i = col + row * this.theRatio.x
-          const j = Math.floor(i / this.wordAsArray.length)
+          const j = i / this.wordAsArray.length
           const k = i % this.wordAsArray.length
-          const random = this.shuffle[j]
-          const permut = this.pickPermutation(this.wordAsArray, this.factorial, random)
+          const permut = this.pickShuffledPermutation(j)
           const letter = permut[k]
           match.boundary = match.boundary || i
           const matchBoundary = this.testIfMatch(this.wordAsArray, match, letter)
@@ -166,13 +176,7 @@ export default {
       const match = { boundary: undefined, candidate: [] }
       for (let i = 0; i < this.wordAsArray.length * this.factorial; i++) {
         if (anagram.length === 0) {
-          const random = this.shuffle[i / this.wordAsArray.length]
-          anagram = this.pickPermutation(this.wordAsArray, this.factorial, random)
-          if (random === 0) {
-            // hide the root word
-            // \u00B7 is '·' (https://www.compart.com/en/unicode/U+00B7)
-            anagram = new Array(this.wordAsArray.length).fill('\u00B7')
-          }
+          anagram = this.pickShuffledPermutation(i / this.wordAsArray.length)
         }
         const letter = anagram.shift()
         if (i % this.wordAsArray.length === 0) {
@@ -234,7 +238,7 @@ export default {
           // prettier-ignore
           // eslint-disable-next-line no-console
           console.log(
-            'fontHeight'                , fontHeight, 
+            'fontHeight'                , fontHeight,
             '= ( fontBoundingBoxAscent' , metrics.fontBoundingBoxAscent,
             '+ fontBoundingBoxDescent )', metrics.fontBoundingBoxDescent,
             'actualHeight'              , actualHeight,
@@ -248,12 +252,7 @@ export default {
 
       let anagram = previousResult
       if (typeof anagram === 'undefined' || anagram.length === 0) {
-        const random = this.shuffle[i / word.length]
-        anagram = this.pickPermutation(word, ratio.factorial, random)
-        if (random === 0) {
-          // hide the root word
-          anagram = new Array(this.word.length).fill('\u00B7') // · https://www.compart.com/en/unicode/U+00B7
-        }
+        anagram = this.pickShuffledPermutation(i / word.length)
       }
       const letter = anagram.shift()
 
@@ -261,21 +260,24 @@ export default {
         this.textSize = getFontSizeToFit(letter, this.fontFamily)
         ctx.font = `bold ${this.textSize}px ${this.fontFamily}`
       }
-
-      if (this.matches.horz.length) {
-        for (let b = 0; b < this.matches.horz.length; b++) {
-          const boundary = this.matches.horz[b]
-          if (boundary <= i && i < boundary + this.word.length) {
-            if (boundary === i) {
-              ctx.save()
-              ctx.fillStyle = 'rgba(255,0,0,0.5)'
-              ctx.fillRect(x, y, cx * this.word.length - 1, cy - 1)
-              ctx.restore()
-            } else if (i % word.length === 0) {
-              ctx.save()
-              ctx.fillStyle = 'black'
-              ctx.fillRect(x, y, 1, cy)
-              ctx.restore()
+      
+      // do not display matches in the last column
+      if (i % this.theRatio.x < this.theRatio.x - this.wordAsArray.length) {
+        if (this.matches.horz.length) {
+          for (let b = 0; b < this.matches.horz.length; b++) {
+            const boundary = this.matches.horz[b]
+            if (boundary <= i && i < boundary + this.word.length) {
+              if (boundary === i) {
+                ctx.save()
+                ctx.fillStyle = 'rgba(255,0,0,0.5)'
+                ctx.fillRect(x, y, cx * this.word.length - 1, cy - 1)
+                ctx.restore()
+              } else if (i % word.length === 0) {
+                ctx.save()
+                ctx.fillStyle = 'black'
+                ctx.fillRect(x, y, 1, cy)
+                ctx.restore()
+              }
             }
           }
         }
