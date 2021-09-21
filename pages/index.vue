@@ -6,12 +6,15 @@
 </template>
 
 <script>
+/* _eslint-disable no-unused-expressions, no-unused-vars, no-sequences, eqeqeq, no-console */
+
 export default {
   data() {
     const word = 'MOZART'
     const backgroundColor = '#160804'
     const fontFamily = 'monospace'
     const matches = { horz: [], vert: [] }
+    const intervalID = undefined
     const shuffle = undefined
     const textSize = 20
     const theCanvas = {}
@@ -21,6 +24,7 @@ export default {
       backgroundColor,
       fontFamily,
       matches,
+      intervalID,
       shuffle,
       textSize,
       theCanvas,
@@ -37,6 +41,14 @@ export default {
   },
   mounted() {
     this.init()
+    const _this = this
+    window.addEventListener('keyup', function (event) {
+      if (event.key === 'Enter') {
+        _this.toggleSlideshow()
+      } else if (event.key === 'Escape') {
+        _this.toggleSlideshow()
+      } 
+    })
   },
   methods: {
     init() {
@@ -66,6 +78,20 @@ export default {
       }
       const shuffle = shuffleArray([...Array(factorial).keys()])
       return shuffle
+    },
+    toggleSlideshow() {
+      if (!this.intervalID) {
+        this.intervalID = setInterval(
+          function () {
+            this.shuffle = this.doShuffle(this.factorial)
+            this.createOrRedrawCanvas()
+          }.bind(this),
+          1000
+        )
+      } else {
+        clearInterval(this.intervalID)
+        this.intervalID = undefined
+      }
     },
     onClick() {
       this.shuffle = this.doShuffle(this.factorial)
@@ -101,8 +127,7 @@ export default {
     // https://stackoverflow.com/a/54018834/1070215
     pickPermutation: (wordAsArray, factorial, nth) => {
       if (factorial < nth) {
-        // eslint-disable-next-line no-console
-        console.log(`n (${nth}) cannot be larger than factorial (${factorial}) !!!`)
+        // console.log(`n (${nth}) cannot be larger than factorial (${factorial}) !!!`)
         return []
         /*
         throw new Error(
@@ -143,7 +168,6 @@ export default {
       return T
     },
     vertical(r) {
-      // eslint-disable-next-line no-console
       const match = { boundary: undefined, candidate: [] }
       for (let col = 0; col < this.theRatio.x; col++) {
         for (let row = 0; row < this.theRatio.y; row++) {
@@ -156,15 +180,13 @@ export default {
           const matchBoundary = this.testIfMatch(this.wordAsArray, match, letter)
           if (matchBoundary) {
             this.matches.vert.push(matchBoundary)
-            // eslint-disable-next-line no-console
-            console.log('added VERTICAL match!', this.matches.vert)
+            // console.log('added VERTICAL match!', this.matches.vert)
           }
         }
       }
     },
     storeMatches() {
-      // eslint-disable-next-line no-console
-      console.log('RAZ matches at start of storeMatches')
+      // console.log('RAZ matches at start of storeMatches')
       this.matches.horz.splice(0, this.matches.horz.length)
       this.matches.vert.splice(0, this.matches.vert.length)
 
@@ -185,8 +207,7 @@ export default {
         const matchBoundary = this.testIfMatch(this.wordAsArray, match, letter)
         if (matchBoundary) {
           this.matches.horz.push(matchBoundary)
-          // eslint-disable-next-line no-console
-          console.log('added HORIZONTAL match!', this.matches.horz)
+          // console.log('added HORIZONTAL match!', this.matches.horz)
         }
         // verts
       }
@@ -217,13 +238,16 @@ export default {
       }
       if (i === target.length) {
         ret = match.boundary
-        // eslint-disable-next-line no-console
-        console.log('hourrah!', this.printCandidate(target, match.boundary))
+        // console.log('hourrah!', this.printCandidate(target, match.boundary))
         this.resetCandidate(match)
       }
       return ret
     },
     drawLetter(ctx, word, ratio, i, x, y, cx, cy, previousResult) {
+      if (i > this.theRatio.x * this.theRatio.y) {
+        return
+      }
+
       // https://stackoverflow.com/a/56922947/1070215
       function getFontSizeToFit(text, fontFamily) {
         ctx.save()
@@ -258,9 +282,15 @@ export default {
 
       if (!this.textSize) {
         this.textSize = getFontSizeToFit(letter, this.fontFamily)
-        ctx.font = `bold ${this.textSize}px ${this.fontFamily}`
+        // ctx.font = `bold ${this.textSize}px ${this.fontFamily}`
+        
+        // SHADOW
+        // ctx.shadowColor = '#572010'
+        // ctx.shadowOffsetX = 1
+        // ctx.shadowOffsetY = 1
+        // ctx.shadowBlur = 1.5
       }
-      
+
       // do not display matches in the last column
       if (i % this.theRatio.x < this.theRatio.x - this.wordAsArray.length) {
         if (this.matches.horz.length) {
@@ -270,12 +300,12 @@ export default {
               if (boundary === i) {
                 ctx.save()
                 ctx.fillStyle = 'rgba(255,0,0,0.5)'
-                ctx.fillRect(x, y, cx * this.word.length - 1, cy - 1)
+                ctx.fillRect(x, y-2, cx * this.word.length, cy)
                 ctx.restore()
               } else if (i % word.length === 0) {
                 ctx.save()
                 ctx.fillStyle = 'black'
-                ctx.fillRect(x, y, 1, cy)
+                ctx.fillRect(x, y-2, 1, cy)
                 ctx.restore()
               }
             }
@@ -290,12 +320,7 @@ export default {
             if (boundary === i) {
               ctx.save()
               ctx.fillStyle = 'rgba(255,0,0,0.5)'
-              ctx.fillRect(x, y, cx - 1, cy * this.word.length - 1)
-              ctx.restore()
-            } else if (i % word.length === 0) {
-              ctx.save()
-              ctx.fillStyle = 'black'
-              ctx.fillRect(x, y, cx, 1)
+              ctx.fillRect(x, y-2, cx, cy * this.word.length - 1)
               ctx.restore()
             }
           }
