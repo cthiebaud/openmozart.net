@@ -47,7 +47,7 @@ export default {
         _this.toggleSlideshow()
       } else if (event.key === 'Escape') {
         _this.toggleSlideshow()
-      } 
+      }
     })
   },
   methods: {
@@ -81,6 +81,8 @@ export default {
     },
     toggleSlideshow() {
       if (!this.intervalID) {
+        this.shuffle = this.doShuffle(this.factorial)
+        this.createOrRedrawCanvas()
         this.intervalID = setInterval(
           function () {
             this.shuffle = this.doShuffle(this.factorial)
@@ -283,12 +285,12 @@ export default {
       if (!this.textSize) {
         this.textSize = getFontSizeToFit(letter, this.fontFamily)
         // ctx.font = `bold ${this.textSize}px ${this.fontFamily}`
-        
+
         // SHADOW
-        // ctx.shadowColor = '#572010'
-        // ctx.shadowOffsetX = 1
-        // ctx.shadowOffsetY = 1
-        // ctx.shadowBlur = 1.5
+        ctx.shadowColor = '#572010'
+        ctx.shadowOffsetX = .5
+        // ctx.shadowOffsetY = 0
+        // ctx.shadowBlur = .5
       }
 
       // do not display matches in the last column
@@ -300,12 +302,12 @@ export default {
               if (boundary === i) {
                 ctx.save()
                 ctx.fillStyle = 'rgba(255,0,0,0.5)'
-                ctx.fillRect(x, y-2, cx * this.word.length, cy)
+                ctx.fillRect(x, y - 2, cx * this.word.length - 1, cy - 1)
                 ctx.restore()
               } else if (i % word.length === 0) {
                 ctx.save()
                 ctx.fillStyle = 'black'
-                ctx.fillRect(x, y-2, 1, cy)
+                ctx.fillRect(x, y - 2, 1, cy - 1)
                 ctx.restore()
               }
             }
@@ -320,7 +322,7 @@ export default {
             if (boundary === i) {
               ctx.save()
               ctx.fillStyle = 'rgba(255,0,0,0.5)'
-              ctx.fillRect(x, y-2, cx, cy * this.word.length - 1)
+              ctx.fillRect(x, y - 3, cx, cy * this.word.length - 1)
               ctx.restore()
             }
           }
