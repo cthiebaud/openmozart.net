@@ -46,9 +46,9 @@ export default {
     const _this = this
     window.addEventListener('keyup', function (event) {
       if (event.key === 'Enter') {
-        _this.toggleSlideshow()
+        _this.startStopOrToggleSlideshow(true)
       } else if (event.key === 'Escape') {
-        _this.toggleSlideshow()
+        _this.startStopOrToggleSlideshow(false)
       }
     })
   },
@@ -81,8 +81,11 @@ export default {
       const shuffle = shuffleArray([...Array(factorial).keys()])
       return shuffle
     },
-    toggleSlideshow() {
-      if (!this.intervalID) {
+    startStopOrToggleSlideshow(start) {
+      if (typeof start === "undefined") {
+        start = !this.intervalID // toggle
+      } 
+      if (start && !this.intervalID) {
         this.shuffle = this.doShuffle(this.factorial)
         this.createOrRedrawCanvas()
         this.intervalID = setInterval(
@@ -92,7 +95,7 @@ export default {
           }.bind(this),
           1000
         )
-      } else {
+      } else if (!start && this.intervalID){
         clearInterval(this.intervalID)
         this.intervalID = undefined
       }
