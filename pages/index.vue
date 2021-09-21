@@ -1,7 +1,7 @@
 <template>
   <main class="vh-100" :style="`background-color: ${backgroundColor}`" @click="onClick">
     <!--  -->
-    <img id="portrait-image" src="/jpegs/Mozart-Lange-darker.jpg" />
+    <img id="portrait-image" src="/jpegs/ricard.jpg" />
   </main>
 </template>
 
@@ -10,8 +10,9 @@
 
 export default {
   data() {
-    const word = 'MOZART'
-    const backgroundColor = '#160804'
+    const word = 'RICARD'
+    const backgroundColor = 'white'
+    const filter = "brightness(100%)"
     const fontFamily = 'monospace'
     const matches = { horz: [], vert: [] }
     const intervalID = undefined
@@ -22,6 +23,7 @@ export default {
     return {
       word,
       backgroundColor,
+      filter,
       fontFamily,
       matches,
       intervalID,
@@ -102,6 +104,7 @@ export default {
     createOrRedrawCanvas(img) {
       // const grain = 18
       const options = {
+        filter: this.filter,
         fontFamily: this.fontFamily,
         resolution: this.calcResolution, // { cx: grain, cy: grain, cx_: grain, cy_: grain }, //
         shape: this.drawLetter, // 'diamond' // 'circle'
@@ -284,11 +287,11 @@ export default {
 
       if (!this.textSize) {
         this.textSize = getFontSizeToFit(letter, this.fontFamily)
-        // ctx.font = `bold ${this.textSize}px ${this.fontFamily}`
+        ctx.font = `bold ${this.textSize}px ${this.fontFamily}`
 
         // SHADOW
         ctx.shadowColor = '#572010'
-        ctx.shadowOffsetX = .5
+        ctx.shadowOffsetX = 0.5
         // ctx.shadowOffsetY = 0
         // ctx.shadowBlur = .5
       }
@@ -301,12 +304,12 @@ export default {
             if (boundary <= i && i < boundary + this.word.length) {
               if (boundary === i) {
                 ctx.save()
-                ctx.fillStyle = 'rgba(255,0,0,0.5)'
+                ctx.fillStyle = 'rgba(255, 255, 0,0.8)'
                 ctx.fillRect(x, y - 2, cx * this.word.length - 1, cy - 1)
                 ctx.restore()
               } else if (i % word.length === 0) {
                 ctx.save()
-                ctx.fillStyle = 'black'
+                ctx.fillStyle = 'white'
                 ctx.fillRect(x, y - 2, 1, cy - 1)
                 ctx.restore()
               }
@@ -321,7 +324,7 @@ export default {
           if (boundary <= i && i < boundary + this.word.length) {
             if (boundary === i) {
               ctx.save()
-              ctx.fillStyle = 'rgba(255,0,0,0.5)'
+              ctx.fillStyle = 'rgba(255, 255, 0,0.8)'
               ctx.fillRect(x, y - 3, cx, cy * this.word.length - 1)
               ctx.restore()
             }
@@ -421,6 +424,6 @@ canvas {
   object-fit: cover;
   object-position: 50% 50%;
   transform: scale(0.98);
-  background-color: #160804;
+  background-color: transparent;
 }
 </style>
