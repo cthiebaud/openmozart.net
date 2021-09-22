@@ -25,6 +25,8 @@ export default {
 
       word: 'MOZART',
       wordAsArray: undefined,
+      ersatz: '······',
+      ersatzAsArray: undefined,
       factorial: undefined
     }
 
@@ -68,6 +70,7 @@ export default {
   },
   mounted() {
     this.config.wordAsArray = this.config.word.split('')
+    this.config.ersatzAsArray = this.config.ersatz.split('')
     this.config.factorial = this.factorialize(this.config.wordAsArray.length)
 
     Vibrant.from(document.getElementById('portrait-image'))
@@ -107,7 +110,6 @@ export default {
       this.shuffle = this.doShuffle(this.config.factorial)
 
       // calc hidden permutations
-      this.ersatz = new Array(this.config.wordAsArray.length).fill('\u00B7')
       for (let i = 1; i < this.config.factorial; i++) {
         const permutation = this.pickPermutation(this.config.wordAsArray, this.config.factorial, i)
         // https://stackoverflow.com/a/19746771/1070215
@@ -187,7 +189,7 @@ export default {
     pickShuffledPermutation(nth) {
       nth = Math.floor(nth)
       if (this.hiddenPermutations.includes(nth)) {
-        return this.ersatz
+        return this.config.ersatzAsArray
       } else {
         const shuffled = this.shuffle[nth]
         return this.pickPermutation(this.config.wordAsArray, this.config.factorial, shuffled)
