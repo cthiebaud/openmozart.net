@@ -371,6 +371,7 @@ export default {
       const cx = wW / x
       const cy = wH / y
       this.theRatio = { x, y, cx, cy, factorial }
+      this.storeMatches()
       return this.theRatio
     },
     // https://www.freecodecamp.org/news/how-to-factorialize-a-number-in-javascript-9263c89a4b38/
