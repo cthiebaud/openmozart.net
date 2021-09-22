@@ -304,7 +304,7 @@ export default {
         // ctx.shadowOffsetY = 0
         // ctx.shadowBlur = .5
 
-        this.textSize = this.getFontSizeToFit(letter, this.fontFamily, cx, cy)
+        this.textSize = this.getFontSizeToFit(ctx, letter, this.fontFamily, cx, cy)
         ctx.font = `${this.textSize}px ${this.fontFamily}`
       }
 
