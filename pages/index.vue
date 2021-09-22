@@ -1,12 +1,13 @@
 <template>
   <main class="vh-100" :style="`background-color: ${config.backgroundColor}`" @click="shuffleAndRedraw">
-    <!--  -->
     <img id="portrait-image" :src="config.imageURL" />
   </main>
 </template>
 
 <script>
-/* _eslint-disable no-unused-expressions, no-unused-vars, no-sequences, eqeqeq, no-console */
+/* eslint-disable no-unused-expressions, no-unused-vars, no-sequences, eqeqeq, no-console, node/handle-callback-err, no-constant-condition */
+
+import * as Vibrant from 'node-vibrant'
 
 export default {
   data() {
@@ -30,34 +31,61 @@ export default {
     const box = { cols: 720, rows: 1 }
     const canvas = undefined
     const matches = { horz: [], vert: [] }
+    const palette = undefined
     const shuffle = undefined
     const slideshowID = undefined
     const textSize = undefined
+    const cheat = ''
     return {
       config,
 
       box,
       canvas,
       matches,
+      palette,
       shuffle,
       slideshowID,
-      textSize
+      textSize,
+
+      cheat
     }
   },
   computed: {
+    cheating() {
+      return this.cheat === 'cheat'
+    }
   },
   mounted() {
     this.config.wordAsArray = this.config.word.split('')
     this.config.factorial = this.factorialize(this.config.wordAsArray.length)
 
+    Vibrant.from(document.getElementById('portrait-image'))
+      .maxColorCount(200)
+      .getPalette()
+      .then((palette) => {
+        this.palette = palette
+      })
+
     this.init()
-    
+
     const that = this
     window.addEventListener('keyup', function (event) {
       if (event.key === 'Enter') {
         that.startOrStopOrToggleSlideshow(true)
       } else if (event.key === 'Escape') {
+        that.cheat = ''
         that.startOrStopOrToggleSlideshow(false)
+      }
+      if ('cheat'.includes(event.key)) {
+        if (that.cheat === 'cheat') {
+          return
+        }
+        that.cheat += event.key
+        if (!'cheat'.startsWith(that.cheat)) {
+          that.cheat = ''
+        } else if (that.cheat === 'cheat') {
+           that.createOrRedrawCanvas()
+        }
       }
     })
   },
@@ -115,13 +143,11 @@ export default {
       const options = {
         filter: this.config.imageFilter,
         fontFamily: this.config.fontFamily,
-        resolution: this.calcResolution, // { cxCol: grain, cyRow: grain }, // undefined, // 
-        shape: this.drawLetter, // 'circle', // 'diamond', // undefined, // 
+        resolution: this.calcResolution, // { cxCol: grain, cyRow: grain }, // undefined, //
+        shape: this.drawLetter, // 'circle', // 'diamond', // undefined, //
         word: this.config.word,
         wordAsArray: this.config.wordAsArray
       }
-      // eslint-disable-next-line no-console
-      console.log(options)
       this.textSize = undefined // triggers text size recalulation
       if (img) {
         this.canvas = img.closePixelate(options)
@@ -214,7 +240,11 @@ export default {
           const k = i % this.config.wordAsArray.length
           const permutation = this.pickShuffledPermutation(j)
           const letter = permutation[k]
-          candidate.boundary = candidate.boundary || i
+          if (!candidate.boundary) {
+            candidate.boundary = [i]
+          } else {
+            candidate.boundary.push(i)
+          }
           const matchBoundary = this.testIfMatch(this.config.wordAsArray, candidate, letter)
           if (matchBoundary) {
             this.matches.vert.push(matchBoundary)
@@ -301,7 +331,7 @@ export default {
 
       if (!this.textSize) {
         ctx.textAlign = this.config.textAlign
-        ctx.textBaseline = this.config.textBaseline 
+        ctx.textBaseline = this.config.textBaseline
 
         // SHADOW
         ctx.shadowColor = this.config.shadowColor
@@ -313,18 +343,29 @@ export default {
         ctx.font = `${this.textSize}px ${this.config.fontFamily}`
       }
 
-      if (i % this.box.cols < this.box.cols - this.config.wordAsArray.length) {
-        // ^^^ do not display matches in the last column ^^^
+      // get nearest color from palette
+      let mindiff = Number.MAX_SAFE_INTEGER
+      let suitableTextColor = ctx.fillStyle
+      for (const color in this.palette) {
+        const diff = Vibrant.Util.hexDiff(this.palette[color].getHex(), ctx.fillStyle)
+        if (diff < mindiff) {
+          mindiff = diff
+          suitableTextColor = this.palette[color].getBodyTextColor()
+        }
+      }
+      // ctx.fillRect(x, y, cx, cy)
+
+      if (this.cheating) {
         if (this.matches.horz.length) {
           for (let b = 0; b < this.matches.horz.length; b++) {
             const boundary = this.matches.horz[b]
             if (boundary <= i && i < boundary + this.config.wordAsArray.length) {
-              if (boundary === i) {
-                ctx.save()
-                ctx.fillStyle = this.config.matchFillStyle
-                ctx.fillRect(x, y - 2, cx * this.config.wordAsArray.length - 1, cy - 1)
-                ctx.restore()
-              } else if (i % word.length === 0 && this.config.matchBoundaryFillStyle) {
+              ctx.save()
+              ctx.fillStyle = this.config.matchFillStyle
+              ctx.fillRect(x, y - 2, cx, cy - 1)
+              ctx.restore()
+
+              if (i % word.length === 0 && this.config.matchBoundaryFillStyle) {
                 ctx.save()
                 ctx.fillStyle = this.config.matchBoundaryFillStyle
                 ctx.fillRect(x, y - 2, 1, cy - 1)
@@ -333,22 +374,20 @@ export default {
             }
           }
         }
-      }
 
-      if (this.matches.vert.length) {
-        for (let b = 0; b < this.matches.vert.length; b++) {
-          const boundary = this.matches.vert[b]
-          if (boundary <= i && i < boundary + this.config.wordAsArray.length) {
-            if (boundary === i) {
+        if (this.matches.vert.length) {
+          for (let b = 0; b < this.matches.vert.length; b++) {
+            const boundary = this.matches.vert[b]
+            if (boundary.includes(i)) {
               ctx.save()
               ctx.fillStyle = this.config.matchFillStyle
-              ctx.fillRect(x, y - 3, cx, cy * this.config.wordAsArray.length - 1)
+              ctx.fillRect(x, y - 3, cx, cy - 1)
               ctx.restore()
             }
           }
         }
       }
-
+      // ctx.fillStyle = suitableTextColor
       ctx.fillText(letter, x + cx / 2, y + cy, cx)
       return anagram
     },
