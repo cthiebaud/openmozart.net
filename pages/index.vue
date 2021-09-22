@@ -5,7 +5,7 @@
 </template>
 
 <script>
-/* eslint-disable no-unused-expressions, no-unused-vars, no-sequences, eqeqeq, no-console, node/handle-callback-err, no-constant-condition */
+/* _eslint-disable no-unused-expressions, no-unused-vars, no-sequences, eqeqeq, no-console, node/handle-callback-err, no-constant-condition */
 
 import * as Vibrant from 'node-vibrant'
 
@@ -28,8 +28,16 @@ export default {
       factorial: undefined
     }
 
+    const tweaks = {
+      x: 0,
+      y: 0,
+      cx: 0,
+      cy: 0
+    }
+
     const box = { cols: 720, rows: 1 }
     const canvas = undefined
+    const hiddenPermutations = [0]
     const matches = { horz: [], vert: [] }
     const palette = undefined
     const shuffle = undefined
@@ -39,8 +47,11 @@ export default {
     return {
       config,
 
+      tweaks,
+
       box,
       canvas,
+      hiddenPermutations,
       matches,
       palette,
       shuffle,
@@ -85,15 +96,31 @@ export default {
         if (!'cheat'.startsWith(that.cheat)) {
           that.cheat = ''
         } else if (that.cheat === 'cheat') {
-           that.createOrRedrawCanvas()
+          that.createOrRedrawCanvas()
         }
       }
     })
   },
   methods: {
     init() {
-      const that = this
+      // calc shuffled array
       this.shuffle = this.doShuffle(this.config.factorial)
+
+      // calc hidden permutations
+      this.ersatz = new Array(this.config.wordAsArray.length).fill('\u00B7')
+      for (let i = 1; i < this.config.factorial; i++) {
+        const permutation = this.pickPermutation(this.config.wordAsArray, this.config.factorial, i)
+        // https://stackoverflow.com/a/19746771/1070215
+        const identicalArrays = (a1, a2) => a1.length === a2.length && a1.every((v, i) => v === a2[i])
+        if (identicalArrays(permutation, this.config.wordAsArray)) {
+          // eslint-disable-next-line no-console
+          console.log('hide nth permutation', i, permutation)
+          this.hiddenPermutations.push(i)
+        }
+      }
+
+      // do the whole gamut when image is loaded
+      const that = this
       document.getElementById('portrait-image').addEventListener('load', function (e) {
         that.createOrRedrawCanvas(this)
       })
@@ -158,12 +185,11 @@ export default {
     },
     // https://stackoverflow.com/a/54018834/1070215
     pickShuffledPermutation(nth) {
-      const shuffled = this.shuffle[Math.floor(nth)]
-      if (shuffled === 0) {
-        // hide the root word
-        // \u00B7 is '·' (https://www.compart.com/en/unicode/U+00B7)
-        return new Array(this.config.wordAsArray.length).fill('\u00B7')
+      nth = Math.floor(nth)
+      if (this.hiddenPermutations.includes(nth)) {
+        return this.ersatz
       } else {
+        const shuffled = this.shuffle[nth]
         return this.pickPermutation(this.config.wordAsArray, this.config.factorial, shuffled)
       }
     },
@@ -319,6 +345,9 @@ export default {
       ctx.restore()
       return Math.min(cx + 2 / w, cy + 2 / actualHeight)
     },
+    tweakAndFillRect(ctx, x, y, cx, cy) {
+      ctx.fillRect(x + this.tweaks.x, y + this.tweaks.y, cx + this.tweaks.cx, cy + this.tweaks.cy)
+    },
     drawLetter(ctx, word, i, x, y, cx, cy, previousResult) {
       if (i > this.box.cols * this.box.rows) {
         return
@@ -351,9 +380,11 @@ export default {
         const diff = Vibrant.Util.hexDiff(this.palette[color].getHex(), ctx.fillStyle)
         if (diff < mindiff) {
           mindiff = diff
+          // eslint-disable-next-line no-unused-vars
           suitableTextColor = this.palette[color].getBodyTextColor()
         }
       }
+
       // ctx.fillRect(x, y, cx, cy)
 
       if (this.cheating) {
@@ -363,13 +394,13 @@ export default {
             if (boundary <= i && i < boundary + this.config.wordAsArray.length) {
               ctx.save()
               ctx.fillStyle = this.config.matchFillStyle
-              ctx.fillRect(x, y - 2, cx, cy - 1)
+              this.tweakAndFillRect(ctx, x, y, cx, cy)
               ctx.restore()
 
               if (i % word.length === 0 && this.config.matchBoundaryFillStyle) {
                 ctx.save()
                 ctx.fillStyle = this.config.matchBoundaryFillStyle
-                ctx.fillRect(x, y - 2, 1, cy - 1)
+                this.tweakAndFillRect(ctx, x, y, 1, cy)
                 ctx.restore()
               }
             }
@@ -382,7 +413,7 @@ export default {
             if (boundary.includes(i)) {
               ctx.save()
               ctx.fillStyle = this.config.matchFillStyle
-              ctx.fillRect(x, y - 3, cx, cy - 1)
+              this.tweakAndFillRect(ctx, x, y, cx, cy)
               ctx.restore()
             }
           }
