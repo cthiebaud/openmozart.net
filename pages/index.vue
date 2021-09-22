@@ -6,23 +6,23 @@
 </template>
 
 <script>
-/* _eslint-disable no-unused-expressions, no-unused-vars, no-sequences, eqeqeq, no-console */
+/* _eslint-disable no-unused-expressions, no-unused-vars, no-sequences, eqeqeq, no-console, node/handle-callback-err */
 
 export default {
   data() {
     const config = {
-      backgroundColor: '#160804',
+      backgroundColor: 'white',
       fontFamily: 'monospace',
-      imageFilter: 'brightness(120%)',
-      imageURL: '/jpegs/Mozart-Lange-darker.jpg',
-      matchBoundaryFillStyle: 'black',
-      matchFillStyle: 'rgba(255, 0, 0, 0.5)',
-      shadowColor: '#572010',
+      imageFilter: 'brightness(95%)',
+      imageURL: '/jpegs/ricard.jpg',
+      matchBoundaryFillStyle: undefined,
+      matchFillStyle: 'rgba(255, 255, 0, .9)',
+      shadowColor: '#462310',
       shadowOffsetX: 0.5,
       textAlign: 'center',
       textBaseline: 'bottom',
 
-      word: 'MOZART',
+      word: 'RICARD',
       wordAsArray: undefined,
       factorial: undefined
     }
@@ -44,14 +44,13 @@ export default {
       textSize
     }
   },
-  computed: {
-  },
+  computed: {},
   mounted() {
     this.config.wordAsArray = this.config.word.split('')
     this.config.factorial = this.factorialize(this.config.wordAsArray.length)
 
     this.init()
-    
+
     const that = this
     window.addEventListener('keyup', function (event) {
       if (event.key === 'Enter') {
@@ -115,8 +114,8 @@ export default {
       const options = {
         filter: this.config.imageFilter,
         fontFamily: this.config.fontFamily,
-        resolution: this.calcResolution, // { cxCol: grain, cyRow: grain }, // undefined, // 
-        shape: this.drawLetter, // 'circle', // 'diamond', // undefined, // 
+        resolution: this.calcResolution, // { cxCol: grain, cyRow: grain }, // undefined, //
+        shape: this.drawLetter, // 'circle', // 'diamond', // undefined, //
         word: this.config.word,
         wordAsArray: this.config.wordAsArray
       }
@@ -301,7 +300,7 @@ export default {
 
       if (!this.textSize) {
         ctx.textAlign = this.config.textAlign
-        ctx.textBaseline = this.config.textBaseline 
+        ctx.textBaseline = this.config.textBaseline
 
         // SHADOW
         ctx.shadowColor = this.config.shadowColor
@@ -440,6 +439,6 @@ canvas {
   object-fit: cover;
   object-position: 50% 50%;
   transform: scale(0.98);
-  background-color: #160804;
+  background-color: transparent;
 }
 </style>
