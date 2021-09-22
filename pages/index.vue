@@ -5,7 +5,7 @@
 </template>
 
 <script>
-/* _eslint-disable no-unused-expressions, no-unused-vars, no-sequences, eqeqeq, no-console, node/handle-callback-err, no-constant-condition */
+/* eslint-disable no-unused-expressions, no-unused-vars, no-sequences, eqeqeq, no-console, node/handle-callback-err, no-constant-condition */
 
 import * as Vibrant from 'node-vibrant'
 
@@ -35,6 +35,7 @@ export default {
     const shuffle = undefined
     const slideshowID = undefined
     const textSize = undefined
+    const cheat = ''
     return {
       config,
 
@@ -44,10 +45,16 @@ export default {
       palette,
       shuffle,
       slideshowID,
-      textSize
+      textSize,
+
+      cheat
     }
   },
-  computed: {},
+  computed: {
+    cheating() {
+      return this.cheat === 'cheat'
+    }
+  },
   mounted() {
     this.config.wordAsArray = this.config.word.split('')
     this.config.factorial = this.factorialize(this.config.wordAsArray.length)
@@ -66,7 +73,19 @@ export default {
       if (event.key === 'Enter') {
         that.startOrStopOrToggleSlideshow(true)
       } else if (event.key === 'Escape') {
+        that.cheat = ''
         that.startOrStopOrToggleSlideshow(false)
+      }
+      if ('cheat'.includes(event.key)) {
+        if (that.cheat === 'cheat') {
+          return
+        }
+        that.cheat += event.key
+        if (!'cheat'.startsWith(that.cheat)) {
+          that.cheat = ''
+        } else if (that.cheat === 'cheat') {
+           that.createOrRedrawCanvas()
+        }
       }
     })
   },
@@ -336,33 +355,35 @@ export default {
       }
       ctx.fillRect(x, y, cx, cy)
 
-      if (this.matches.horz.length) {
-        for (let b = 0; b < this.matches.horz.length; b++) {
-          const boundary = this.matches.horz[b]
-          if (boundary <= i && i < boundary + this.config.wordAsArray.length) {
-            ctx.save()
-            ctx.fillStyle = this.config.matchFillStyle
-            ctx.fillRect(x, y, cx, cy - 1)
-            ctx.restore()
-
-            if (i % word.length === 0 && this.config.matchBoundaryFillStyle) {
+      if (this.cheating) {
+        if (this.matches.horz.length) {
+          for (let b = 0; b < this.matches.horz.length; b++) {
+            const boundary = this.matches.horz[b]
+            if (boundary <= i && i < boundary + this.config.wordAsArray.length) {
               ctx.save()
-              ctx.fillStyle = this.config.matchBoundaryFillStyle
-              ctx.fillRect(x, y, 1, cy - 1)
+              ctx.fillStyle = this.config.matchFillStyle
+              ctx.fillRect(x, y, cx, cy - 1)
               ctx.restore()
+
+              if (i % word.length === 0 && this.config.matchBoundaryFillStyle) {
+                ctx.save()
+                ctx.fillStyle = this.config.matchBoundaryFillStyle
+                ctx.fillRect(x, y, 1, cy - 1)
+                ctx.restore()
+              }
             }
           }
         }
-      }
 
-      if (this.matches.vert.length) {
-        for (let b = 0; b < this.matches.vert.length; b++) {
-          const boundary = this.matches.vert[b]
-          if (boundary.includes(i)) {
-            ctx.save()
-            ctx.fillStyle = this.config.matchFillStyle
-            ctx.fillRect(x, y, cx, 2 * cy * this.config.wordAsArray.length - 1)
-            ctx.restore()
+        if (this.matches.vert.length) {
+          for (let b = 0; b < this.matches.vert.length; b++) {
+            const boundary = this.matches.vert[b]
+            if (boundary.includes(i)) {
+              ctx.save()
+              ctx.fillStyle = this.config.matchFillStyle
+              ctx.fillRect(x, y, cx, 2 * cy * this.config.wordAsArray.length - 1)
+              ctx.restore()
+            }
           }
         }
       }
