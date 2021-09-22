@@ -70,7 +70,6 @@ export default {
 
     const that = this
     window.addEventListener('keyup', function (event) {
-      console.log(event)
       if (event.code === 'Enter') {
         that.startOrStopOrToggleSlideshow(true)
       } else if (event.code === 'Space') {
@@ -257,7 +256,7 @@ export default {
       }
     },
     storeMatches() {
-      // console.log('RAZ matches at start of storeMatches')
+      // RAZ matches at start of storeMatches
       this.matches.horz.splice(0, this.matches.horz.length)
       this.matches.vert.splice(0, this.matches.vert.length)
 
