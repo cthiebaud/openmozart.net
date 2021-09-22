@@ -28,6 +28,13 @@ export default {
       factorial: undefined
     }
 
+    const tweaks = {
+      x: 0,
+      y: 0,
+      cx: 1,
+      cy: 0
+    }
+
     const box = { cols: 720, rows: 1 }
     const canvas = undefined
     const matches = { horz: [], vert: [] }
@@ -38,6 +45,8 @@ export default {
     const cheat = ''
     return {
       config,
+
+      tweaks,
 
       box,
       canvas,
@@ -321,6 +330,9 @@ export default {
       ctx.restore()
       return Math.min(cx - 5 / w, cy - 5 / actualHeight)
     },
+    tweakAndFillRect(ctx, x, y, cx, cy) {
+      ctx.fillRect(x + this.tweaks.x, y + this.tweaks.y, cx + this.tweaks.cx, cy + this.tweaks.cy)
+    },
     drawLetter(ctx, word, i, x, y, cx, cy, previousResult) {
       if (i > this.box.cols * this.box.rows) {
         return
@@ -365,13 +377,13 @@ export default {
             if (boundary <= i && i < boundary + this.config.wordAsArray.length) {
               ctx.save()
               ctx.fillStyle = this.config.matchFillStyle
-              ctx.fillRect(x, y, cx, cy - 1)
+              this.tweakAndFillRect(ctx, x, y, cx, cy)
               ctx.restore()
 
               if (i % word.length === 0 && this.config.matchBoundaryFillStyle) {
                 ctx.save()
                 ctx.fillStyle = this.config.matchBoundaryFillStyle
-                ctx.fillRect(x, y, 1, cy - 1)
+                this.tweakAndFillRect(ctx, x, y, 1, cy)
                 ctx.restore()
               }
             }
@@ -384,7 +396,7 @@ export default {
             if (boundary.includes(i)) {
               ctx.save()
               ctx.fillStyle = this.config.matchFillStyle
-              ctx.fillRect(x, y, cx, 2 * cy * this.config.wordAsArray.length - 1)
+              this.tweakAndFillRect(ctx, x, y, cx, cy)
               ctx.restore()
             }
           }
