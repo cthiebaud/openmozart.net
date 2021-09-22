@@ -85,26 +85,26 @@
     const imgData = this.imgData
 
     let res
-    if (isFunction(opts.resolution) && opts.word) {
-      ctx.font = '20px monospace'
+    if (isFunction(opts.resolution) && opts.word && opts.fontFamily) {
+      ctx.font = `1px ${opts.fontFamily} `
       const metrics = ctx.measureText(opts.word)
       const actualHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent
       res = opts.resolution(opts.word, metrics.width, actualHeight, w, h)
     } else {
       res = opts.resolution || {
-        cx: 16,
-        cy: 16
+        cxCol: 16,
+        cyRow: 16
       }
     }
 
     // option defaults
-    const size = opts.size || {
-      cx: Math.ceil(res.cx),
-      cy: Math.ceil(res.cy)
-    }
     const alpha = opts.alpha || 1
-    const cols = w / res.cx
-    const rows = h / res.cy
+    const cols = res.cols || w / res.cxCol
+    const rows = res.rows || w / res.cyRow
+    const size = opts.size || {
+      cx: Math.ceil(res.cxCol),
+      cy: Math.ceil(res.cyRow)
+    }
     const halfSize = {
       cx: size.cx / 2,
       cy: size.cy / 2
@@ -116,16 +116,16 @@
     let i = 0
     let shapeResult
     for (row = 0; row < rows; row++) {
-      y_ = row * res.cy
+      y_ = row * res.cyRow
       y = Math.round(y_)
       // normalize y so shapes around edges get color
-      pixelY = Math.max(Math.min(y, h - res.cy), 0)
+      pixelY = Math.max(Math.min(y, h - res.cyRow), 0)
 
       for (col = 0; col < cols; col++) {
-        x_ = col * res.cx
+        x_ = col * res.cxCol
         x = Math.round(x_)
         // normalize x so shapes around edges get color
-        pixelX = Math.max(Math.min(x, w - res.cx), 0)
+        pixelX = Math.max(Math.min(x, w - res.cxCol), 0)
 
         const rgb = {
           r: 0,
@@ -133,8 +133,8 @@
           b: 0
         }
         let count = 0
-        for (let Y = 0; Y < res.cy; Y++) {
-          for (let X = 0; X < res.cx; X++) {
+        for (let Y = 0; Y < res.cyRow; Y++) {
+          for (let X = 0; X < res.cxCol; X++) {
             pixelIndex = (pixelX + X + (pixelY + Y) * w) * 4
             // https://sighack.com/post/averaging-rgb-colors-the-right-way
             rgb.r += imgData[pixelIndex] * imgData[pixelIndex]
@@ -196,8 +196,8 @@
             (col === 0 || (col + 1) % Math.round(cols) === 0)) {
           markers.push({
             text: col + 1 + '·' + (row + 1),
-            x: col * res.cx,
-            y: row * res.cy
+            x: col * res.cxCol,
+            y: row * res.cyRow
           })
         }
         i++
@@ -214,8 +214,8 @@
         ctx.textBaseline = m.y === 0 ? 'top' : 'bottom'
         // prettier-ignore
         ctx.fillText(m.text, 
-          m.x + (m.x !== 0 ? res.cx - 2 : 0), 
-          m.y + (m.y !== 0 ? res.cy     : 0))
+          m.x + (m.x !== 0 ? res.cxCol - 2 : 0), 
+          m.y + (m.y !== 0 ? res.cyRow     : 0))
       })
       ctx.restore()
     }
