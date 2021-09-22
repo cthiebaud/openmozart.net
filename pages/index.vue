@@ -78,6 +78,7 @@ export default {
       } else if (event.code === 'Escape') {
         that.cheat = ''
         that.startOrStopOrToggleSlideshow(false)
+        that.createOrRedrawCanvas()
       }
       if ('cheat'.includes(event.key)) {
         if (that.cheat === 'cheat') {
