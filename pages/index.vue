@@ -1,7 +1,7 @@
 <template>
-  <main class="vh-100" :style="`background-color: ${backgroundColor}`" @click="shuffleAndRedraw">
+  <main class="vh-100" :style="`background-color: ${config.backgroundColor}`" @click="shuffleAndRedraw">
     <!--  -->
-    <img id="portrait-image" :src="imageURL" />
+    <img id="portrait-image" :src="config.imageURL" />
   </main>
 </template>
 
@@ -10,60 +10,63 @@
 
 export default {
   data() {
-    const word = 'MOZART'
-    const backgroundColor = '#160804'
-    const filter = 'brightness(120%)'
-    const fontFamily = 'monospace'
-    const imageURL = '/jpegs/Mozart-Lange-darker.jpg'
-    const slideshowID = undefined
+    const config = {
+      backgroundColor: '#160804',
+      fontFamily: 'monospace',
+      imageFilter: 'brightness(120%)',
+      imageURL: '/jpegs/Mozart-Lange-darker.jpg',
+      matchBoundaryFillStyle: 'black',
+      matchFillStyle: 'rgba(255, 0, 0, 0.5)',
+      shadowColor: '#572010',
+      shadowOffsetX: 0.5,
+      textAlign: 'center',
+      textBaseline: 'bottom',
+
+      word: 'MOZART',
+      wordAsArray: undefined,
+      factorial: undefined
+    }
+
+    const box = { cols: 720, rows: 1 }
+    const canvas = undefined
     const matches = { horz: [], vert: [] }
-    const matchFillStyle = 'rgba(255, 0, 0, 0.5)'
-    const matchBoundaryFillStyle = 'black'
     const shuffle = undefined
-    const textSize = 20
-    const theCanvas = {}
-    const theRatio = {}
+    const slideshowID = undefined
+    const textSize = undefined
     return {
-      word,
-      backgroundColor,
-      filter,
-      fontFamily,
-      imageURL,
-      slideshowID,
+      config,
+
+      box,
+      canvas,
       matches,
-      matchFillStyle,
-      matchBoundaryFillStyle,
       shuffle,
-      textSize,
-      theCanvas,
-      theRatio
+      slideshowID,
+      textSize
     }
   },
   computed: {
-    wordAsArray() {
-      return this.word.split('')
-    },
-    factorial() {
-      return this.factorialize(this.wordAsArray.length)
-    }
   },
   mounted() {
+    this.config.wordAsArray = this.config.word.split('')
+    this.config.factorial = this.factorialize(this.config.wordAsArray.length)
+
     this.init()
-    const _this = this
+    
+    const that = this
     window.addEventListener('keyup', function (event) {
       if (event.key === 'Enter') {
-        _this.startOrStopOrToggleSlideshow(true)
+        that.startOrStopOrToggleSlideshow(true)
       } else if (event.key === 'Escape') {
-        _this.startOrStopOrToggleSlideshow(false)
+        that.startOrStopOrToggleSlideshow(false)
       }
     })
   },
   methods: {
     init() {
-      const _this = this
-      this.shuffle = this.doShuffle(this.factorial)
+      const that = this
+      this.shuffle = this.doShuffle(this.config.factorial)
       document.getElementById('portrait-image').addEventListener('load', function (e) {
-        _this.createOrRedrawCanvas(this)
+        that.createOrRedrawCanvas(this)
       })
     },
     doShuffle: (factorial) => {
@@ -87,7 +90,7 @@ export default {
       return shuffleArray([...Array(factorial).keys()])
     },
     shuffleAndRedraw() {
-      this.shuffle = this.doShuffle(this.factorial)
+      this.shuffle = this.doShuffle(this.config.factorial)
       this.createOrRedrawCanvas()
     },
     startOrStopOrToggleSlideshow(start) {
@@ -110,18 +113,20 @@ export default {
     createOrRedrawCanvas(img) {
       // const grain = 18
       const options = {
-        filter: this.filter,
-        fontFamily: this.fontFamily,
-        resolution: this.calcResolution, // { cx: grain, cy: grain, cx_: grain, cy_: grain }, //
-        shape: this.drawLetter, // 'diamond' // 'circle'
-        word: this.word,
-        wordAsArray: this.wordAsArray
+        filter: this.config.imageFilter,
+        fontFamily: this.config.fontFamily,
+        resolution: this.calcResolution, // { cxCol: grain, cyRow: grain }, // undefined, // 
+        shape: this.drawLetter, // 'circle', // 'diamond', // undefined, // 
+        word: this.config.word,
+        wordAsArray: this.config.wordAsArray
       }
+      // eslint-disable-next-line no-console
+      console.log(options)
       this.textSize = undefined // triggers text size recalulation
       if (img) {
-        this.theCanvas = img.closePixelate(options)
+        this.canvas = img.closePixelate(options)
       } else {
-        this.theCanvas.render(options)
+        this.canvas.render(options)
       }
     },
     // https://stackoverflow.com/a/54018834/1070215
@@ -130,9 +135,9 @@ export default {
       if (shuffled === 0) {
         // hide the root word
         // \u00B7 is '·' (https://www.compart.com/en/unicode/U+00B7)
-        return new Array(this.wordAsArray.length).fill('\u00B7')
+        return new Array(this.config.wordAsArray.length).fill('\u00B7')
       } else {
-        return this.pickPermutation(this.wordAsArray, this.factorial, shuffled)
+        return this.pickPermutation(this.config.wordAsArray, this.config.factorial, shuffled)
       }
     },
     // https://stackoverflow.com/a/54018834/1070215
@@ -183,17 +188,17 @@ export default {
       // horz
       let permutation = []
       const candidate = { boundary: undefined, accumulator: [] }
-      for (let row = 0; row < this.theRatio.y; row++) {
-        for (let col = 0; col < this.theRatio.x; col++) {
-          const i = col + row * this.theRatio.x
+      for (let row = 0; row < this.box.rows; row++) {
+        for (let col = 0; col < this.box.cols; col++) {
+          const i = col + row * this.box.cols
           if (permutation.length === 0) {
-            permutation = this.pickShuffledPermutation(i / this.wordAsArray.length)
+            permutation = this.pickShuffledPermutation(i / this.config.wordAsArray.length)
           }
           const letter = permutation.shift()
-          if (i % this.wordAsArray.length === 0) {
+          if (i % this.config.wordAsArray.length === 0) {
             candidate.boundary = i - candidate.accumulator.length
           }
-          const matchBoundary = this.testIfMatch(this.wordAsArray, candidate, letter)
+          const matchBoundary = this.testIfMatch(this.config.wordAsArray, candidate, letter)
           if (matchBoundary) {
             this.matches.horz.push(matchBoundary)
           }
@@ -202,15 +207,15 @@ export default {
     },
     vertical(r) {
       const candidate = { boundary: undefined, accumulator: [] }
-      for (let col = 0; col < this.theRatio.x; col++) {
-        for (let row = 0; row < this.theRatio.y; row++) {
-          const i = col + row * this.theRatio.x
-          const j = i / this.wordAsArray.length
-          const k = i % this.wordAsArray.length
+      for (let col = 0; col < this.box.cols; col++) {
+        for (let row = 0; row < this.box.rows; row++) {
+          const i = col + row * this.box.cols
+          const j = i / this.config.wordAsArray.length
+          const k = i % this.config.wordAsArray.length
           const permutation = this.pickShuffledPermutation(j)
           const letter = permutation[k]
           candidate.boundary = candidate.boundary || i
-          const matchBoundary = this.testIfMatch(this.wordAsArray, candidate, letter)
+          const matchBoundary = this.testIfMatch(this.config.wordAsArray, candidate, letter)
           if (matchBoundary) {
             this.matches.vert.push(matchBoundary)
           }
@@ -284,7 +289,7 @@ export default {
       return Math.min(cx + 2 / w, cy + 2 / actualHeight)
     },
     drawLetter(ctx, word, i, x, y, cx, cy, previousResult) {
-      if (i > this.theRatio.x * this.theRatio.y) {
+      if (i > this.box.cols * this.box.rows) {
         return
       }
 
@@ -295,33 +300,33 @@ export default {
       const letter = anagram.shift()
 
       if (!this.textSize) {
-        ctx.textAlign = 'center'
-        ctx.textBaseline = 'bottom'
+        ctx.textAlign = this.config.textAlign
+        ctx.textBaseline = this.config.textBaseline 
 
         // SHADOW
-        ctx.shadowColor = '#572010'
-        ctx.shadowOffsetX = 0.5
+        ctx.shadowColor = this.config.shadowColor
+        ctx.shadowOffsetX = this.config.shadowOffsetX
         // ctx.shadowOffsetY = 0
         // ctx.shadowBlur = .5
 
-        this.textSize = this.getFontSizeToFit(ctx, letter, this.fontFamily, cx, cy)
-        ctx.font = `${this.textSize}px ${this.fontFamily}`
+        this.textSize = this.getFontSizeToFit(ctx, letter, this.config.fontFamily, cx, cy)
+        ctx.font = `${this.textSize}px ${this.config.fontFamily}`
       }
 
-      if (i % this.theRatio.x < this.theRatio.x - this.wordAsArray.length) {
+      if (i % this.box.cols < this.box.cols - this.config.wordAsArray.length) {
         // ^^^ do not display matches in the last column ^^^
         if (this.matches.horz.length) {
           for (let b = 0; b < this.matches.horz.length; b++) {
             const boundary = this.matches.horz[b]
-            if (boundary <= i && i < boundary + this.word.length) {
+            if (boundary <= i && i < boundary + this.config.wordAsArray.length) {
               if (boundary === i) {
                 ctx.save()
-                ctx.fillStyle = this.matchFillStyle
-                ctx.fillRect(x, y - 2, cx * this.word.length - 1, cy - 1)
+                ctx.fillStyle = this.config.matchFillStyle
+                ctx.fillRect(x, y - 2, cx * this.config.wordAsArray.length - 1, cy - 1)
                 ctx.restore()
-              } else if (i % word.length === 0 && this.matchBoundaryFillStyle) {
+              } else if (i % word.length === 0 && this.config.matchBoundaryFillStyle) {
                 ctx.save()
-                ctx.fillStyle = this.matchBoundaryFillStyle
+                ctx.fillStyle = this.config.matchBoundaryFillStyle
                 ctx.fillRect(x, y - 2, 1, cy - 1)
                 ctx.restore()
               }
@@ -333,11 +338,11 @@ export default {
       if (this.matches.vert.length) {
         for (let b = 0; b < this.matches.vert.length; b++) {
           const boundary = this.matches.vert[b]
-          if (boundary <= i && i < boundary + this.word.length) {
+          if (boundary <= i && i < boundary + this.config.wordAsArray.length) {
             if (boundary === i) {
               ctx.save()
-              ctx.fillStyle = this.matchFillStyle
-              ctx.fillRect(x, y - 3, cx, cy * this.word.length - 1)
+              ctx.fillStyle = this.config.matchFillStyle
+              ctx.fillRect(x, y - 3, cx, cy * this.config.wordAsArray.length - 1)
               ctx.restore()
             }
           }
@@ -361,18 +366,19 @@ export default {
       const wordRatio = eW / eH
       const targetRatio = wW / wH / wordRatio
 
-      const good = this.binarySearch(
+      const nearest = this.binarySearch(
         ratios.map((r) => r.ratio),
         targetRatio
       )
+      // TODO : may be the next ratio is nearer from the target ratio ?
 
-      const x = ratios[good].x * word.length
-      const y = ratios[good].y
-      const cx = wW / x
-      const cy = wH / y
-      this.theRatio = { x, y, cx, cy, factorial }
+      const cols = ratios[nearest].x * word.length
+      const rows = ratios[nearest].y
+      const cxCol = wW / cols
+      const cyRow = wH / rows
+      this.box = { cols, rows, cxCol, cyRow, factorial }
       this.storeMatches()
-      return this.theRatio
+      return this.box
     },
     // https://www.freecodecamp.org/news/how-to-factorialize-a-number-in-javascript-9263c89a4b38/
     factorialize(num) {
