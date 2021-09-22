@@ -15,7 +15,7 @@ export default {
       backgroundColor: 'white',
       fontFamily: 'monospace',
       imageFilter: 'brightness(95%)',
-      imageURL: '/jpegs/ricard.png',
+      imageURL: '/jpegs/ricard.jpg',
       matchBoundaryFillStyle: undefined,
       matchFillStyle: 'rgba(255, 255, 0, .5)',
       shadowColor: '#462310',
