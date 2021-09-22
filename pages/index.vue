@@ -15,7 +15,7 @@ export default {
       backgroundColor: 'white',
       fontFamily: 'monospace',
       imageFilter: 'brightness(95%)',
-      imageURL: '/jpegs/ricard.jpg',
+      imageURL: '/jpegs/ricard.png',
       matchBoundaryFillStyle: undefined,
       matchFillStyle: 'rgba(255, 255, 0, .5)',
       shadowColor: '#462310',
@@ -70,9 +70,12 @@ export default {
 
     const that = this
     window.addEventListener('keyup', function (event) {
-      if (event.key === 'Enter') {
+      console.log(event)
+      if (event.code === 'Enter') {
         that.startOrStopOrToggleSlideshow(true)
-      } else if (event.key === 'Escape') {
+      } else if (event.code === 'Space') {
+        that.shuffleAndRedraw()
+      } else if (event.code === 'Escape') {
         that.cheat = ''
         that.startOrStopOrToggleSlideshow(false)
       }
@@ -84,7 +87,7 @@ export default {
         if (!'cheat'.startsWith(that.cheat)) {
           that.cheat = ''
         } else if (that.cheat === 'cheat') {
-           that.createOrRedrawCanvas()
+          that.createOrRedrawCanvas()
         }
       }
     })

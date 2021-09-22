@@ -1,4 +1,4 @@
-# openmozart.net
+# openricard
 
 ## Build Setup
 
