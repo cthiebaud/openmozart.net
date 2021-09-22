@@ -2,7 +2,7 @@
 
 ## The pitch
 
-718 permutations of the word "RICARD" colored in such a way as to make the famous portrait by Lange appear.
+718 permutations of the word "RICARD" colored in such a way as to make a bottle appear.
 
 The (2) identity permutations "RICARD" are replaced by "······" 
 
