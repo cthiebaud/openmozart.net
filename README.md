@@ -26,4 +26,4 @@ Already tedious in itself, this unglamorous task is made even more difficult by 
 * Pressing 'Escape' stops it
 * Typing 'cheat' reveals the lucky collisions and the undreamed of vertical alignments
 * Pressing 'Escape' stops cheating
-* Pressing 'Spacebar' or clicking anywhere reorders
+* Pressing 'Spacebar' or clicking anywhere refresh the screen, and thus the ordering of the permutations
