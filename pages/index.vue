@@ -1,12 +1,12 @@
 <template>
-  <main class="vh-100" :style="`background-color: ${backgroundColor}`" @click="onClick">
+  <main class="vh-100" :style="`background-color: ${backgroundColor}`" @click="shuffleAndRedraw">
     <!--  -->
-    <img id="portrait-image" src="/jpegs/Mozart-Lange-darker.jpg" />
+    <img id="portrait-image" :src="imageURL" />
   </main>
 </template>
 
 <script>
-/* eslint-disable no-unused-expressions, no-unused-vars, no-sequences, eqeqeq, no-console */
+/* _eslint-disable no-unused-expressions, no-unused-vars, no-sequences, eqeqeq, no-console */
 
 export default {
   data() {
@@ -14,8 +14,11 @@ export default {
     const backgroundColor = '#160804'
     const filter = 'brightness(120%)'
     const fontFamily = 'monospace'
+    const imageURL = '/jpegs/Mozart-Lange-darker.jpg'
+    const slideshowID = undefined
     const matches = { horz: [], vert: [] }
-    const intervalID = undefined
+    const matchFillStyle = 'rgba(255, 0, 0, 0.5)'
+    const matchBoundaryFillStyle = 'black'
     const shuffle = undefined
     const textSize = 20
     const theCanvas = {}
@@ -25,8 +28,11 @@ export default {
       backgroundColor,
       filter,
       fontFamily,
+      imageURL,
+      slideshowID,
       matches,
-      intervalID,
+      matchFillStyle,
+      matchBoundaryFillStyle,
       shuffle,
       textSize,
       theCanvas,
@@ -46,9 +52,9 @@ export default {
     const _this = this
     window.addEventListener('keyup', function (event) {
       if (event.key === 'Enter') {
-        _this.startStopOrToggleSlideshow(true)
+        _this.startOrStopOrToggleSlideshow(true)
       } else if (event.key === 'Escape') {
-        _this.startStopOrToggleSlideshow(false)
+        _this.startOrStopOrToggleSlideshow(false)
       }
     })
   },
@@ -78,31 +84,28 @@ export default {
         }
         return array
       }
-      const shuffle = shuffleArray([...Array(factorial).keys()])
-      return shuffle
+      return shuffleArray([...Array(factorial).keys()])
     },
-    startStopOrToggleSlideshow(start) {
-      if (typeof start === "undefined") {
-        start = !this.intervalID // toggle
-      } 
-      if (start && !this.intervalID) {
-        this.shuffle = this.doShuffle(this.factorial)
-        this.createOrRedrawCanvas()
-        this.intervalID = setInterval(
+    shuffleAndRedraw() {
+      this.shuffle = this.doShuffle(this.factorial)
+      this.createOrRedrawCanvas()
+    },
+    startOrStopOrToggleSlideshow(start) {
+      if (typeof start === 'undefined') {
+        start = !this.slideshowID // toggle
+      }
+      if (start && !this.slideshowID) {
+        this.shuffleAndRedraw()
+        this.slideshowID = setInterval(
           function () {
-            this.shuffle = this.doShuffle(this.factorial)
-            this.createOrRedrawCanvas()
+            this.shuffleAndRedraw()
           }.bind(this),
           1000
         )
-      } else if (!start && this.intervalID){
-        clearInterval(this.intervalID)
-        this.intervalID = undefined
+      } else if (!start && this.slideshowID) {
+        clearInterval(this.slideshowID)
+        this.slideshowID = undefined
       }
-    },
-    onClick() {
-      this.shuffle = this.doShuffle(this.factorial)
-      this.createOrRedrawCanvas()
     },
     createOrRedrawCanvas(img) {
       // const grain = 18
@@ -114,7 +117,7 @@ export default {
         word: this.word,
         wordAsArray: this.wordAsArray
       }
-      this.textSize = undefined
+      this.textSize = undefined // triggers text size recalulation
       if (img) {
         this.theCanvas = img.closePixelate(options)
       } else {
@@ -135,7 +138,8 @@ export default {
     // https://stackoverflow.com/a/54018834/1070215
     pickPermutation: (wordAsArray, factorial, nth) => {
       if (factorial < nth) {
-        // console.log(`n (${nth}) cannot be larger than factorial (${factorial}) !!!`)
+        // eslint-disable-next-line no-console
+        console.log(`n (${nth}) cannot be larger than factorial (${factorial}) !!!`)
         return []
         /*
         throw new Error(
@@ -175,20 +179,40 @@ export default {
       }
       return T
     },
+    horizontal(r) {
+      // horz
+      let permutation = []
+      const candidate = { boundary: undefined, accumulator: [] }
+      for (let row = 0; row < this.theRatio.y; row++) {
+        for (let col = 0; col < this.theRatio.x; col++) {
+          const i = col + row * this.theRatio.x
+          if (permutation.length === 0) {
+            permutation = this.pickShuffledPermutation(i / this.wordAsArray.length)
+          }
+          const letter = permutation.shift()
+          if (i % this.wordAsArray.length === 0) {
+            candidate.boundary = i - candidate.accumulator.length
+          }
+          const matchBoundary = this.testIfMatch(this.wordAsArray, candidate, letter)
+          if (matchBoundary) {
+            this.matches.horz.push(matchBoundary)
+          }
+        }
+      }
+    },
     vertical(r) {
-      const match = { boundary: undefined, candidate: [] }
+      const candidate = { boundary: undefined, accumulator: [] }
       for (let col = 0; col < this.theRatio.x; col++) {
         for (let row = 0; row < this.theRatio.y; row++) {
           const i = col + row * this.theRatio.x
           const j = i / this.wordAsArray.length
           const k = i % this.wordAsArray.length
-          const permut = this.pickShuffledPermutation(j)
-          const letter = permut[k]
-          match.boundary = match.boundary || i
-          const matchBoundary = this.testIfMatch(this.wordAsArray, match, letter)
+          const permutation = this.pickShuffledPermutation(j)
+          const letter = permutation[k]
+          candidate.boundary = candidate.boundary || i
+          const matchBoundary = this.testIfMatch(this.wordAsArray, candidate, letter)
           if (matchBoundary) {
             this.matches.vert.push(matchBoundary)
-            // console.log('added VERTICAL match!', this.matches.vert)
           }
         }
       }
@@ -201,24 +225,8 @@ export default {
       // vert
       this.vertical()
 
-      // horz
-      let anagram = []
-      const match = { boundary: undefined, candidate: [] }
-      for (let i = 0; i < this.wordAsArray.length * this.factorial; i++) {
-        if (anagram.length === 0) {
-          anagram = this.pickShuffledPermutation(i / this.wordAsArray.length)
-        }
-        const letter = anagram.shift()
-        if (i % this.wordAsArray.length === 0) {
-          match.boundary = i - match.candidate.length
-        }
-        const matchBoundary = this.testIfMatch(this.wordAsArray, match, letter)
-        if (matchBoundary) {
-          this.matches.horz.push(matchBoundary)
-          // console.log('added HORIZONTAL match!', this.matches.horz)
-        }
-        // verts
-      }
+      // vert
+      this.horizontal()
     },
     printCandidate(word, boundary) {
       const ret = []
@@ -230,56 +238,54 @@ export default {
       }
       return ret.join('')
     },
-    resetCandidate(match) {
-      match.candidate.splice(0, match.candidate.length)
-      match.boundary = undefined
+    resetCandidate(candidate) {
+      candidate.accumulator.splice(0, candidate.accumulator.length)
+      candidate.boundary = undefined
     },
-    testIfMatch(target, match, letter) {
+    testIfMatch(target, candidate, letter) {
       let ret
-      match.candidate.push(letter)
+      candidate.accumulator.push(letter)
       let i = 0
-      for (; i < match.candidate.length; i++) {
-        if (match.candidate[i] !== target[i]) {
-          this.resetCandidate(match)
+      for (; i < candidate.accumulator.length; i++) {
+        if (candidate.accumulator[i] !== target[i]) {
+          this.resetCandidate(candidate)
           break
         }
       }
       if (i === target.length) {
-        ret = match.boundary
-        // console.log('hourrah!', this.printCandidate(target, match.boundary))
-        this.resetCandidate(match)
+        ret = candidate.boundary
+        this.resetCandidate(candidate)
       }
       return ret
     },
-    drawLetter(ctx, word, ratio, i, x, y, cx, cy, previousResult) {
+    // https://stackoverflow.com/a/56922947/1070215
+    getFontSizeToFit: (ctx, text, fontFamily, cx, cy) => {
+      ctx.save()
+      ctx.font = `1px ${fontFamily} `
+      const metrics = ctx.measureText(text)
+      const w = metrics.width
+      // https://stackoverflow.com/a/46950087/1070215
+      const fontHeight = metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent
+      const actualHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent
+      // eslint-disable-next-line no-constant-condition
+      if (false) {
+        // prettier-ignore
+        // eslint-disable-next-line no-console
+        console.log(
+          'fontHeight'                , fontHeight,
+          '= ( fontBoundingBoxAscent' , metrics.fontBoundingBoxAscent,
+          '+ fontBoundingBoxDescent )', metrics.fontBoundingBoxDescent,
+          'actualHeight'              , actualHeight,
+          '= ( fontBoundingBoxAscent' , metrics.actualBoundingBoxAscent,
+          '+ fontBoundingBoxAscent )' , metrics.actualBoundingBoxDescent
+        )
+      }
+      ctx.restore()
+      return Math.min(cx + 2 / w, cy + 2 / actualHeight)
+    },
+    drawLetter(ctx, word, i, x, y, cx, cy, previousResult) {
       if (i > this.theRatio.x * this.theRatio.y) {
         return
-      }
-
-      // https://stackoverflow.com/a/56922947/1070215
-      function getFontSizeToFit(text, fontFamily) {
-        ctx.save()
-        ctx.font = `1px ${fontFamily} `
-        const metrics = ctx.measureText(text)
-        const w = metrics.width
-        // https://stackoverflow.com/a/46950087/1070215
-        const fontHeight = metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent
-        const actualHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent
-        // eslint-disable-next-line no-constant-condition
-        if (false) {
-          // prettier-ignore
-          // eslint-disable-next-line no-console
-          console.log(
-            'fontHeight'                , fontHeight,
-            '= ( fontBoundingBoxAscent' , metrics.fontBoundingBoxAscent,
-            '+ fontBoundingBoxDescent )', metrics.fontBoundingBoxDescent,
-            'actualHeight'              , actualHeight,
-            '= ( fontBoundingBoxAscent' , metrics.actualBoundingBoxAscent,
-            '+ fontBoundingBoxAscent )' , metrics.actualBoundingBoxDescent
-          )
-        }
-        ctx.restore()
-        return Math.min(cx + 2 / w, cy + 2 / actualHeight)
       }
 
       let anagram = previousResult
@@ -289,30 +295,33 @@ export default {
       const letter = anagram.shift()
 
       if (!this.textSize) {
-        this.textSize = getFontSizeToFit(letter, this.fontFamily)
-        ctx.font = `${this.textSize}px ${this.fontFamily}`
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'bottom'
 
         // SHADOW
         ctx.shadowColor = '#572010'
         ctx.shadowOffsetX = 0.5
         // ctx.shadowOffsetY = 0
         // ctx.shadowBlur = .5
+
+        this.textSize = this.getFontSizeToFit(letter, this.fontFamily, cx, cy)
+        ctx.font = `${this.textSize}px ${this.fontFamily}`
       }
 
-      // do not display matches in the last column
       if (i % this.theRatio.x < this.theRatio.x - this.wordAsArray.length) {
+        // ^^^ do not display matches in the last column ^^^
         if (this.matches.horz.length) {
           for (let b = 0; b < this.matches.horz.length; b++) {
             const boundary = this.matches.horz[b]
             if (boundary <= i && i < boundary + this.word.length) {
               if (boundary === i) {
                 ctx.save()
-                ctx.fillStyle = 'rgba(255, 0, 0, 0.8)'
+                ctx.fillStyle = this.matchFillStyle
                 ctx.fillRect(x, y - 2, cx * this.word.length - 1, cy - 1)
                 ctx.restore()
               } else if (i % word.length === 0) {
                 ctx.save()
-                ctx.fillStyle = 'black'
+                ctx.fillStyle = this.matchBoundaryFillStyle
                 ctx.fillRect(x, y - 2, 1, cy - 1)
                 ctx.restore()
               }
@@ -327,7 +336,7 @@ export default {
           if (boundary <= i && i < boundary + this.word.length) {
             if (boundary === i) {
               ctx.save()
-              ctx.fillStyle = 'rgba(255, 0, 0, 0.5)'
+              ctx.fillStyle = this.matchFillStyle
               ctx.fillRect(x, y - 3, cx, cy * this.word.length - 1)
               ctx.restore()
             }
@@ -335,8 +344,6 @@ export default {
         }
       }
 
-      ctx.textAlign = 'center'
-      ctx.textBaseline = 'bottom'
       ctx.fillText(letter, x + cx / 2, y + cy, cx)
       return anagram
     },
@@ -364,7 +371,6 @@ export default {
       const cx = wW / x
       const cy = wH / y
       this.theRatio = { x, y, cx, cy, factorial }
-      this.storeMatches()
       return this.theRatio
     },
     // https://www.freecodecamp.org/news/how-to-factorialize-a-number-in-javascript-9263c89a4b38/
