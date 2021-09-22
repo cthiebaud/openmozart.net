@@ -319,7 +319,7 @@ export default {
                 ctx.fillStyle = this.matchFillStyle
                 ctx.fillRect(x, y - 2, cx * this.word.length - 1, cy - 1)
                 ctx.restore()
-              } else if (i % word.length === 0) {
+              } else if (i % word.length === 0 && this.matchBoundaryFillStyle) {
                 ctx.save()
                 ctx.fillStyle = this.matchBoundaryFillStyle
                 ctx.fillRect(x, y - 2, 1, cy - 1)
