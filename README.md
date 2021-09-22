@@ -1,4 +1,4 @@
-# openricard
+# openricard.cthiebaud.com
 
 ## The pitch
 
