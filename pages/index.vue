@@ -14,11 +14,11 @@ export default {
     const backgroundColor = 'white'
     const filter = "brightness(100%)"
     const fontFamily = 'monospace'
-    const imageURL = '/jpegs/Mozart-Lange-darker.jpg'
+    const imageURL = '/jpegs/ricard.jpg'
     const slideshowID = undefined
     const matches = { horz: [], vert: [] }
-    const matchFillStyle = 'rgba(255, 0, 0, 0.5)'
-    const matchBoundaryFillStyle = 'black'
+    const matchFillStyle = 'rgba(255, 255, 0, .9)'
+    const matchBoundaryFillStyle = undefined
     const shuffle = undefined
     const textSize = 20
     const theCanvas = {}
