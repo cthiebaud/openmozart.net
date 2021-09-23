@@ -86,7 +86,7 @@
 
     let res
     if (isFunction(opts.resolution) && opts.word && opts.fontFamily) {
-      ctx.font = `1px ${opts.fontFamily} `
+      ctx.font = `20px ${opts.fontFamily} `
       const metrics = ctx.measureText(opts.word)
       const actualHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent
       res = opts.resolution(opts.word, metrics.width, actualHeight, w, h)
