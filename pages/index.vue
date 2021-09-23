@@ -17,7 +17,7 @@ export default {
   data() {
     const config = {
       backgroundColor: '#160804',
-      fontFamily: '\'IM Fell English SC\', serif',
+      fontFamily: 'monospace', // '\'IM Fell English SC\', serif',
       imageFilter: 'brightness(120%)',
       imageURL: '/jpegs/Mozart-Lange-darker.jpg',
       matchBoundaryFillStyle: 'black',
@@ -35,7 +35,7 @@ export default {
         y: 0,
         cx: 0,
         cy: 0,
-        textSize: 2
+        textSize: 9
       },
 
       style: {
@@ -372,8 +372,8 @@ export default {
       ctx.restore()
       // prettier-ignore
       return Math.min(
-        cx + textSize / w,
-        cy + textSize / actualHeight
+        cx * textSize/ w,
+        cy * textSize / actualHeight
       )
     },
     tweakAndFillRect(ctx, x, y, cx, cy) {
