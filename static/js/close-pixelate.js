@@ -208,7 +208,7 @@
     if (true) {
       ctx.save()
       ctx.fillStyle = 'azure'
-      ctx.font = `bold 20px monospace`
+      ctx.font = `20px monospace`
       markers.forEach((m, i) => {
         ctx.save()
         ctx.textAlign = m.x === 0 ? 'left' : 'right'

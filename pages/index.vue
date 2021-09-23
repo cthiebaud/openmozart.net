@@ -17,7 +17,7 @@ export default {
   data() {
     const config = {
       backgroundColor: '#160804',
-      fontFamily: 'monospace',
+      fontFamily: '\'IM Fell English SC\', serif',
       imageFilter: 'brightness(120%)',
       imageURL: '/jpegs/Mozart-Lange-darker.jpg',
       matchBoundaryFillStyle: 'black',
@@ -35,14 +35,14 @@ export default {
         y: 0,
         cx: 0,
         cy: 0,
-        textSize: 0
+        textSize: 2
       },
 
       style: {
         canvas: {
           objectPositionX: '50%',
           objectPositionY: '50%',
-          scaleTransform: '98%',
+          scaleTransform: '95%',
           backgroundColor: '#160804'
         }
       }
@@ -347,16 +347,19 @@ export default {
     getFontSizeToFit: (ctx, text, fontFamily, cx, cy, textSize) => {
       ctx.save()
       ctx.font = `1px ${fontFamily} `
-      const metrics = ctx.measureText(text)
-      const w = metrics.width
-      // https://stackoverflow.com/a/46950087/1070215
-      const fontHeight = metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent
-      const actualHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent
-      // eslint-disable-next-line no-constant-condition
-      if (false) {
-        // prettier-ignore
-        // eslint-disable-next-line no-console
-        console.log(
+      let w = 0
+      let actualHeight = 0
+      text.forEach((letter) => {
+        const metrics = ctx.measureText(text)
+        w = Math.max((w = metrics.width))
+        // https://stackoverflow.com/a/46950087/1070215
+        const fontHeight = metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent
+        actualHeight = Math.max(actualHeight, metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent)
+        // eslint-disable-next-line no-constant-condition
+        if (false) {
+          // prettier-ignore
+          // eslint-disable-next-line no-console
+          console.log(
           'fontHeight'                , fontHeight,
           '= ( fontBoundingBoxAscent' , metrics.fontBoundingBoxAscent,
           '+ fontBoundingBoxDescent )', metrics.fontBoundingBoxDescent,
@@ -364,7 +367,8 @@ export default {
           '= ( fontBoundingBoxAscent' , metrics.actualBoundingBoxAscent,
           '+ fontBoundingBoxAscent )' , metrics.actualBoundingBoxDescent
         )
-      }
+        }
+      })
       ctx.restore()
       // prettier-ignore
       return Math.min(
@@ -411,7 +415,7 @@ export default {
         // ctx.shadowOffsetY = 0
         // ctx.shadowBlur = .5
 
-        this.textSize = this.getFontSizeToFit(ctx, letter, this.config.fontFamily, cx, cy, this.config.tweaks.textSize)
+        this.textSize = this.getFontSizeToFit(ctx, this.config.wordAsArray, this.config.fontFamily, cx, cy, this.config.tweaks.textSize)
         ctx.font = `${this.textSize}px ${this.config.fontFamily}`
       }
 

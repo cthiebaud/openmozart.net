@@ -12,7 +12,8 @@ export default {
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
     title: 'openmozart.net',
-    meta: [{
+    meta: [
+      {
         charset: 'utf-8'
       },
       {
@@ -89,7 +90,8 @@ export default {
         href: 'https://cdn.jsdelivr.net/npm/bootstrap@latest/dist/css/bootstrap.min.css'
       }
     ],
-    script: [{
+    script: [
+      {
         src: 'https://cdn.jsdelivr.net/npm/@popperjs/core@latest/dist/umd/popper.min.js',
         type: 'text/javascript'
       },
@@ -116,8 +118,16 @@ export default {
   // Modules for dev and build (recommended): https://go.nuxtjs.dev/config-modules
   buildModules: [
     // https://go.nuxtjs.dev/eslint
-    '@nuxtjs/eslint-module'
+    '@nuxtjs/eslint-module',
+    // https://google-fonts.nuxtjs.org/
+    '@nuxtjs/google-fonts'
   ],
+
+  googleFonts: {
+    families: {
+      'IM+Fell+English+SC': true
+    }
+  },
 
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: [
