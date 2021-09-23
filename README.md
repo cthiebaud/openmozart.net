@@ -6,13 +6,15 @@ In memoriam openmozart.net 2001* - 2005†.
 
 719 permutations of the name "MOZART" colored in such a way as to make a bottle appear.
 
-The identity permutations "MOZART" is replaced by "●●●●●●·" 
+Permutations are randomly sorted and the order will change with each refresh of the page.
 
-However, since the permutations are sorted randomly, the name "MOZART" can appear through the collision of two other permutations: e.g. "TAR·MOZ" then "ART·ZOM".
+The name "MOZART" itself (kind of identity permutation) is replaced by "●●●●●●" 
+
+However, since the permutations are sorted randomly, the name "MOZART" can still appear through the collision of two other permutations: e.g. "TAR·MOZ" then "ART·ZOM".
 
 Furthermore, "MOZART" may appear vertically.
 
-People who really have nothing else to do may have fun trying to find the happy collisions and the vertical coincidences.
+People who really have nothing else to do can have fun trying to find the happy collisions and the vertical coincidences.
 
 Already tedious in itself, this unglamorous task is made even more difficult by 3 obstacles:
 
@@ -28,4 +30,4 @@ Already tedious in itself, this unglamorous task is made even more difficult by 
 * Pressing 'Escape' stops it
 * Typing 'cheat' reveals the happy collisions and the undreamed of vertical coincidences
 * Pressing 'Escape' stops cheating
-* Pressing 'Spacebar' or clicking anywhere refresh the screen, and thus the ordering of the permutations
+* Pressing 'Spacebar' or clicking anywhere refreshes the screen, thus the ordering of the permutations
