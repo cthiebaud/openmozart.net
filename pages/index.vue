@@ -1,18 +1,18 @@
 <template>
-  <main
-    v-hammer:swipe.left="onSwipeLeft"
-    v-hammer:swipe.right="onSwipeRight"
-    v-hammer:swipe.up="onSwipeRight"
-    v-hammer:swipe.down="onSwipeRight"
-    class="vh-100"
-    :style="`background-color: ${config.backgroundColor}`"
-    @click="shuffleAndRedraw"
-  >
+  <main class="vh-100" :style="`background-color: ${config.backgroundColor}`" @click="shuffleAndRedraw">
     <component :is="'style'">
       {{ styleCanvas }}
     </component>
     <h1 class="text-center" :style="`font-family: ${config.fontFamily}; z-index: -1; color: ghostwhite; visibility: hidden;`">made by christophe thiebaud</h1>
     <img id="portrait-image" :src="config.imageURL" />
+    <div
+      id="swiper"
+      v-hammer:swipe.left="onSwipeLeft"
+      v-hammer:swipe.right="onSwipeRight"
+      v-hammer:swipe.up="onSwipeRight"
+      v-hammer:swipe.down="onSwipeRight"
+      class="vh-100"
+    ></div>
   </main>
 </template>
 
@@ -117,6 +117,9 @@ export default {
     this.init()
 
     const that = this
+    window.addEventListener('contextmenu', function (e) {
+      e.preventDefault()
+    })
     window.addEventListener('keyup', function (event) {
       if (event.code === 'Enter') {
         that.startOrStopOrToggleSlideshow(true)
@@ -143,7 +146,7 @@ export default {
   methods: {
     onSwipeLeft() {
       // eslint-disable-next-line no-console
-      console.log('SWIPED LEFT !!!')
+      alert('SWIPED LEFT !!!')
       this.startOrStopOrToggleSlideshow(true)
     },
     onSwipeRight() {
@@ -611,6 +614,11 @@ export default {
 body {
   position: relative;
 }
+div#swiper {
+  background: transparent;
+  z-index: 123;
+}
+div#swiper,
 canvas {
   display: block;
   position: absolute;
