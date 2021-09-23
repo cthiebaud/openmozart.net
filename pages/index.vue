@@ -496,11 +496,6 @@ export default {
       }
       // ctx.fillStyle = suitableTextColor
       ctx.fillText(letter, x + cx / 2, y + cy / 2)
-      /*
-      ctx.strokeStyle = 'green'
-      ctx.lineWidth = 0.3
-      this.tweakAndStrokeRect(ctx, x, y, cx, cy)
-      */
 
       return anagram
     },
