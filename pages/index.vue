@@ -3,7 +3,7 @@
     <component :is="'style'">
       {{ styleCanvas }}
     </component>
-    <h1 class="text-center" style="font-family: 'IM Fell English SC'; z-index: -1; color: ghostwhite; visibility: hidden; ">made by christophe thiebaud</h1>
+    <h1 class="text-center" :style="`font-family: ${config.fontFamily}; z-index: -1; color: ghostwhite; visibility: hidden;`">made by christophe thiebaud</h1>
     <img id="portrait-image" :src="config.imageURL" />
   </main>
 </template>
@@ -17,7 +17,7 @@ export default {
   data() {
     const config = {
       backgroundColor: '#160804',
-      fontFamily: "'IM Fell English SC', serif", // 'monospace', //
+      fontFamily: "'Birthstone Bounce'", // "Inconsolata", // "'Roboto Slab', serif", // "'IM Fell English SC', serif", // 'monospace', //
       imageFilter: 'brightness(120%)',
       imageURL: '/jpegs/Mozart-Lange-darker.jpg',
       matchBoundaryFillStyle: 'black',
@@ -31,11 +31,11 @@ export default {
       factorial: undefined,
 
       tweaks: {
-        x: 0,
-        y: 0,
-        cx: 0,
+        x: -1,
+        y: -2,
+        cx: 2,
         cy: 0,
-        textSize: 6
+        textSize: 3
       },
 
       style: {
@@ -149,14 +149,14 @@ export default {
           // repeatedly poll check
           const poller = setInterval(async () => {
             try {
-              console.log("loading font")
+              console.log('loading font')
               await document.fonts.load(font)
             } catch (err) {
-              console.log("error loading font")
+              console.log('error loading font')
               reject(err)
             }
             if (document.fonts.check(font)) {
-              console.log("font checked")
+              console.log('font checked')
               clearInterval(poller)
               resolve(true)
             }
@@ -169,7 +169,7 @@ export default {
       const that = this
       waitForFontLoad(`40px ${this.config.fontFamily}`).then(
         document.getElementById('portrait-image').addEventListener('load', function (e) {
-          console.log("image loaded")
+          console.log('image loaded')
           that.createOrRedrawCanvas(this)
         })
       )
@@ -371,14 +371,16 @@ export default {
     // https://stackoverflow.com/a/56922947/1070215
     getFontSizeToFit: (ctx, text, fontFamily, cx, cy, textSize) => {
       ctx.save()
-      ctx.font = `1px ${fontFamily}`
+      ctx.font = `1px 'Roboto Slab'`
       let w = 0
       let actualHeight = 0
+      let fontHeight = 0
       text.forEach((letter) => {
+        console.log(letter, fontFamily, w, fontHeight, actualHeight)
         const metrics = ctx.measureText(text)
         w = Math.max((w = metrics.width))
         // https://stackoverflow.com/a/46950087/1070215
-        const fontHeight = metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent
+        fontHeight = metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent
         actualHeight = Math.max(actualHeight, metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent)
         // eslint-disable-next-line no-constant-condition
         if (false) {
@@ -394,11 +396,12 @@ export default {
         )
         }
       })
+      console.log(w, fontHeight, actualHeight)
       ctx.restore()
       // prettier-ignore
       return Math.min(
-        cx * textSize/ w,
-        cy * textSize / actualHeight
+        cx + textSize / w,
+        cy + textSize / actualHeight
       )
     },
     tweakAndFillRect(ctx, x, y, cx, cy) {
