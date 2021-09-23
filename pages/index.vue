@@ -9,7 +9,7 @@
 </template>
 
 <script>
-/* eslint-disable no-unused-expressions, no-unused-vars, no-sequences, eqeqeq, no-console, node/handle-callback-err, no-constant-condition */
+/* _eslint-disable no-unused-expressions, no-unused-vars, no-sequences, eqeqeq, no-console, node/handle-callback-err, no-constant-condition */
 
 import * as Vibrant from 'node-vibrant'
 
@@ -86,12 +86,12 @@ export default {
     }
   },
   mounted() {
-    ;(this.config.wordAsArray = this.config.wordAsArray || this.config.word.split('')),
-      // \u00B7 is '·' https://www.compart.com/en/unicode/U+00B7
-      // \u25CF is '●' https://www.compart.com/en/unicode/U+25CF
-      // \u25CB is '○' https://www.compart.com/en/unicode/U+25CB
-      (this.config.ersatzAsArray = this.config.ersatzAsArray || Array(this.config.word.length).fill('\u25CB')),
-      (this.config.factorial = this.factorialize(this.config.wordAsArray.length))
+    this.config.wordAsArray = this.config.wordAsArray || this.config.word.split('')
+    // \u00B7 is '·' https://www.compart.com/en/unicode/U+00B7
+    // \u25CF is '●' https://www.compart.com/en/unicode/U+25CF
+    // \u25CB is '○' https://www.compart.com/en/unicode/U+25CB
+    this.config.ersatzAsArray = this.config.ersatzAsArray || Array(this.config.word.length).fill('\u25CB')
+    this.config.factorial = this.factorialize(this.config.wordAsArray.length)
 
     Vibrant.from(document.getElementById('portrait-image'))
       .maxColorCount(200)
