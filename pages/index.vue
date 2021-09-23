@@ -63,6 +63,8 @@ export default {
       }
     }
 
+    const toastOptions = {duration:1000, position: 'top-center'}
+
     const box = { cols: undefined, rows: undefined }
     const canvas = undefined
     const hiddenPermutations = new Set()
@@ -83,6 +85,7 @@ export default {
       shuffle,
       slideshowID,
       textSize,
+      toastOptions,
 
       cheat
     }
@@ -139,6 +142,7 @@ export default {
         if (!'cheat'.startsWith(that.cheat)) {
           that.cheat = ''
         } else if (that.cheat === 'cheat') {
+          that.$toast.show("Now cheating", this.toastOptions)
           that.createOrRedrawCanvas()
         }
       }
@@ -148,16 +152,14 @@ export default {
     onPress() {
       if (this.cheating) {
         this.cheat = ''
+        this.$toast.show("Cheating stopped", this.toastOptions)
       } else {
         this.cheat = 'cheat'
+        this.$toast.show("Now cheating", this.toastOptions)
       }
-      // eslint-disable-next-line no-console
-      console.log('PRESSED !!! cheating is now ', this.cheating)
       this.createOrRedrawCanvas()
     },
     onSwipeRight() {
-      // eslint-disable-next-line no-console
-      console.log('SWIPED RIGHT !!!')
       this.startOrStopOrToggleSlideshow()
     },
     init() {
@@ -239,6 +241,7 @@ export default {
         start = !this.slideshowID // toggle
       }
       if (start && !this.slideshowID) {
+        this.$toast.show("Starting slideshow", this.toastOptions)
         this.shuffleAndRedraw()
         this.slideshowID = setInterval(
           function () {
@@ -247,6 +250,7 @@ export default {
           1500
         )
       } else if (!start && this.slideshowID) {
+        this.$toast.show("Stopping slideshow", this.toastOptions)
         clearInterval(this.slideshowID)
         this.slideshowID = undefined
       }

@@ -122,7 +122,9 @@ export default {
     // https://go.nuxtjs.dev/eslint
     '@nuxtjs/eslint-module',
     // https://google-fonts.nuxtjs.org/
-    '@nuxtjs/google-fonts'
+    '@nuxtjs/google-fonts',
+    // https://github.com/shakee93/vue-toasted
+    '@nuxtjs/toast'
   ],
 
   googleFonts: {
