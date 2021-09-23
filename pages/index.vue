@@ -3,13 +3,13 @@
     <component :is="'style'">
       {{ styleCanvas }}
     </component>
-
+    <h1 class="text-center" style="font-family: 'IM Fell English SC'; z-index: -1; color: ghostwhite; visibility: hidden; ">made by christophe thiebaud</h1>
     <img id="portrait-image" :src="config.imageURL" />
   </main>
 </template>
 
 <script>
-/* _eslint-disable no-unused-expressions, no-unused-vars, no-sequences, eqeqeq, no-console, node/handle-callback-err, no-constant-condition */
+/* eslint-disable no-unused-expressions, no-unused-vars, no-sequences, eqeqeq, no-console, node/handle-callback-err, no-constant-condition */
 
 import * as Vibrant from 'node-vibrant'
 
@@ -17,7 +17,7 @@ export default {
   data() {
     const config = {
       backgroundColor: '#160804',
-      fontFamily: '\'IM Fell English SC\', serif', // 'monospace', // 
+      fontFamily: "'IM Fell English SC', serif", // 'monospace', //
       imageFilter: 'brightness(120%)',
       imageURL: '/jpegs/Mozart-Lange-darker.jpg',
       matchBoundaryFillStyle: 'black',
@@ -42,7 +42,7 @@ export default {
         canvas: {
           objectPositionX: '50%',
           objectPositionY: '50%',
-          scaleTransform: '95%',
+          scaleTransform: '97%',
           backgroundColor: '#160804'
         }
       }
@@ -143,11 +143,36 @@ export default {
         }
       }
 
+      // https://stackoverflow.com/a/64192936/1070215
+      function waitForFontLoad(font, timeout = 1000, interval = 10) {
+        return new Promise((resolve, reject) => {
+          // repeatedly poll check
+          const poller = setInterval(async () => {
+            try {
+              console.log("loading font")
+              await document.fonts.load(font)
+            } catch (err) {
+              console.log("error loading font")
+              reject(err)
+            }
+            if (document.fonts.check(font)) {
+              console.log("font checked")
+              clearInterval(poller)
+              resolve(true)
+            }
+          }, interval)
+          setTimeout(() => clearInterval(poller), timeout)
+        })
+      }
+
       // do the whole gamut when image is loaded
       const that = this
-      document.getElementById('portrait-image').addEventListener('load', function (e) {
-        that.createOrRedrawCanvas(this)
-      })
+      waitForFontLoad(`40px ${this.config.fontFamily}`).then(
+        document.getElementById('portrait-image').addEventListener('load', function (e) {
+          console.log("image loaded")
+          that.createOrRedrawCanvas(this)
+        })
+      )
     },
     doShuffle: (factorial) => {
       // http://stackoverflow.com/questions/20789373/shuffle-array-in-ng-repeat-angular
@@ -346,7 +371,7 @@ export default {
     // https://stackoverflow.com/a/56922947/1070215
     getFontSizeToFit: (ctx, text, fontFamily, cx, cy, textSize) => {
       ctx.save()
-      ctx.font = `1px ${fontFamily} `
+      ctx.font = `1px ${fontFamily}`
       let w = 0
       let actualHeight = 0
       text.forEach((letter) => {
