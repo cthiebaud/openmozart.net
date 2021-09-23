@@ -92,8 +92,8 @@ export default {
         that.shuffleAndRedraw()
       } else if (event.code === 'Escape') {
         that.cheat = ''
-        that.createOrRedrawCanvas()
         that.startOrStopOrToggleSlideshow(false)
+        that.createOrRedrawCanvas()
       }
       if ('cheat'.includes(event.key)) {
         if (that.cheat === 'cheat') {
@@ -119,7 +119,6 @@ export default {
         // https://stackoverflow.com/a/19746771/1070215
         const identicalArrays = (a1, a2) => a1.length === a2.length && a1.every((v, i) => v === a2[i])
         if (identicalArrays(permutation, this.config.wordAsArray)) {
-          // eslint-disable-next-line no-console
           this.hiddenPermutations.add(i)
           // eslint-disable-next-line no-console
           console.log('REMEMBER nth permutation', i, permutation, this.hiddenPermutations)
@@ -183,14 +182,13 @@ export default {
         word: this.config.word,
         wordAsArray: this.config.wordAsArray
       }
-      this.textSize = undefined // triggers text size recalulation
+      this.textSize = undefined // triggers text size recalculation
       if (img) {
         this.canvas = img.closePixelate(options)
       } else {
         this.canvas.render(options)
       }
     },
-    // https://stackoverflow.com/a/54018834/1070215
     pickShuffledPermutation(nth) {
       nth = Math.floor(nth)
       const shuffled = this.shuffle[nth]
