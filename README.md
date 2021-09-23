@@ -4,7 +4,7 @@ In memoriam openmozart.net 2001* - 2005†.
 
 ## The pitch
 
-719 permutations of the name "MOZART" colored in such a way as to make the famous portrait by [Joseph Lange](https://en.wikipedia.org/wiki/Joseph_Lange).
+719 permutations of the name "MOZART" colored in such a way as to form the famous portrait by [Joseph Lange](https://en.wikipedia.org/wiki/Joseph_Lange).
 
 Permutations are randomly sorted and the order will change with each refresh of the page.
 
