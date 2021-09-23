@@ -1,5 +1,9 @@
 <template>
   <main class="vh-100" :style="`background-color: ${config.backgroundColor}`" @click="shuffleAndRedraw">
+    <component :is="'style'">
+      {{ styleCanvas }}
+    </component>
+    <h1 class="text-center" :style="`font-family: ${config.fontFamily}; z-index: -1; color: ghostwhite; visibility: hidden;`">made by christophe thiebaud</h1>
     <img id="portrait-image" :src="config.imageURL" />
   </main>
 </template>
@@ -20,27 +24,31 @@ export default {
       matchFillStyle: 'rgba(255, 255, 0, .5)',
       shadowColor: '#462310',
       shadowOffsetX: 0.5,
-      textAlign: 'center',
-      textBaseline: 'bottom',
 
       word: 'RICARD',
+      ersatzAsArray: undefined,
       wordAsArray: undefined,
-      // \u00B7 is '·' https://www.compart.com/en/unicode/U+00B7
-      // \u30FB is '・' https://www.compart.com/en/unicode/U+30FB
-      // \u25CF is '●' https://www.compart.com/en/unicode/U+25CF
-      ersatzAsArray: Array(6).fill('\u25CF'),
-      factorial: undefined
+      factorial: undefined,
+
+      tweaks: {
+        x: 0,
+        y: 0,
+        cx: 1,
+        cy: 0,
+        textSize: -4
+      },
+
+      style: {
+        canvas: {
+          objectPositionX: '50%',
+          objectPositionY: '50%',
+          scaleTransform: '97%',
+          backgroundColor: 'transparent'
+        }
+      }
     }
 
-    const tweaks = {
-      x: 0,
-      y: 0,
-      cx: 1,
-      cy: 0,
-      textSize: -4
-    }
-
-    const box = { cols: 720, rows: 1 }
+    const box = { cols: undefined, rows: undefined }
     const canvas = undefined
     const hiddenPermutations = new Set()
     const matches = { horz: [], vert: [] }
@@ -51,8 +59,6 @@ export default {
     const cheat = ''
     return {
       config,
-
-      tweaks,
 
       box,
       canvas,
@@ -69,10 +75,22 @@ export default {
   computed: {
     cheating() {
       return this.cheat === 'cheat'
+    },
+    styleCanvas() {
+      // pretty-ignore
+      return `canvas {
+  object-position: ${this.config.style.canvas.objectPositionX} ${this.config.style.canvas.objectPositionY};
+  transform: scale(${this.config.style.canvas.scaleTransform});
+  background-color: ${this.config.style.canvas.backgroundColor};
+}`
     }
   },
   mounted() {
-    this.config.wordAsArray = this.config.word.split('')
+    this.config.wordAsArray = this.config.wordAsArray || this.config.word.split('')
+    // \u00B7 is '·' https://www.compart.com/en/unicode/U+00B7
+    // \u25CF is '●' https://www.compart.com/en/unicode/U+25CF
+    // \u25CB is '○' https://www.compart.com/en/unicode/U+25CB
+    this.config.ersatzAsArray = this.config.ersatzAsArray || Array(this.config.word.length).fill('\u25CB')
     this.config.factorial = this.factorialize(this.config.wordAsArray.length)
 
     Vibrant.from(document.getElementById('portrait-image'))
@@ -92,8 +110,8 @@ export default {
         that.shuffleAndRedraw()
       } else if (event.code === 'Escape') {
         that.cheat = ''
-        that.createOrRedrawCanvas()
         that.startOrStopOrToggleSlideshow(false)
+        that.createOrRedrawCanvas()
       }
       if ('cheat'.includes(event.key)) {
         if (that.cheat === 'cheat') {
@@ -119,18 +137,38 @@ export default {
         // https://stackoverflow.com/a/19746771/1070215
         const identicalArrays = (a1, a2) => a1.length === a2.length && a1.every((v, i) => v === a2[i])
         if (identicalArrays(permutation, this.config.wordAsArray)) {
-          // eslint-disable-next-line no-console
           this.hiddenPermutations.add(i)
           // eslint-disable-next-line no-console
           console.log('REMEMBER nth permutation', i, permutation, this.hiddenPermutations)
         }
       }
 
+      // https://stackoverflow.com/a/64192936/1070215
+      function waitForFontLoad(font, timeout = 1000, interval = 10) {
+        return new Promise((resolve, reject) => {
+          // repeatedly poll check
+          const poller = setInterval(async () => {
+            try {
+              await document.fonts.load(font)
+            } catch (err) {
+              reject(err)
+            }
+            if (document.fonts.check(font)) {
+              clearInterval(poller)
+              resolve(true)
+            }
+          }, interval)
+          setTimeout(() => clearInterval(poller), timeout)
+        })
+      }
+
       // do the whole gamut when image is loaded
       const that = this
-      document.getElementById('portrait-image').addEventListener('load', function (e) {
-        that.createOrRedrawCanvas(this)
-      })
+      waitForFontLoad(`40px ${this.config.fontFamily}`).then(
+        document.getElementById('portrait-image').addEventListener('load', function (e) {
+          that.createOrRedrawCanvas(this)
+        })
+      )
     },
     doShuffle: (factorial) => {
       // http://stackoverflow.com/questions/20789373/shuffle-array-in-ng-repeat-angular
@@ -152,6 +190,13 @@ export default {
       }
       return shuffleArray([...Array(factorial).keys()])
     },
+    toggleCheat() {
+      if (this.cheat === 'cheat') {
+        this.cheat = ''
+      } else {
+        this.cheat = 'cheat'
+      }
+    },
     shuffleAndRedraw() {
       this.shuffle = this.doShuffle(this.config.factorial)
       this.createOrRedrawCanvas()
@@ -166,7 +211,7 @@ export default {
           function () {
             this.shuffleAndRedraw()
           }.bind(this),
-          1000
+          2000
         )
       } else if (!start && this.slideshowID) {
         clearInterval(this.slideshowID)
@@ -183,18 +228,17 @@ export default {
         word: this.config.word,
         wordAsArray: this.config.wordAsArray
       }
-      this.textSize = undefined // triggers text size recalulation
+      this.textSize = undefined // triggers text size recalculation
       if (img) {
         this.canvas = img.closePixelate(options)
       } else {
         this.canvas.render(options)
       }
     },
-    // https://stackoverflow.com/a/54018834/1070215
     pickShuffledPermutation(nth) {
       nth = Math.floor(nth)
       const shuffled = this.shuffle[nth]
-      if ( this.hiddenPermutations.has(shuffled) ) {
+      if (this.hiddenPermutations.has(shuffled)) {
         return [...this.config.ersatzAsArray] // CLONE ME !!!!
       } else {
         return this.pickPermutation(this.config.wordAsArray, this.config.factorial, shuffled)
@@ -330,17 +374,21 @@ export default {
     // https://stackoverflow.com/a/56922947/1070215
     getFontSizeToFit: (ctx, text, fontFamily, cx, cy, textSize) => {
       ctx.save()
-      ctx.font = `1px ${fontFamily} `
-      const metrics = ctx.measureText(text)
-      const w = metrics.width
-      // https://stackoverflow.com/a/46950087/1070215
-      const fontHeight = metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent
-      const actualHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent
-      // eslint-disable-next-line no-constant-condition
-      if (false) {
-        // prettier-ignore
-        // eslint-disable-next-line no-console
-        console.log(
+      ctx.font = `1px 'Roboto Slab'`
+      let w = 0
+      let actualHeight = 0
+      let fontHeight = 0
+      text.forEach((letter) => {
+        const metrics = ctx.measureText(text)
+        w = Math.max((w = metrics.width))
+        // https://stackoverflow.com/a/46950087/1070215
+        fontHeight = metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent
+        actualHeight = Math.max(actualHeight, metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent)
+        // eslint-disable-next-line no-constant-condition
+        if (false) {
+          // prettier-ignore
+          // eslint-disable-next-line no-console
+          console.log(
           'fontHeight'                , fontHeight,
           '= ( fontBoundingBoxAscent' , metrics.fontBoundingBoxAscent,
           '+ fontBoundingBoxDescent )', metrics.fontBoundingBoxDescent,
@@ -348,12 +396,32 @@ export default {
           '= ( fontBoundingBoxAscent' , metrics.actualBoundingBoxAscent,
           '+ fontBoundingBoxAscent )' , metrics.actualBoundingBoxDescent
         )
-      }
+        }
+      })
       ctx.restore()
-      return Math.min(cx + textSize / w, cy + textSize / actualHeight)
+      // prettier-ignore
+      return Math.min(
+        cx + textSize / w,
+        cy + textSize / actualHeight
+      )
     },
     tweakAndFillRect(ctx, x, y, cx, cy) {
-      ctx.fillRect(x + this.tweaks.x, y + this.tweaks.y, cx + this.tweaks.cx, cy + this.tweaks.cy)
+      // prettier-ignore
+      ctx.fillRect(
+        x  + this.config.tweaks.x,
+        y  + this.config.tweaks.y,
+        cx + this.config.tweaks.cx,
+        cy + this.config.tweaks.cy
+      )
+    },
+    tweakAndStrokeRect(ctx, x, y, cx, cy) {
+      // prettier-ignore
+      ctx.strokeRect(
+        x  + this.config.tweaks.x,
+        y  + this.config.tweaks.y,
+        cx + this.config.tweaks.cx,
+        cy + this.config.tweaks.cy
+      )
     },
     drawLetter(ctx, word, i, x, y, cx, cy, previousResult) {
       if (i > this.box.cols * this.box.rows) {
@@ -367,8 +435,8 @@ export default {
       const letter = anagram.shift()
 
       if (!this.textSize) {
-        ctx.textAlign = this.config.textAlign
-        ctx.textBaseline = this.config.textBaseline
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
 
         // SHADOW
         ctx.shadowColor = this.config.shadowColor
@@ -376,7 +444,7 @@ export default {
         // ctx.shadowOffsetY = 0
         // ctx.shadowBlur = .5
 
-        this.textSize = this.getFontSizeToFit(ctx, letter, this.config.fontFamily, cx, cy, this.tweaks.textSize)
+        this.textSize = this.getFontSizeToFit(ctx, this.config.wordAsArray, this.config.fontFamily, cx, cy, this.config.tweaks.textSize)
         ctx.font = `${this.textSize}px ${this.config.fontFamily}`
       }
 
@@ -425,7 +493,8 @@ export default {
         }
       }
       ctx.fillStyle = suitableTextColor
-      ctx.fillText(letter, x + cx / 2, y + cy + this.tweaks.textSize, cx)
+      ctx.fillText(letter, x + cx / 2, y + cy / 2)
+
       return anagram
     },
     calcResolution(word, eW, eH, wW, wH) {
@@ -514,8 +583,5 @@ canvas {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 50% 50%;
-  transform: scale(0.98);
-  background-color: transparent;
 }
 </style>

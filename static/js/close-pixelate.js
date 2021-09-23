@@ -86,7 +86,7 @@
 
     let res
     if (isFunction(opts.resolution) && opts.word && opts.fontFamily) {
-      ctx.font = `1px ${opts.fontFamily} `
+      ctx.font = `20px ${opts.fontFamily} `
       const metrics = ctx.measureText(opts.word)
       const actualHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent
       res = opts.resolution(opts.word, metrics.width, actualHeight, w, h)
@@ -205,17 +205,60 @@
     } // row
 
     // eslint-disable-next-line no-constant-condition
-    if (false) {
+    if (true) {
       ctx.save()
       ctx.fillStyle = 'azure'
-      ctx.font = `bold 20px monospace`
-      markers.forEach((m) => {
+      ctx.font = `20px monospace`
+      markers.forEach((m, i) => {
+        ctx.save()
         ctx.textAlign = m.x === 0 ? 'left' : 'right'
         ctx.textBaseline = m.y === 0 ? 'top' : 'bottom'
-        // prettier-ignore
-        ctx.fillText(m.text, 
-          m.x + (m.x !== 0 ? res.cxCol - 2 : 0), 
-          m.y + (m.y !== 0 ? res.cyRow     : 0))
+
+        const center = { x: 0, y: 0, a: 0 }
+        const factor = 1
+        if (m.x === 0) {
+          if (m.y === 0) {
+            center.x += factor * res.cxCol + 1
+            center.y += factor * res.cyRow + 1
+            center.a = 0
+          } else {
+            center.x += factor * res.cxCol
+            center.y += res.cyRow * (res.rows - factor) - 1
+            center.a = 3
+          }
+        } else if (m.y === 0) {
+          center.x += res.cxCol * (res.cols - factor)
+          center.y += factor * res.cyRow + 1
+          center.a = 1
+        } else {
+          center.x += res.cxCol * (res.cols - factor) - 1
+          center.y += res.cyRow * (res.rows - factor) - 1
+          center.a = 2
+        }
+
+        ctx.translate(center.x, center.y)
+        // eslint-disable-next-line no-constant-condition
+        if (false) {
+          ctx.fillText(m.text, 0, 0)
+        }
+        const radius = .666
+        ctx.rotate((center.a * (90 * Math.PI)) / 180)
+        ctx.beginPath()
+        ctx.moveTo(radius * res.cxCol, -res.cyRow)
+        ctx.lineTo(-res.cxCol, -res.cyRow)
+        ctx.lineTo(-res.cxCol, radius * res.cyRow)
+        ctx.lineWidth = 1
+        ctx.strokeStyle = '#FFD700'
+        ctx.stroke()
+        ctx.beginPath()
+        ctx.moveTo(-res.cxCol, -res.cyRow)
+        ctx.arc(-res.cxCol, -res.cyRow, (1+radius) * (res.cxCol + res.cyRow) / 2, 0 * Math.PI, 0.5 * Math.PI)
+        ctx.closePath()
+        ctx.fillStyle = '#FFD70040'
+        ctx.fill()
+
+        ctx.setTransform(1, 0, 0, 1, 0, 0)
+        ctx.restore()
       })
       ctx.restore()
     }

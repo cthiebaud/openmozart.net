@@ -89,7 +89,8 @@ export default {
         href: 'https://cdn.jsdelivr.net/npm/bootstrap@latest/dist/css/bootstrap.min.css'
       }
     ],
-    script: [{
+    script: [
+      {
         src: 'https://cdn.jsdelivr.net/npm/@popperjs/core@latest/dist/umd/popper.min.js',
         type: 'text/javascript'
       },
@@ -105,7 +106,7 @@ export default {
   },
 
   // Global CSS: https://go.nuxtjs.dev/config-css
-  css: [],
+  css: ['@/assets/css/fonts.css'],
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [],
@@ -116,8 +117,26 @@ export default {
   // Modules for dev and build (recommended): https://go.nuxtjs.dev/config-modules
   buildModules: [
     // https://go.nuxtjs.dev/eslint
-    '@nuxtjs/eslint-module'
+    '@nuxtjs/eslint-module',
+    // https://google-fonts.nuxtjs.org/
+    '@nuxtjs/google-fonts'
   ],
+
+  googleFonts: {
+    display: 'block', // 'auto' | 'block' | 'swap' | 'fallback' | 'optional'
+    preload: true,
+    prefetch: true,
+    preconnect: true,
+    download: true,
+    base64: true,
+    inject: true,
+    families: {
+      // 'IM+Fell+English+SC': true,
+      // 'Roboto+Slab': true,
+      // 'Inconsolata': true,
+      'Birthstone+Bounce': true
+    }
+  },
 
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: [
