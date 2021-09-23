@@ -1,3 +1,5 @@
+import { name, version } from './package.json'
+
 export default {
   // Disable server-side rendering: https://go.nuxtjs.dev/ssr-mode
 
@@ -135,7 +137,7 @@ export default {
       // 'Roboto+Slab': true,
       // 'Inconsolata': true,
       'Birthstone+Bounce': true,
-      'Arvo': true
+      Arvo: true
     }
   },
 
@@ -172,5 +174,12 @@ export default {
         use: 'yaml-loader'
       })
     }
+  },
+
+  publicRuntimeConfig: {
+    packageName: name,
+    packageVersion: version
+  },
+  privateRuntimeConfig: {
   }
 }
