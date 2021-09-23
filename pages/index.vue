@@ -21,7 +21,7 @@ export default {
       imageFilter: 'brightness(95%)',
       imageURL: '/jpegs/ricard.jpg',
       matchBoundaryFillStyle: undefined,
-      matchFillStyle: 'rgba(255, 255, 0, .5)',
+      matchFillStyle: 'rgba(255, 255, 0, .7)',
       shadowColor: '#462310',
       shadowOffsetX: 0.5,
 
@@ -35,7 +35,7 @@ export default {
         y: 0,
         cx: 1,
         cy: 0,
-        textSize: -4
+        textSize: -2
       },
 
       style: {
