@@ -40,8 +40,8 @@ export default {
 
       style: {
         canvas: {
-          objectPositionX: '0%',
-          objectPositionY: '100%',
+          objectPositionX: '50%',
+          objectPositionY: '50%',
           scaleTransform: '97%',
           backgroundColor: 'transparent'
         }
