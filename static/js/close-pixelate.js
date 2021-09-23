@@ -109,6 +109,8 @@
       cx: size.cx / 2,
       cy: size.cy / 2
     }
+    const cornerStrokeStyle = opts.cornerStrokeStyle || '#C0C0C0'
+    const cornerFillStyle = opts.cornerFillStyle || '#C0C0C040'
 
     let row, col, x_, y_, x, y, pixelY, pixelX, pixelIndex
 
@@ -248,13 +250,13 @@
         ctx.lineTo(-radius / 2, -radius / 2)
         ctx.lineTo(-radius / 2, radius / 2)
         ctx.lineWidth = 1
-        ctx.strokeStyle = '#C0C0C0'
+        ctx.strokeStyle = cornerStrokeStyle
         ctx.stroke()
         ctx.beginPath()
         ctx.moveTo(-radius / 2, -radius / 2)
         ctx.arc(-radius / 2, -radius / 2, radius, 0 * Math.PI, 0.5 * Math.PI)
         ctx.closePath()
-        ctx.fillStyle = '#C0C0C040'
+        ctx.fillStyle = cornerFillStyle
         ctx.fill()
 
         ctx.setTransform(1, 0, 0, 1, 0, 0)
