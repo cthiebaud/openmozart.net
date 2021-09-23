@@ -26,4 +26,10 @@ Already tedious in itself, this unglamorous task is made even more difficult by 
 * Pressing 'Escape' stops it
 * Typing 'cheat' reveals the lucky collisions and the undreamed-of vertical coincidences
 * Pressing 'Escape' stops cheating
-* Pressing 'Spacebar' or clicking anywhere refreshes the screen, and thus the ordering of the permutations
+* Pressing 'Spacebar' or clicking anywhere refreshes the screen, thus the ordering of the permutations
+
+### Mobile gestures
+
+* Swipe to right: toggles slideshow
+* Tap: refreshes the screen
+* Press: toggles cheating
