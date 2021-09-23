@@ -36,7 +36,7 @@ export default {
       x: 0,
       y: 0,
       cx: 1,
-      cy: 0
+      cy: 0,
       textSize: -4
     }
 
@@ -328,7 +328,7 @@ export default {
       return ret
     },
     // https://stackoverflow.com/a/56922947/1070215
-    getFontSizeToFit: (ctx, text, fontFamily, cx, cy) => {
+    getFontSizeToFit: (ctx, text, fontFamily, cx, cy, textSize) => {
       ctx.save()
       ctx.font = `1px ${fontFamily} `
       const metrics = ctx.measureText(text)
