@@ -164,5 +164,14 @@ export default {
   content: {},
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
-  build: {}
+  build: {
+    extend(config, { isDev, isClient }) {
+      // https://www.npmjs.com/package/yaml-loader
+      config.module.rules.push({
+        test: /\.ya?ml$/,
+        type: 'json', // Required by Webpack v4
+        use: 'yaml-loader'
+      })
+    }
+  }
 }
