@@ -107,9 +107,7 @@ export default {
   },
 
   // Global CSS: https://go.nuxtjs.dev/config-css
-  css: [
-    '@/assets/css/fonts.css'
-  ],
+  css: ['@/assets/css/fonts.css'],
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [],
@@ -132,7 +130,7 @@ export default {
     preconnect: true,
     download: true,
     base64: true,
-    inject: true, 
+    inject: true,
     families: {
       // 'IM+Fell+English+SC': true,
       // 'Roboto+Slab': true,

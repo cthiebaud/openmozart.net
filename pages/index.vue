@@ -9,7 +9,7 @@
 </template>
 
 <script>
-/* eslint-disable no-unused-expressions, no-unused-vars, no-sequences, eqeqeq, no-console, node/handle-callback-err, no-constant-condition */
+/* _eslint-disable no-unused-expressions, no-unused-vars, no-sequences, eqeqeq, no-console, node/handle-callback-err, no-constant-condition */
 
 import * as Vibrant from 'node-vibrant'
 
@@ -149,14 +149,11 @@ export default {
           // repeatedly poll check
           const poller = setInterval(async () => {
             try {
-              console.log('loading font')
               await document.fonts.load(font)
             } catch (err) {
-              console.log('error loading font')
               reject(err)
             }
             if (document.fonts.check(font)) {
-              console.log('font checked')
               clearInterval(poller)
               resolve(true)
             }
@@ -169,7 +166,6 @@ export default {
       const that = this
       waitForFontLoad(`40px ${this.config.fontFamily}`).then(
         document.getElementById('portrait-image').addEventListener('load', function (e) {
-          console.log('image loaded')
           that.createOrRedrawCanvas(this)
         })
       )
@@ -193,6 +189,13 @@ export default {
         return array
       }
       return shuffleArray([...Array(factorial).keys()])
+    },
+    toggleCheat() {
+      if (this.cheat === 'cheat') {
+        this.cheat = ''
+      } else {
+        this.cheat = 'cheat'
+      }
     },
     shuffleAndRedraw() {
       this.shuffle = this.doShuffle(this.config.factorial)
@@ -376,7 +379,6 @@ export default {
       let actualHeight = 0
       let fontHeight = 0
       text.forEach((letter) => {
-        console.log(letter, fontFamily, w, fontHeight, actualHeight)
         const metrics = ctx.measureText(text)
         w = Math.max((w = metrics.width))
         // https://stackoverflow.com/a/46950087/1070215
@@ -396,7 +398,6 @@ export default {
         )
         }
       })
-      console.log(w, fontHeight, actualHeight)
       ctx.restore()
       // prettier-ignore
       return Math.min(
