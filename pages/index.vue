@@ -17,7 +17,7 @@ export default {
   data() {
     const config = {
       backgroundColor: 'white',
-      fontFamily: 'monospace',
+      fontFamily: 'Arvo',
       imageFilter: 'brightness(95%)',
       imageURL: '/jpegs/ricard.jpg',
       matchBoundaryFillStyle: undefined,
@@ -25,7 +25,7 @@ export default {
       shadowColor: '#462310',
       shadowOffsetX: 0.5,
 
-      word: 'RICARD',
+      word: 'ricard',
       ersatzAsArray: undefined,
       wordAsArray: undefined,
       factorial: undefined,
@@ -35,13 +35,13 @@ export default {
         y: 0,
         cx: 1,
         cy: 0,
-        textSize: -2
+        textSize: -6
       },
 
       style: {
         canvas: {
-          objectPositionX: '50%',
-          objectPositionY: '50%',
+          objectPositionX: '0%',
+          objectPositionY: '100%',
           scaleTransform: '97%',
           backgroundColor: 'transparent'
         }

@@ -248,13 +248,13 @@
         ctx.lineTo(-res.cxCol, -res.cyRow)
         ctx.lineTo(-res.cxCol, radius * res.cyRow)
         ctx.lineWidth = 1
-        ctx.strokeStyle = '#FFD700'
+        ctx.strokeStyle = '#C0C0C0'
         ctx.stroke()
         ctx.beginPath()
         ctx.moveTo(-res.cxCol, -res.cyRow)
         ctx.arc(-res.cxCol, -res.cyRow, (1+radius) * (res.cxCol + res.cyRow) / 2, 0 * Math.PI, 0.5 * Math.PI)
         ctx.closePath()
-        ctx.fillStyle = '#FFD70040'
+        ctx.fillStyle = '#C0C0C040'
         ctx.fill()
 
         ctx.setTransform(1, 0, 0, 1, 0, 0)
