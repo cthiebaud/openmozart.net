@@ -25,8 +25,10 @@ export default {
 
       word: 'MOZART',
       wordAsArray: undefined,
-      ersatz: '······',
-      ersatzAsArray: undefined,
+      // \u00B7 is '·' https://www.compart.com/en/unicode/U+00B7
+      // \u30FB is '・' https://www.compart.com/en/unicode/U+30FB
+      // \u25CF is '●' https://www.compart.com/en/unicode/U+25CF
+      ersatzAsArray: Array(6).fill('\u25CF'),
       factorial: undefined
     }
 
@@ -39,7 +41,7 @@ export default {
 
     const box = { cols: 720, rows: 1 }
     const canvas = undefined
-    const hiddenPermutations = [0]
+    const hiddenPermutations = new Set()
     const matches = { horz: [], vert: [] }
     const palette = undefined
     const shuffle = undefined
@@ -110,14 +112,14 @@ export default {
       this.shuffle = this.doShuffle(this.config.factorial)
 
       // calc hidden permutations
-      for (let i = 1; i < this.config.factorial; i++) {
+      for (let i = 0; i < this.config.factorial; i++) {
         const permutation = this.pickPermutation(this.config.wordAsArray, this.config.factorial, i)
         // https://stackoverflow.com/a/19746771/1070215
         const identicalArrays = (a1, a2) => a1.length === a2.length && a1.every((v, i) => v === a2[i])
         if (identicalArrays(permutation, this.config.wordAsArray)) {
           // eslint-disable-next-line no-console
-          console.log('hide nth permutation', i, permutation)
-          this.hiddenPermutations.push(i)
+          this.hiddenPermutations.add(i)
+          console.log('REMEMBER nth permutation', i, permutation, this.hiddenPermutations)
         }
       }
 
@@ -188,8 +190,9 @@ export default {
     // https://stackoverflow.com/a/54018834/1070215
     pickShuffledPermutation(nth) {
       nth = Math.floor(nth)
-      if (this.hiddenPermutations.includes(nth)) {
-        return this.config.ersatzAsArray
+      const shuffled = this.shuffle[nth]
+      if ( this.hiddenPermutations.has(shuffled) ) {
+        return [...this.config.ersatzAsArray] // CLONE ME !!!!
       } else {
         const shuffled = this.shuffle[nth]
         return this.pickPermutation(this.config.wordAsArray, this.config.factorial, shuffled)
