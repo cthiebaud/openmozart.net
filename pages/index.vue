@@ -10,7 +10,6 @@
         id="swiper"
         v-hammer:press="onPress"
         v-hammer:tap="shuffleAndRedraw"
-        v-hammer:swipe.left="onSwipeLeft"
         v-hammer:swipe.right="onSwipeRight"
         class="vh-100"
       ></div>
@@ -156,15 +155,10 @@ export default {
       console.log('PRESSED !!! cheating is now ', this.cheating)
       this.createOrRedrawCanvas()
     },
-    onSwipeLeft() {
-      // eslint-disable-next-line no-console
-      console.log('SWIPED LEFT !!!')
-      this.startOrStopOrToggleSlideshow(false)
-    },
     onSwipeRight() {
       // eslint-disable-next-line no-console
       console.log('SWIPED RIGHT !!!')
-      this.startOrStopOrToggleSlideshow(true)
+      this.startOrStopOrToggleSlideshow()
     },
     init() {
       // calc shuffled array
