@@ -124,6 +124,12 @@ export default {
   ],
 
   googleFonts: {
+    display: 'block', // 'auto' | 'block' | 'swap' | 'fallback' | 'optional'
+    preload: true,
+    prefetch: true,
+    preconnect: true,
+    download: true,
+    base64: true,
     families: {
       'IM+Fell+English+SC': true
     }

@@ -17,7 +17,7 @@ export default {
   data() {
     const config = {
       backgroundColor: '#160804',
-      fontFamily: 'monospace', // '\'IM Fell English SC\', serif',
+      fontFamily: '\'IM Fell English SC\', serif', // 'monospace', // 
       imageFilter: 'brightness(120%)',
       imageURL: '/jpegs/Mozart-Lange-darker.jpg',
       matchBoundaryFillStyle: 'black',
@@ -35,7 +35,7 @@ export default {
         y: 0,
         cx: 0,
         cy: 0,
-        textSize: 9
+        textSize: 6
       },
 
       style: {
