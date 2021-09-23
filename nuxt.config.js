@@ -130,6 +130,7 @@ export default {
     preconnect: true,
     download: true,
     base64: true,
+    inject: true, 
     families: {
       'IM+Fell+English+SC': true
     }
