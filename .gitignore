@@ -90,4 +90,4 @@ sw.*
 *.swp
 *-bis.*
 
-/static/git
+/static/git.yml
