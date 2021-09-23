@@ -37,6 +37,7 @@ export default {
       y: 0,
       cx: 1,
       cy: 0
+      textSize: -4
     }
 
     const box = { cols: 720, rows: 1 }
@@ -120,6 +121,7 @@ export default {
         if (identicalArrays(permutation, this.config.wordAsArray)) {
           // eslint-disable-next-line no-console
           this.hiddenPermutations.add(i)
+          // eslint-disable-next-line no-console
           console.log('REMEMBER nth permutation', i, permutation, this.hiddenPermutations)
         }
       }
@@ -348,7 +350,7 @@ export default {
         )
       }
       ctx.restore()
-      return Math.min(cx - 5 / w, cy - 5 / actualHeight)
+      return Math.min(cx + textSize / w, cy + textSize / actualHeight)
     },
     tweakAndFillRect(ctx, x, y, cx, cy) {
       ctx.fillRect(x + this.tweaks.x, y + this.tweaks.y, cx + this.tweaks.cx, cy + this.tweaks.cy)
@@ -374,7 +376,7 @@ export default {
         // ctx.shadowOffsetY = 0
         // ctx.shadowBlur = .5
 
-        this.textSize = this.getFontSizeToFit(ctx, letter, this.config.fontFamily, cx, cy)
+        this.textSize = this.getFontSizeToFit(ctx, letter, this.config.fontFamily, cx, cy, this.tweaks.textSize)
         ctx.font = `${this.textSize}px ${this.config.fontFamily}`
       }
 
@@ -423,7 +425,7 @@ export default {
         }
       }
       ctx.fillStyle = suitableTextColor
-      ctx.fillText(letter, x + cx / 2, y + cy - 4, cx)
+      ctx.fillText(letter, x + cx / 2, y + cy + this.tweaks.textSize, cx)
       return anagram
     },
     calcResolution(word, eW, eH, wW, wH) {
