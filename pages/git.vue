@@ -1,5 +1,5 @@
 <template>
-  <a :href="`https://github.com/cthiebaud/${name}/commit/${git}`">{{ git }}</a>
+  <a :href="`https://github.com/cthiebaud/${name}.net/commit/${git}`">{{ git }}</a>
 </template>
 
 <script>
