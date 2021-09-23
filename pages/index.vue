@@ -1,5 +1,9 @@
 <template>
   <main class="vh-100" :style="`background-color: ${config.backgroundColor}`" @click="shuffleAndRedraw">
+    <component :is="'style'">
+      {{ styleCanvas }}
+    </component>
+
     <img id="portrait-image" :src="config.imageURL" />
   </main>
 </template>
@@ -20,27 +24,31 @@ export default {
       matchFillStyle: 'rgba(255, 0, 0, 0.5)',
       shadowColor: '#572010',
       shadowOffsetX: 0.5,
-      textAlign: 'center',
-      textBaseline: 'bottom',
 
       word: 'MOZART',
+      ersatzAsArray: undefined,
       wordAsArray: undefined,
-      // \u00B7 is '·' https://www.compart.com/en/unicode/U+00B7
-      // \u30FB is '・' https://www.compart.com/en/unicode/U+30FB
-      // \u25CF is '●' https://www.compart.com/en/unicode/U+25CF
-      ersatzAsArray: Array(6).fill('\u25CF'),
-      factorial: undefined
+      factorial: undefined,
+
+      tweaks: {
+        x: 0,
+        y: 0,
+        cx: 0,
+        cy: 0,
+        textSize: 0
+      },
+
+      style: {
+        canvas: {
+          objectPositionX: '50%',
+          objectPositionY: '50%',
+          scaleTransform: '98%',
+          backgroundColor: '#160804'
+        }
+      }
     }
 
-    const tweaks = {
-      x: 0,
-      y: -2,
-      cx: 0,
-      cy: 0,
-      textSize: 2
-    }
-
-    const box = { cols: 720, rows: 1 }
+    const box = { cols: undefined, rows: undefined }
     const canvas = undefined
     const hiddenPermutations = new Set()
     const matches = { horz: [], vert: [] }
@@ -51,8 +59,6 @@ export default {
     const cheat = ''
     return {
       config,
-
-      tweaks,
 
       box,
       canvas,
@@ -69,11 +75,23 @@ export default {
   computed: {
     cheating() {
       return this.cheat === 'cheat'
+    },
+    styleCanvas() {
+      // pretty-ignore
+      return `canvas {
+  object-position: ${this.config.style.canvas.objectPositionX} ${this.config.style.canvas.objectPositionY};
+  transform: scale(${this.config.style.canvas.scaleTransform});
+  background-color: ${this.config.style.canvas.backgroundColor};
+}`
     }
   },
   mounted() {
-    this.config.wordAsArray = this.config.word.split('')
-    this.config.factorial = this.factorialize(this.config.wordAsArray.length)
+    ;(this.config.wordAsArray = this.config.wordAsArray || this.config.word.split('')),
+      // \u00B7 is '·' https://www.compart.com/en/unicode/U+00B7
+      // \u25CF is '●' https://www.compart.com/en/unicode/U+25CF
+      // \u25CB is '○' https://www.compart.com/en/unicode/U+25CB
+      (this.config.ersatzAsArray = this.config.ersatzAsArray || Array(this.config.word.length).fill('\u25CB')),
+      (this.config.factorial = this.factorialize(this.config.wordAsArray.length))
 
     Vibrant.from(document.getElementById('portrait-image'))
       .maxColorCount(200)
@@ -165,7 +183,7 @@ export default {
           function () {
             this.shuffleAndRedraw()
           }.bind(this),
-          1000
+          2000
         )
       } else if (!start && this.slideshowID) {
         clearInterval(this.slideshowID)
@@ -192,7 +210,7 @@ export default {
     pickShuffledPermutation(nth) {
       nth = Math.floor(nth)
       const shuffled = this.shuffle[nth]
-      if ( this.hiddenPermutations.has(shuffled) ) {
+      if (this.hiddenPermutations.has(shuffled)) {
         return [...this.config.ersatzAsArray] // CLONE ME !!!!
       } else {
         return this.pickPermutation(this.config.wordAsArray, this.config.factorial, shuffled)
@@ -348,10 +366,29 @@ export default {
         )
       }
       ctx.restore()
-      return Math.min(cx + textSize / w, cy + textSize / actualHeight)
+      // prettier-ignore
+      return Math.min(
+        cx + textSize / w,
+        cy + textSize / actualHeight
+      )
     },
     tweakAndFillRect(ctx, x, y, cx, cy) {
-      ctx.fillRect(x + this.tweaks.x, y + this.tweaks.y, cx + this.tweaks.cx, cy + this.tweaks.cy)
+      // prettier-ignore
+      ctx.fillRect(
+        x  + this.config.tweaks.x,
+        y  + this.config.tweaks.y,
+        cx + this.config.tweaks.cx,
+        cy + this.config.tweaks.cy
+      )
+    },
+    tweakAndStrokeRect(ctx, x, y, cx, cy) {
+      // prettier-ignore
+      ctx.strokeRect(
+        x  + this.config.tweaks.x,
+        y  + this.config.tweaks.y,
+        cx + this.config.tweaks.cx,
+        cy + this.config.tweaks.cy
+      )
     },
     drawLetter(ctx, word, i, x, y, cx, cy, previousResult) {
       if (i > this.box.cols * this.box.rows) {
@@ -365,8 +402,8 @@ export default {
       const letter = anagram.shift()
 
       if (!this.textSize) {
-        ctx.textAlign = this.config.textAlign
-        ctx.textBaseline = this.config.textBaseline
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
 
         // SHADOW
         ctx.shadowColor = this.config.shadowColor
@@ -374,7 +411,7 @@ export default {
         // ctx.shadowOffsetY = 0
         // ctx.shadowBlur = .5
 
-        this.textSize = this.getFontSizeToFit(ctx, letter, this.config.fontFamily, cx, cy, this.tweaks.textSize)
+        this.textSize = this.getFontSizeToFit(ctx, letter, this.config.fontFamily, cx, cy, this.config.tweaks.textSize)
         ctx.font = `${this.textSize}px ${this.config.fontFamily}`
       }
 
@@ -425,7 +462,13 @@ export default {
         }
       }
       // ctx.fillStyle = suitableTextColor
-      ctx.fillText(letter, x + cx / 2, y + cy, cx)
+      ctx.fillText(letter, x + cx / 2, y + cy / 2)
+      /*
+      ctx.strokeStyle = 'green'
+      ctx.lineWidth = 0.3
+      this.tweakAndStrokeRect(ctx, x, y, cx, cy)
+      */
+
       return anagram
     },
     calcResolution(word, eW, eH, wW, wH) {
@@ -513,9 +556,6 @@ canvas {
   bottom: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: 50% 50%;
-  transform: scale(0.98);
-  background-color: #160804;
+  object-fit: contain;
 }
 </style>
