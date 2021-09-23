@@ -1,5 +1,13 @@
 <template>
-  <main class="vh-100" :style="`background-color: ${config.backgroundColor}`" @click="shuffleAndRedraw">
+  <main
+    v-hammer:swipe.left="onSwipeLeft"
+    v-hammer:swipe.right="onSwipeRight"
+    v-hammer:swipe.up="onSwipeRight"
+    v-hammer:swipe.down="onSwipeRight"
+    class="vh-100"
+    :style="`background-color: ${config.backgroundColor}`"
+    @click="shuffleAndRedraw"
+  >
     <component :is="'style'">
       {{ styleCanvas }}
     </component>
@@ -11,7 +19,11 @@
 <script>
 /* eslint-disable no-unused-expressions, no-unused-vars, no-sequences, eqeqeq, no-console, node/handle-callback-err, no-constant-condition */
 
+import Vue from 'vue'
 import * as Vibrant from 'node-vibrant'
+import { NuxtHammer } from 'nuxt-hammer'
+
+Vue.use(NuxtHammer)
 
 export default {
   data() {
@@ -127,6 +139,26 @@ export default {
     })
   },
   methods: {
+    onSwipeLeft() {
+      // eslint-disable-next-line no-console
+      console.log('SWIPED LEFT !!!')
+      this.startOrStopOrToggleSlideshow(true)
+    },
+    onSwipeRight() {
+      // eslint-disable-next-line no-console
+      console.log('SWIPED RIGHT !!!')
+      this.startOrStopOrToggleSlideshow(false)
+    },
+    onSwipeUp() {
+      // eslint-disable-next-line no-console
+      console.log('SWIPED UP !!!')
+      this.cheat = 'cheat'
+    },
+    onSwipeDown() {
+      // eslint-disable-next-line no-console
+      console.log('SWIPED DOWN !!!')
+      this.cheat = ''
+    },
     init() {
       // calc shuffled array
       this.shuffle = this.doShuffle(this.config.factorial)
