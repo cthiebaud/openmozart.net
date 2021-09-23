@@ -5,7 +5,7 @@
 </template>
 
 <script>
-/* _eslint-disable no-unused-expressions, no-unused-vars, no-sequences, eqeqeq, no-console, node/handle-callback-err, no-constant-condition */
+/* eslint-disable no-unused-expressions, no-unused-vars, no-sequences, eqeqeq, no-console, node/handle-callback-err, no-constant-condition */
 
 import * as Vibrant from 'node-vibrant'
 
@@ -34,9 +34,10 @@ export default {
 
     const tweaks = {
       x: 0,
-      y: 0,
+      y: -2,
       cx: 0,
-      cy: 0
+      cy: 0,
+      textSize: 2
     }
 
     const box = { cols: 720, rows: 1 }
@@ -72,7 +73,6 @@ export default {
   },
   mounted() {
     this.config.wordAsArray = this.config.word.split('')
-    this.config.ersatzAsArray = this.config.ersatz.split('')
     this.config.factorial = this.factorialize(this.config.wordAsArray.length)
 
     Vibrant.from(document.getElementById('portrait-image'))
@@ -86,9 +86,11 @@ export default {
 
     const that = this
     window.addEventListener('keyup', function (event) {
-      if (event.key === 'Enter') {
+      if (event.code === 'Enter') {
         that.startOrStopOrToggleSlideshow(true)
-      } else if (event.key === 'Escape') {
+      } else if (event.code === 'Space') {
+        that.shuffleAndRedraw()
+      } else if (event.code === 'Escape') {
         that.cheat = ''
         that.createOrRedrawCanvas()
         that.startOrStopOrToggleSlideshow(false)
@@ -119,6 +121,7 @@ export default {
         if (identicalArrays(permutation, this.config.wordAsArray)) {
           // eslint-disable-next-line no-console
           this.hiddenPermutations.add(i)
+          // eslint-disable-next-line no-console
           console.log('REMEMBER nth permutation', i, permutation, this.hiddenPermutations)
         }
       }
@@ -194,7 +197,6 @@ export default {
       if ( this.hiddenPermutations.has(shuffled) ) {
         return [...this.config.ersatzAsArray] // CLONE ME !!!!
       } else {
-        const shuffled = this.shuffle[nth]
         return this.pickPermutation(this.config.wordAsArray, this.config.factorial, shuffled)
       }
     },
@@ -285,7 +287,7 @@ export default {
       }
     },
     storeMatches() {
-      // console.log('RAZ matches at start of storeMatches')
+      // RAZ matches at start of storeMatches
       this.matches.horz.splice(0, this.matches.horz.length)
       this.matches.vert.splice(0, this.matches.vert.length)
 
@@ -326,7 +328,7 @@ export default {
       return ret
     },
     // https://stackoverflow.com/a/56922947/1070215
-    getFontSizeToFit: (ctx, text, fontFamily, cx, cy) => {
+    getFontSizeToFit: (ctx, text, fontFamily, cx, cy, textSize) => {
       ctx.save()
       ctx.font = `1px ${fontFamily} `
       const metrics = ctx.measureText(text)
@@ -348,7 +350,7 @@ export default {
         )
       }
       ctx.restore()
-      return Math.min(cx + 2 / w, cy + 2 / actualHeight)
+      return Math.min(cx + textSize / w, cy + textSize / actualHeight)
     },
     tweakAndFillRect(ctx, x, y, cx, cy) {
       ctx.fillRect(x + this.tweaks.x, y + this.tweaks.y, cx + this.tweaks.cx, cy + this.tweaks.cy)
@@ -374,7 +376,7 @@ export default {
         // ctx.shadowOffsetY = 0
         // ctx.shadowBlur = .5
 
-        this.textSize = this.getFontSizeToFit(ctx, letter, this.config.fontFamily, cx, cy)
+        this.textSize = this.getFontSizeToFit(ctx, letter, this.config.fontFamily, cx, cy, this.tweaks.textSize)
         ctx.font = `${this.textSize}px ${this.config.fontFamily}`
       }
 
