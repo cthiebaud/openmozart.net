@@ -1,18 +1,20 @@
 <template>
-  <main
-    v-hammer:swipe.left="onSwipeLeft"
-    v-hammer:swipe.right="onSwipeRight"
-    v-hammer:swipe.up="onSwipeRight"
-    v-hammer:swipe.down="onSwipeRight"
-    class="vh-100"
-    :style="`background-color: ${config.backgroundColor}`"
-    @click="shuffleAndRedraw"
-  >
+  <main class="vh-100" :style="`background-color: ${config.backgroundColor}`">
     <component :is="'style'">
       {{ styleCanvas }}
     </component>
     <h1 class="text-center" :style="`font-family: ${config.fontFamily}; z-index: -1; color: ghostwhite; visibility: hidden;`">made by christophe thiebaud</h1>
     <img id="portrait-image" :src="config.imageURL" />
+    <client-only>
+      <div
+        id="swiper"
+        v-hammer:press="onPress"
+        v-hammer:tap="shuffleAndRedraw"
+        v-hammer:swipe.left="onSwipeLeft"
+        v-hammer:swipe.right="onSwipeRight"
+        class="vh-100"
+      ></div>
+    </client-only>
   </main>
 </template>
 
@@ -115,14 +117,17 @@ export default {
     this.init()
 
     const that = this
+    window.addEventListener('contextmenu', function (e) {
+      e.preventDefault()
+    })
     window.addEventListener('keyup', function (event) {
       if (event.code === 'Enter') {
         that.startOrStopOrToggleSlideshow(true)
       } else if (event.code === 'Space') {
         that.shuffleAndRedraw()
       } else if (event.code === 'Escape') {
-        that.cheat = ''
         that.startOrStopOrToggleSlideshow(false)
+        that.cheat = ''
         that.createOrRedrawCanvas()
       }
       if ('cheat'.includes(event.key)) {
@@ -139,25 +144,25 @@ export default {
     })
   },
   methods: {
+    onPress() {
+      if (this.cheating) {
+        this.cheat = ''
+      } else {
+        this.cheat = 'cheat'
+      }
+      // eslint-disable-next-line no-console
+      console.log('PRESSED !!! cheating is now ', this.cheating)
+      this.createOrRedrawCanvas()
+    },
     onSwipeLeft() {
       // eslint-disable-next-line no-console
       console.log('SWIPED LEFT !!!')
-      this.startOrStopOrToggleSlideshow(true)
+      this.startOrStopOrToggleSlideshow(false)
     },
     onSwipeRight() {
       // eslint-disable-next-line no-console
       console.log('SWIPED RIGHT !!!')
-      this.startOrStopOrToggleSlideshow(false)
-    },
-    onSwipeUp() {
-      // eslint-disable-next-line no-console
-      console.log('SWIPED UP !!!')
-      this.cheat = 'cheat'
-    },
-    onSwipeDown() {
-      // eslint-disable-next-line no-console
-      console.log('SWIPED DOWN !!!')
-      this.cheat = ''
+      this.startOrStopOrToggleSlideshow(true)
     },
     init() {
       // calc shuffled array
@@ -243,7 +248,7 @@ export default {
           function () {
             this.shuffleAndRedraw()
           }.bind(this),
-          2000
+          1500
         )
       } else if (!start && this.slideshowID) {
         clearInterval(this.slideshowID)
@@ -605,6 +610,11 @@ export default {
 body {
   position: relative;
 }
+div#swiper {
+  background: transparent;
+  z-index: 123;
+}
+div#swiper,
 canvas {
   display: block;
   position: absolute;
