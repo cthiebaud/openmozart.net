@@ -22,6 +22,8 @@ export default {
       imageURL: '/jpegs/Mozart-Lange-darker.jpg',
       matchBoundaryFillStyle: 'black',
       matchFillStyle: 'rgba(255, 0, 0, 0.5)',
+      cornerStrokeStyle: '#FFD700',
+      cornerFillStyle: '#FFD70040',
       shadowColor: '#572010',
       shadowOffsetX: 0.5,
 
@@ -226,7 +228,9 @@ export default {
         resolution: this.calcResolution, // { cxCol: grain, cyRow: grain }, // undefined, //
         shape: this.drawLetter, // 'circle', // 'diamond', // undefined, //
         word: this.config.word,
-        wordAsArray: this.config.wordAsArray
+        wordAsArray: this.config.wordAsArray,
+        cornerStrokeStyle: this.cornerStrokeStyle,
+        cornerFillStyle: this.cornerFillStyle
       }
       this.textSize = undefined // triggers text size recalculation
       if (img) {
