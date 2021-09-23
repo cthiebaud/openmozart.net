@@ -215,24 +215,23 @@
         ctx.textBaseline = m.y === 0 ? 'top' : 'bottom'
 
         const center = { x: 0, y: 0, a: 0 }
-        const factor = 1
         if (m.x === 0) {
           if (m.y === 0) {
-            center.x += factor * res.cxCol + 1
-            center.y += factor * res.cyRow + 1
+            center.x += res.cxCol + 1
+            center.y += res.cxCol + 1
             center.a = 0
           } else {
-            center.x += factor * res.cxCol
-            center.y += res.cyRow * (res.rows - factor) - 1
+            center.x += res.cxCol + 1
+            center.y += res.cyRow * res.rows - res.cxCol - 2
             center.a = 3
           }
         } else if (m.y === 0) {
-          center.x += res.cxCol * (res.cols - factor)
-          center.y += factor * res.cyRow + 1
+          center.x += res.cxCol * res.cols - res.cxCol - 1
+          center.y += res.cxCol + 1
           center.a = 1
         } else {
-          center.x += res.cxCol * (res.cols - factor) - 1
-          center.y += res.cyRow * (res.rows - factor) - 1
+          center.x += res.cxCol * res.cols - res.cxCol - 2
+          center.y += res.cyRow * res.rows - res.cxCol - 1
           center.a = 2
         }
 
@@ -241,18 +240,19 @@
         if (false) {
           ctx.fillText(m.text, 0, 0)
         }
-        const radius = .666
+        const radius = res.cxCol * 2
         ctx.rotate((center.a * (90 * Math.PI)) / 180)
         ctx.beginPath()
-        ctx.moveTo(radius * res.cxCol, -res.cyRow)
-        ctx.lineTo(-res.cxCol, -res.cyRow)
-        ctx.lineTo(-res.cxCol, radius * res.cyRow)
+        ctx.moveTo(radius / 2, -radius / 2)
+
+        ctx.lineTo(-radius / 2, -radius / 2)
+        ctx.lineTo(-radius / 2, radius / 2)
         ctx.lineWidth = 1
         ctx.strokeStyle = '#FFD700'
         ctx.stroke()
         ctx.beginPath()
-        ctx.moveTo(-res.cxCol, -res.cyRow)
-        ctx.arc(-res.cxCol, -res.cyRow, (1+radius) * (res.cxCol + res.cyRow) / 2, 0 * Math.PI, 0.5 * Math.PI)
+        ctx.moveTo(-radius / 2, -radius / 2)
+        ctx.arc(-radius / 2, -radius / 2, radius, 0 * Math.PI, 0.5 * Math.PI)
         ctx.closePath()
         ctx.fillStyle = '#FFD70040'
         ctx.fill()
