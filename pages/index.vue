@@ -168,7 +168,7 @@ canvas {
           that.cheat = ''
           event.preventDefault()
         } else if (that.cheat === 'cheat') {
-          that.$toast.show('Now cheating', this.toastOptions)
+          that.$toast.show('Now cheating', that.toastOptions)
           that.createOrRedrawCanvas()
           event.preventDefault()
         }
