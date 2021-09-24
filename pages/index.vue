@@ -118,8 +118,8 @@ export default {
         return Math.round(this.averageTimeBetweenSlides.total / this.averageTimeBetweenSlides.slides)
       },
       set(newTime) {
-        this.averageTimeBetweenSlides.total ++
-        this.averageTimeBetweenSlides.slides += newTime
+        this.averageTimeBetweenSlides.slides ++
+        this.averageTimeBetweenSlides.total += newTime
       }
     },
     cheating() {
@@ -328,8 +328,6 @@ canvas {
         iterations++
         // eslint-disable-next-line no-unmodified-loop-condition
       } while (typeof target !== 'undefined' && matches < target)
-      // eslint-disable-next-line no-console
-      console.log(iterations, 'FOUND', matches, target)
       this.shuffle = shuffle
 
       if (!this.slideshow || !this.cheating) {
@@ -347,10 +345,14 @@ canvas {
       if (start && typeof this.slideshow === 'undefined') {
         this.$toast.show('Starting slideshow', this.toastOptions)
         this.shuffleAndRedraw()
+        let slideshowLastredraw = new Date()
         this.slideshow = setInterval(
           function () {
             if (typeof this.slideshow !== 'undefined') {
               this.shuffleAndRedraw()
+              const oldDate = slideshowLastredraw
+              slideshowLastredraw = new Date()
+              this.timeBetweenSlides = Math.abs((slideshowLastredraw.getTime() - oldDate.getTime()));
             }
           }.bind(this),
           2000
