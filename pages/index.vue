@@ -12,7 +12,7 @@
         id="swiper"
         v-touch:swipe.left="onSwipe"
         v-touch:swipe.right="onSwipe"
-        v-touch:tap="animateShuffleAndRedraw"
+        v-touch:tap="onTap"
         v-touch:touchhold="onPress"
         class="vh-100"
         :style="`background-color: ${config.backgroundColor}`"
@@ -163,11 +163,14 @@ canvas {
         event.preventDefault()
         return
       } else if (event.code === 'Space') {
-        that.startOrStopOrToggleSlideshow()
+        if (this.slideshowID) {
+          that.startOrStopOrToggleSlideshow(false)
+        } else {
+          that.animateShuffleAndRedraw()
+        }
         event.preventDefault()
         return
       } else if (event.code === 'Escape') {
-        that.startOrStopOrToggleSlideshow(false)
         that.cheat = ''
         that.createOrRedrawCanvas()
         event.preventDefault()
@@ -206,6 +209,9 @@ canvas {
     },
     onSwipe() {
       this.startOrStopOrToggleSlideshow()
+    },
+    onTap() {
+      this.animateShuffleAndRedraw()
     },
     init() {
       // calc shuffled array
@@ -304,7 +310,7 @@ canvas {
           function () {
             this.shuffleAndRedraw()
           }.bind(this),
-          1500
+          2000
         )
       } else if (!start && this.slideshowID) {
         this.$toast.show('Slideshow stopped', this.toastOptions)
@@ -434,6 +440,13 @@ canvas {
 
       // vert
       this.horizontal()
+
+      if (!this.slideshowID || !this.cheating) {
+        this.$toast.show(`${this.matches.horz.length} horizontal, ${this.matches.vert.length} vertical`, {
+          ...this.toastOptions,
+          ...{ duration: 2000 }
+        })
+      }
     },
     printCandidate(word, boundary) {
       const ret = []

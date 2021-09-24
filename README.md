@@ -25,13 +25,13 @@ Already tedious in itself, this unglamorous task is made even more difficult by 
 ## Tips and tricks
 
 * Clicking anywhere sets a new random order for the permutations
-* Pressing 'Enter' starts a slideshow that basically reorders every 1 or 2 seconds
-* Pressing 'Escape' stops it
-* Typing 'cheat' reveals the lucky collisions and the undreamed-of vertical coincidences
+* Pressing 'Enter' starts a slideshow that reorders every 2 seconds
+* Pressing 'Spacebar' stops the slideshow if any, otherwise, it reorders
+* Typing 'cheat' reveals the happy collision(s) and the undreamed-of vertical coincidence(s)
 * Pressing 'Escape' stops cheating
 
 ### Mobile gestures
 
 * Tap: sets a new random order for the permutations
 * Horizontal swipe: toggles slideshow
-* Long-press (also known as press-and-hold): toggles cheating
+* Long press (also known as 'press and hold'): toggles cheating
