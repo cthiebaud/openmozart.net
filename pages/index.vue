@@ -83,7 +83,7 @@ export default {
     const palette = undefined
     const shuffle = undefined
     const slideshowID = undefined
-    const averageTimeBetweenSlides = {slides: 1, total: 1500}
+    const averageTimeBetweenSlides = { slides: 1, total: 1500 }
     const cheat = ''
     return {
       config,
@@ -115,7 +115,7 @@ export default {
         return Math.round(this.averageTimeBetweenSlides.total / this.averageTimeBetweenSlides.slides)
       },
       set(newTime) {
-        this.averageTimeBetweenSlides.slides ++
+        this.averageTimeBetweenSlides.slides++
         this.averageTimeBetweenSlides.total += newTime
       }
     },
@@ -231,7 +231,9 @@ canvas {
       this.startOrStopOrToggleSlideshow()
     },
     onTap() {
-      this.animateShuffleAndRedraw()
+      if (typeof this.slideshow === 'undefined') {
+        this.animateShuffleAndRedraw()
+      }
     },
     init() {
       // calc shuffled array
@@ -349,7 +351,7 @@ canvas {
               this.shuffleAndRedraw()
               const oldDate = slideshowLastredraw
               slideshowLastredraw = new Date()
-              this.timeBetweenSlides = Math.abs((slideshowLastredraw.getTime() - oldDate.getTime()));
+              this.timeBetweenSlides = Math.abs(slideshowLastredraw.getTime() - oldDate.getTime())
             }
           }.bind(this),
           2000
