@@ -4,6 +4,8 @@
 
 718 permutations of the word "RICARD" colored in such a way as to make a bottle appear.
 
+Permutations are randomly sorted and the order changes with each refresh of the page.
+
 The (2) identity permutations "RICARD" are replaced by "∅∅∅∅∅∅" 
 
 However, since permutations are sorted randomly, the word "RICARD" can appear through the collision of two other permutations: e.g. "DAR·RIC" then "ARD·RIC".
