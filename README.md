@@ -53,6 +53,6 @@ I have no idea what the probability is that a genius like Mozart could have exis
 
 ---
 
-*The image below contains five times MOZART (three times horizontally and two times vertically), of which 4 are clearly readable (the fifth, vertical, is in the dark). The jpeg to cheat is in the directory.*
+*The image below contains five times MOZART (three times horizontally and two times vertically), of which four are clearly readable (the fifth, vertical, is in the dark). The jpeg to cheat is in the directory.*
 
 ![5 matches](matches-5.jpg)
