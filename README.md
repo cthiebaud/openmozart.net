@@ -49,4 +49,6 @@ The probability that a sorting of these (719 + 1) anagrams forms an image immedi
 
 I have no idea what the probability is that a genius like Mozart could have existed, but I like to think it is of a similar order of magnitude.
 
+*The image below contains 5 times MOZART (3 times horizontally and 2 times vertically), of which 4 are clearly readable (the 5th, vertical, is in the dark). The jpeg to cheat is in the directory.*
+
 ![5 matches](matches-5.jpg)
