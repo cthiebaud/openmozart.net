@@ -4,6 +4,8 @@
 
 718 permutations of the word "RICARD" colored in such a way as to make a bottle appear.
 
+Permutations are randomly sorted; the order changes with each refresh of the page.
+
 The (2) identity permutations "RICARD" are replaced by "∅∅∅∅∅∅" 
 
 However, since permutations are sorted randomly, the word "RICARD" can appear through the collision of two other permutations: e.g. "DAR·RIC" then "ARD·RIC".
@@ -22,14 +24,14 @@ Already tedious in itself, this unglamorous task is made even more difficult by 
 
 ## Tips and tricks
 
-* Pressing 'Enter' starts a slideshow
+* Clicking anywhere sets a new random order for the permutations
+* Pressing 'Enter' starts a slideshow that basically reorders every 1 or 2 seconds
 * Pressing 'Escape' stops it
 * Typing 'cheat' reveals the lucky collisions and the undreamed-of vertical coincidences
 * Pressing 'Escape' stops cheating
-* Pressing 'Spacebar' or clicking anywhere refreshes the screen, thus the ordering of the permutations
 
 ### Mobile gestures
 
-* Swipe to right: toggles slideshow
-* Tap: refreshes the screen
-* Press: toggles cheating
+* Tap: sets a new random order for the permutations
+* Horizontal swipe: toggles slideshow
+* Long-press (also known as press-and-hold): toggles cheating

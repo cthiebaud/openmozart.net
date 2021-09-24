@@ -3,14 +3,17 @@
     <component :is="'style'">
       {{ styleCanvas }}
     </component>
-    <h1 class="text-center" :style="`font-family: ${config.fontFamily}; z-index: -1; color: ghostwhite; visibility: hidden;`">made by christophe thiebaud</h1>
+    <h1 class="text-center" :style="`font-family: ${fontFamily(config.textSizeDefault)}; z-index: -1; color: ghostwhite; visibility: hidden;`">
+      made by christophe thiebaud
+    </h1>
     <img id="portrait-image" :src="config.imageURL" />
     <client-only>
       <div
         id="swiper"
-        v-hammer:press="onPress"
-        v-hammer:tap="shuffleAndRedraw"
-        v-hammer:swipe.right="onSwipeRight"
+        v-touch:swipe.left="onSwipe"
+        v-touch:swipe.right="onSwipe"
+        v-touch:tap="shuffleAndRedraw"
+        v-touch:touchhold="onPress"
         class="vh-100"
       ></div>
     </client-only>
@@ -20,11 +23,19 @@
 <script>
 /* eslint-disable no-unused-expressions, no-unused-vars, no-sequences, eqeqeq, no-console, node/handle-callback-err, no-constant-condition */
 
-import Vue from 'vue'
 import * as Vibrant from 'node-vibrant'
-import { NuxtHammer } from 'nuxt-hammer'
-
-Vue.use(NuxtHammer)
+import Vue from 'vue'
+import Vue2TouchEvents from 'vue2-touch-events'
+// https://www.npmjs.com/package/vue2-touch-events
+Vue.use(Vue2TouchEvents, {
+  disableClick: false,
+  touchClass: '',
+  tapTolerance: 10,
+  touchHoldTolerance: 400,
+  swipeTolerance: 30,
+  longTapTimeInterval: 400,
+  namespace: 'touch'
+})
 
 export default {
   data() {
@@ -37,6 +48,7 @@ export default {
       matchFillStyle: 'rgba(255, 255, 0, .7)',
       shadowColor: '#462310',
       shadowOffsetX: 0.5,
+      textSizeDefault: 20,
 
       word: 'ricard',
       ersatzAsArray: undefined,
@@ -61,7 +73,7 @@ export default {
       }
     }
 
-    const toastOptions = {duration:1000, position: 'top-center'}
+    const toastOptions = { duration: 1000, position: 'top-center', theme: 'outline' }
 
     const box = { cols: undefined, rows: undefined }
     const canvas = undefined
@@ -70,7 +82,6 @@ export default {
     const palette = undefined
     const shuffle = undefined
     const slideshowID = undefined
-    const textSize = undefined
     const cheat = ''
     return {
       config,
@@ -82,7 +93,6 @@ export default {
       palette,
       shuffle,
       slideshowID,
-      textSize,
       toastOptions,
 
       cheat
@@ -94,12 +104,19 @@ export default {
     },
     styleCanvas() {
       // pretty-ignore
-      return `canvas {
+      return `div#swiper {
+  background: ${this.config.style.canvas.backgroundColor};
+}
+canvas {
   object-position: ${this.config.style.canvas.objectPositionX} ${this.config.style.canvas.objectPositionY};
   transform: scale(${this.config.style.canvas.scaleTransform});
   background-color: ${this.config.style.canvas.backgroundColor};
 }`
     }
+  },
+  destroyed() {
+    window.removeEventListener('contextmenu', this.contextmenuEventListener)
+    window.removeEventListener('keyup', this.keyupEventListener)
   },
   mounted() {
     this.config.wordAsArray = this.config.wordAsArray || this.config.word.split('')
@@ -120,18 +137,24 @@ export default {
     this.init()
 
     const that = this
-    window.addEventListener('contextmenu', function (e) {
+    this.contextmenuEventListener = window.addEventListener('contextmenu', function (e) {
       e.preventDefault()
     })
-    window.addEventListener('keyup', function (event) {
+    this.keyupEventListener = window.addEventListener('keyup', function (event) {
       if (event.code === 'Enter') {
         that.startOrStopOrToggleSlideshow(true)
+        event.preventDefault()
+        return
       } else if (event.code === 'Space') {
-        that.shuffleAndRedraw()
+        that.startOrStopOrToggleSlideshow()
+        event.preventDefault()
+        return
       } else if (event.code === 'Escape') {
         that.startOrStopOrToggleSlideshow(false)
         that.cheat = ''
         that.createOrRedrawCanvas()
+        event.preventDefault()
+        return
       }
       if ('cheat'.includes(event.key)) {
         if (that.cheat === 'cheat') {
@@ -140,25 +163,31 @@ export default {
         that.cheat += event.key
         if (!'cheat'.startsWith(that.cheat)) {
           that.cheat = ''
+          event.preventDefault()
         } else if (that.cheat === 'cheat') {
-          that.$toast.show("Now cheating", this.toastOptions)
+          that.$toast.show('Now cheating', that.toastOptions)
           that.createOrRedrawCanvas()
+          event.preventDefault()
         }
       }
     })
   },
+
   methods: {
+    fontFamily(size) {
+      return `${size}px ${this.config.fontFamily}, ${this.config.fontFamilyFallback}`
+    },
     onPress() {
       if (this.cheating) {
         this.cheat = ''
-        this.$toast.show("Cheating stopped", this.toastOptions)
+        this.$toast.show('Cheating stopped', this.toastOptions)
       } else {
         this.cheat = 'cheat'
-        this.$toast.show("Now cheating", this.toastOptions)
+        this.$toast.show('Now cheating', this.toastOptions)
       }
       this.createOrRedrawCanvas()
     },
-    onSwipeRight() {
+    onSwipe() {
       this.startOrStopOrToggleSlideshow()
     },
     init() {
@@ -198,9 +227,10 @@ export default {
 
       // do the whole gamut when image is loaded
       const that = this
-      waitForFontLoad(`40px ${this.config.fontFamily}`).then(
+      waitForFontLoad(this.fontFamily(40)).then(
         document.getElementById('portrait-image').addEventListener('load', function (e) {
           that.createOrRedrawCanvas(this)
+          document.getElementById('swiper').style.background = 'transparent'
         })
       )
     },
@@ -240,7 +270,7 @@ export default {
         start = !this.slideshowID // toggle
       }
       if (start && !this.slideshowID) {
-        this.$toast.show("Starting slideshow", this.toastOptions)
+        this.$toast.show('Starting slideshow', this.toastOptions)
         this.shuffleAndRedraw()
         this.slideshowID = setInterval(
           function () {
@@ -249,7 +279,7 @@ export default {
           1500
         )
       } else if (!start && this.slideshowID) {
-        this.$toast.show("Stopping slideshow", this.toastOptions)
+        this.$toast.show('Slideshow stopped', this.toastOptions)
         clearInterval(this.slideshowID)
         this.slideshowID = undefined
       }
@@ -264,7 +294,7 @@ export default {
         word: this.config.word,
         wordAsArray: this.config.wordAsArray
       }
-      this.textSize = undefined // triggers text size recalculation
+      this.textSizeDefault = undefined // triggers text size recalculation
       if (img) {
         this.canvas = img.closePixelate(options)
       } else {
@@ -408,9 +438,9 @@ export default {
       return ret
     },
     // https://stackoverflow.com/a/56922947/1070215
-    getFontSizeToFit: (ctx, text, fontFamily, cx, cy, textSize) => {
+    getFontSizeToFit: (ctx, text, fontFamily, cx, cy, textSizeFix) => {
       ctx.save()
-      ctx.font = `1px 'Roboto Slab'`
+      ctx.font = fontFamily
       let w = 0
       let actualHeight = 0
       let fontHeight = 0
@@ -437,8 +467,8 @@ export default {
       ctx.restore()
       // prettier-ignore
       return Math.min(
-        cx + textSize / w,
-        cy + textSize / actualHeight
+        cx + textSizeFix / w,
+        cy + textSizeFix / actualHeight
       )
     },
     tweakAndFillRect(ctx, x, y, cx, cy) {
@@ -480,8 +510,9 @@ export default {
         // ctx.shadowOffsetY = 0
         // ctx.shadowBlur = .5
 
-        this.textSize = this.getFontSizeToFit(ctx, this.config.wordAsArray, this.config.fontFamily, cx, cy, this.config.tweaks.textSize)
-        ctx.font = `${this.textSize}px ${this.config.fontFamily}`
+        const onePxFontFamily = this.fontFamily(1)
+        this.textSizeDefault = this.getFontSizeToFit(ctx, this.config.wordAsArray, onePxFontFamily, cx, cy, this.config.tweaks.textSize)
+        ctx.font = this.fontFamily(this.textSizeDefault)
       }
 
       // get nearest color from palette
