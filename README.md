@@ -8,7 +8,7 @@ In memoriam openmozart.net 2001* - 2005†.
 
 Permutations are randomly sorted and the order will change with each refresh of the page.
 
-The name "MOZART" itself (kind of identity permutation) is replaced by "●●●●●●" 
+The name "MOZART" itself (kind of identity permutation) is replaced by "○○○○○○" 
 
 However, since the permutations are sorted randomly, the name "MOZART" can still appear through the collision of two other permutations: e.g. "TAR·MOZ" then "ART·ZOM".
 
