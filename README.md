@@ -47,6 +47,5 @@ Already tedious in itself, this unglamorous task is made even more difficult by 
 
 The probability that a sorting of these (719 + 1) anagrams forms an image immediately identifiable as being the famous portrait of Mozart by Joseph Lange is thus of the order of 2.6 E1740 (!720 divided by some billions of billions (guess work) of neighbouring combinations).
 
-I have no idea of the probability that a genius like Mozart could have existed, but I like to think that it is of a comparable order of magnitude.
-
+I have no idea what the probability is that a genius like Mozart could have existed, but I like to think it is of a similar order of magnitude.
 
