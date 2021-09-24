@@ -1,4 +1,4 @@
-# [openmozart.cthiebaud.com](https://openmozart.cthiebaud.com/)
+[openmozart.cthiebaud.com](https://openmozart.cthiebaud.com/)
 
 In memoriam openmozart.net 2001* - 2005†. 
 
