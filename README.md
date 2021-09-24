@@ -6,7 +6,7 @@ In memoriam openmozart.net 2001* - 2005†.
 
 719 permutations of the name "MOZART" colored in such a way as to form the famous portrait by [Joseph Lange](https://en.wikipedia.org/wiki/Joseph_Lange).
 
-Permutations are randomly sorted and the order will change with each refresh of the page.
+Permutations are randomly sorted and the order changes with each refresh of the page.
 
 The name "MOZART" itself (kind of identity permutation) is replaced by "∅∅∅∅∅∅" 
 
