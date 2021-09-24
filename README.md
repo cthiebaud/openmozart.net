@@ -13,7 +13,7 @@ possible orderings of (719 + 1) permutations. That's a lot. Much, much more than
 
 The name "MOZART" itself (kind of identity permutation) is replaced by "∅∅∅∅∅∅" 
 
-However, since the permutations are sorted randomly, the name "MOZART" can still appear through the collision of two other permutations: e.g. "TAR·MOZ" then "ART·ZOM".
+However, since the permutations are sorted randomly, the name "MOZART" can still appear through the collision of two other permutations: e.g. "TAR·MOZ", then "ART·ZOM".
 
 Furthermore, "MOZART" may appear vertically.
 
