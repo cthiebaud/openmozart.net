@@ -11,7 +11,7 @@ Permutations are randomly sorted; the order changes with each refresh of the pag
 According to [Factorial Calculator](https://www.calculatorsoup.com/calculators/discretemathematics/factorials.php), there are \~= 2.6 E+1746 (!720) 
 possible orderings of (719 + 1) permutations. That's a lot. Much, much more than the atoms in the observable universe (\~[1.0 E83](https://www.universetoday.com/36302/atoms-in-the-universe/))
 
-The name "MOZART" itself (kind of identity permutation) is replaced by "∅∅∅∅∅∅" 
+The name "MOZART" itself (kind of identity permutation) is replaced by "∅∅∅∅∅∅".
 
 However, since the permutations are sorted randomly, the name "MOZART" can still appear through the collision of two other permutations: e.g. "TAR·MOZ", then "ART·ZOM".
 
