@@ -83,6 +83,7 @@ export default {
     const palette = undefined
     const shuffle = undefined
     const slideshowID = undefined
+    const averageTimeBetweenSlides = {slides: 1, total: 1500}
     const cheat = ''
     return {
       config,
@@ -94,6 +95,7 @@ export default {
       palette,
       shuffle,
       slideshowID,
+      averageTimeBetweenSlides,
       toastOptions,
 
       cheat
@@ -101,11 +103,20 @@ export default {
   },
   computed: {
     slideshow: {
-      get () {
+      get() {
         return this.slideshowID
       },
-      set (newSlideshowID) {
+      set(newSlideshowID) {
         this.slideshowID = newSlideshowID
+      }
+    },
+    timeBetweenSlides: {
+      get() {
+        return Math.round(this.averageTimeBetweenSlides.total / this.averageTimeBetweenSlides.slides)
+      },
+      set(newTime) {
+        this.averageTimeBetweenSlides.total ++
+        this.averageTimeBetweenSlides.slides += newTime
       }
     },
     cheating() {
@@ -165,8 +176,6 @@ canvas {
     })
     if (this.keyupEventListener) window.removeEventListener('keyup', this.keyupEventListener)
     this.keyupEventListener = window.addEventListener('keyup', (event) => {
-      // eslint-disable-next-line no-console
-      console.log("THIS?", this)
       if (event.code === 'Enter') {
         this.startOrStopOrToggleSlideshow(true)
         event.preventDefault()
@@ -295,19 +304,37 @@ canvas {
         this.cheat = 'cheat'
       }
     },
-    animateShuffleAndRedraw() {
+    animateShuffleAndRedraw(target) {
+      target = target || 1
       const $swiper = document.getElementById('swiper')
       // https://betterprogramming.pub/how-to-restart-a-css-animation-with-javascript-and-what-is-the-dom-reflow-a86e8b6df00f
-      // eslint-disable-next-line no-console
-      console.log($swiper)
       $swiper.classList.remove('animate')
       // eslint-disable-next-line no-unused-expressions
       $swiper.offsetWidth // trigger a DOM reflow
       $swiper.classList.add('animate')
-      this.shuffleAndRedraw()
+      this.shuffleAndRedraw(target)
     },
-    shuffleAndRedraw() {
-      this.shuffle = this.doShuffle(this.config.factorial)
+    shuffleAndRedraw(target) {
+      target = target || 1
+      let matches = 0
+      let shuffle
+      let iterations = 0
+      do {
+        shuffle = this.doShuffle(this.config.factorial)
+        matches = this.storeMatches(shuffle)
+        iterations++
+        // eslint-disable-next-line no-unmodified-loop-condition
+      } while (typeof target !== 'undefined' && matches < target)
+      // eslint-disable-next-line no-console
+      console.log(iterations, 'FOUND', matches, target)
+      this.shuffle = shuffle
+
+      if (!this.slideshow || !this.cheating) {
+        this.$toast.show(`${this.matches.horz.length} horizontal, ${this.matches.vert.length} vertical`, {
+          ...this.toastOptions,
+          ...{ duration: this.timeBetweenSlides - 500 }
+        })
+      }
       this.createOrRedrawCanvas()
     },
     startOrStopOrToggleSlideshow(start) {
@@ -325,11 +352,9 @@ canvas {
           }.bind(this),
           2000
         )
-        // eslint-disable-next-line no-console
-        console.log('SLIDESHOWID', this.slideshow)
       } else if (!start && typeof this.slideshow !== 'undefined') {
         clearInterval(this.slideshow)
-        this.slideshow = undefined 
+        this.slideshow = undefined
         this.$toast.show('Slideshow stopped', this.toastOptions)
       }
     },
@@ -350,13 +375,13 @@ canvas {
         this.canvas.render(options)
       }
     },
-    pickShuffledPermutation(nth) {
+    pickShuffledPermutation(wordAsArray, factorial, shuffle, nth) {
       nth = Math.floor(nth)
-      const shuffled = this.shuffle[nth]
+      const shuffled = shuffle[nth]
       if (this.hiddenPermutations.has(shuffled)) {
         return [...this.config.ersatzAsArray] // CLONE ME !!!!
       } else {
-        return this.pickPermutation(this.config.wordAsArray, this.config.factorial, shuffled)
+        return this.pickPermutation(wordAsArray, factorial, shuffled)
       }
     },
     // https://stackoverflow.com/a/54018834/1070215
@@ -403,7 +428,7 @@ canvas {
       }
       return T
     },
-    horizontal(r) {
+    horizontal(wordAsArray, factorial, shuffle) {
       // horz
       let permutation = []
       const candidate = { boundary: undefined, accumulator: [] }
@@ -411,27 +436,27 @@ canvas {
         for (let col = 0; col < this.box.cols; col++) {
           const i = col + row * this.box.cols
           if (permutation.length === 0) {
-            permutation = this.pickShuffledPermutation(i / this.config.wordAsArray.length)
+            permutation = this.pickShuffledPermutation(wordAsArray, factorial, shuffle, i / this.config.wordAsArray.length)
           }
           const letter = permutation.shift()
           if (i % this.config.wordAsArray.length === 0) {
             candidate.boundary = i - candidate.accumulator.length
           }
-          const matchBoundary = this.testIfMatch(this.config.wordAsArray, candidate, letter)
+          const matchBoundary = this.testIfMatch(wordAsArray, candidate, letter)
           if (matchBoundary) {
             this.matches.horz.push(matchBoundary)
           }
         }
       }
     },
-    vertical(r) {
+    vertical(wordAsArray, factorial, shuffle) {
       const candidate = { boundary: undefined, accumulator: [] }
       for (let col = 0; col < this.box.cols; col++) {
         for (let row = 0; row < this.box.rows; row++) {
           const i = col + row * this.box.cols
           const j = i / this.config.wordAsArray.length
           const k = i % this.config.wordAsArray.length
-          const permutation = this.pickShuffledPermutation(j)
+          const permutation = this.pickShuffledPermutation(wordAsArray, factorial, shuffle, j)
           const letter = permutation[k]
           if (!candidate.boundary) {
             candidate.boundary = [i]
@@ -445,23 +470,18 @@ canvas {
         }
       }
     },
-    storeMatches() {
+    storeMatches(shuffle) {
       // RAZ matches at start of storeMatches
       this.matches.horz.splice(0, this.matches.horz.length)
       this.matches.vert.splice(0, this.matches.vert.length)
 
       // vert
-      this.vertical()
+      this.vertical(this.config.wordAsArray, this.config.factorial, shuffle)
 
       // vert
-      this.horizontal()
+      this.horizontal(this.config.wordAsArray, this.config.factorial, shuffle)
 
-      if (!this.slideshow || !this.cheating) {
-        this.$toast.show(`${this.matches.horz.length} horizontal, ${this.matches.vert.length} vertical`, {
-          ...this.toastOptions,
-          ...{ duration: 2000 }
-        })
-      }
+      return this.matches.vert.length + this.matches.horz.length
     },
     printCandidate(word, boundary) {
       const ret = []
@@ -552,7 +572,7 @@ canvas {
 
       let anagram = previousResult
       if (typeof anagram === 'undefined' || anagram.length === 0) {
-        anagram = this.pickShuffledPermutation(i / word.length)
+        anagram = this.pickShuffledPermutation(this.config.wordAsArray, this.config.factorial, this.shuffle, i / word.length)
       }
       const letter = anagram.shift()
 
@@ -645,7 +665,6 @@ canvas {
       const cxCol = wW / cols
       const cyRow = wH / rows
       this.box = { cols, rows, cxCol, cyRow, factorial }
-      this.storeMatches()
       return this.box
     },
     // https://www.freecodecamp.org/news/how-to-factorialize-a-number-in-javascript-9263c89a4b38/
