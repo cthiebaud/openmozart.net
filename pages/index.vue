@@ -100,6 +100,14 @@ export default {
     }
   },
   computed: {
+    slideshow: {
+      get () {
+        return this.slideshowID
+      },
+      set (newSlideshowID) {
+        this.slideshowID = newSlideshowID
+      }
+    },
     cheating() {
       return this.cheat === 'cheat'
     },
@@ -151,44 +159,45 @@ canvas {
 
     this.init()
 
-    const that = this
     if (this.contextmenuEventListener) window.removeEventListener('contextmenu', this.contextmenuEventListener)
     this.contextmenuEventListener = window.addEventListener('contextmenu', function (e) {
       e.preventDefault()
     })
     if (this.keyupEventListener) window.removeEventListener('keyup', this.keyupEventListener)
-    this.keyupEventListener = window.addEventListener('keyup', function (event) {
+    this.keyupEventListener = window.addEventListener('keyup', (event) => {
+      // eslint-disable-next-line no-console
+      console.log("THIS?", this)
       if (event.code === 'Enter') {
-        that.startOrStopOrToggleSlideshow(true)
+        this.startOrStopOrToggleSlideshow(true)
         event.preventDefault()
         return
       } else if (event.code === 'Space') {
-        const wasSlideshowing = typeof this.slideshowID !== "undefined"
+        const wasSlideshowing = typeof this.slideshow !== 'undefined'
         // try to stop this bloody slideshow in any case
-        that.startOrStopOrToggleSlideshow(false)
+        this.startOrStopOrToggleSlideshow(false)
         // if the slide show was not running, re-shuffle
         if (!wasSlideshowing) {
-          that.animateShuffleAndRedraw()
+          this.animateShuffleAndRedraw()
         }
         event.preventDefault()
         return
       } else if (event.code === 'Escape') {
-        that.cheat = ''
-        that.createOrRedrawCanvas()
+        this.cheat = ''
+        this.createOrRedrawCanvas()
         event.preventDefault()
         return
       }
       if ('cheat'.includes(event.key)) {
-        if (that.cheat === 'cheat') {
+        if (this.cheat === 'cheat') {
           return
         }
-        that.cheat += event.key
-        if (!'cheat'.startsWith(that.cheat)) {
-          that.cheat = ''
+        this.cheat += event.key
+        if (!'cheat'.startsWith(this.cheat)) {
+          this.cheat = ''
           event.preventDefault()
-        } else if (that.cheat === 'cheat') {
-          that.$toast.show('Now cheating', that.toastOptions)
-          that.createOrRedrawCanvas()
+        } else if (this.cheat === 'cheat') {
+          this.$toast.show('Now cheating', this.toastOptions)
+          this.createOrRedrawCanvas()
           event.preventDefault()
         }
       }
@@ -303,20 +312,24 @@ canvas {
     },
     startOrStopOrToggleSlideshow(start) {
       if (typeof start === 'undefined') {
-        start = !this.slideshowID // toggle
+        start = typeof this.slideshow === 'undefined' // toggle
       }
-      if (start && !this.slideshowID) {
+      if (start && typeof this.slideshow === 'undefined') {
         this.$toast.show('Starting slideshow', this.toastOptions)
         this.shuffleAndRedraw()
-        this.slideshowID = setInterval(
+        this.slideshow = setInterval(
           function () {
-            this.shuffleAndRedraw()
+            if (typeof this.slideshow !== 'undefined') {
+              this.shuffleAndRedraw()
+            }
           }.bind(this),
           2000
         )
-      } else if (!start && this.slideshowID) {
-        clearInterval(this.slideshowID)
-        this.slideshowID = undefined
+        // eslint-disable-next-line no-console
+        console.log('SLIDESHOWID', this.slideshow)
+      } else if (!start && typeof this.slideshow !== 'undefined') {
+        clearInterval(this.slideshow)
+        this.slideshow = undefined 
         this.$toast.show('Slideshow stopped', this.toastOptions)
       }
     },
@@ -443,7 +456,7 @@ canvas {
       // vert
       this.horizontal()
 
-      if (!this.slideshowID || !this.cheating) {
+      if (!this.slideshow || !this.cheating) {
         this.$toast.show(`${this.matches.horz.length} horizontal, ${this.matches.vert.length} vertical`, {
           ...this.toastOptions,
           ...{ duration: 2000 }
