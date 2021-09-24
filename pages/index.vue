@@ -108,7 +108,8 @@ export default {
     // \u00B7 is '·' https://www.compart.com/en/unicode/U+00B7
     // \u25CF is '●' https://www.compart.com/en/unicode/U+25CF
     // \u25CB is '○' https://www.compart.com/en/unicode/U+25CB
-    this.config.ersatzAsArray = this.config.ersatzAsArray || Array(this.config.word.length).fill('\u25CB')
+    // \u2205 is '∅' https://www.compart.com/en/unicode/U+2205
+    this.config.ersatzAsArray = this.config.ersatzAsArray || Array(this.config.word.length).fill('\u2205')
     this.config.factorial = this.factorialize(this.config.wordAsArray.length)
 
     Vibrant.from(document.getElementById('portrait-image'))
