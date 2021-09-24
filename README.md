@@ -29,13 +29,15 @@ Already tedious in itself, this unglamorous task is made even more difficult by 
 
 ## Tips and Tricks
 
+### On a Browser
+
 * Clicking anywhere sets a new random order for the permutations.
 * Pressing 'Enter' starts a slideshow that reorders every 2 seconds.
 * Pressing 'Spacebar' stops the slideshow when it is running; otherwise, it sets a new random order.
 * Typing 'cheat' reveals the happy collision(s) and the undreamed-of vertical coincidence(s), if any.
 * Pressing 'Escape' stops cheating.
 
-### Mobile Gestures
+### On a Mobile Phone
 
 * Tap: sets a new random order for the permutations.
 * Horizontal swipe: toggles slideshow.
