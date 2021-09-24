@@ -25,7 +25,7 @@ Already tedious in itself, this unglamorous task is made even more difficult by 
 
 2. a large number of almost black letters on a dark brown background are illegible, and
 
-3. there is no guarantee that a collision or a vertical alignment exists in the current page.
+3. there is no guarantee that a collision or a vertical alignment exists in the current sort.
 
 ## Tips and Tricks
 
