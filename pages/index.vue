@@ -12,9 +12,10 @@
         id="swiper"
         v-touch:swipe.left="onSwipe"
         v-touch:swipe.right="onSwipe"
-        v-touch:tap="shuffleAndRedraw"
+        v-touch:tap="animateShuffleAndRedraw"
         v-touch:touchhold="onPress"
         class="vh-100"
+        :style="`background-color: ${config.backgroundColor}`"
       ></div>
     </client-only>
   </main>
@@ -110,6 +111,20 @@ export default {
       return `div#swiper {
   background: ${this.config.style.canvas.backgroundColor};
 }
+.animate {
+  background: ${this.config.style.canvas.backgroundColor};
+  animation: fadeOut 3s forwards;
+}
+@keyframes fadeOut {
+    0% {
+      backdrop-filter: blur(1rem);
+      background: ${this.config.style.canvas.backgroundColor};
+    }
+    100% {
+      backdrop-filter: blur(0);
+      background: transparent;
+    }
+}
 canvas {
   object-position: ${this.config.style.canvas.objectPositionX} ${this.config.style.canvas.objectPositionY};
   transform: scale(${this.config.style.canvas.scaleTransform});
@@ -118,8 +133,8 @@ canvas {
     }
   },
   destroyed() {
-    window.removeEventListener('contextmenu', this.contextmenuEventListener)
-    window.removeEventListener('keyup', this.keyupEventListener)
+    if (this.contextmenuEventListener) window.removeEventListener('contextmenu', this.contextmenuEventListener)
+    if (this.keyupEventListener) window.removeEventListener('keyup', this.keyupEventListener)
   },
   mounted() {
     this.config.wordAsArray = this.config.wordAsArray || this.config.word.split('')
@@ -140,9 +155,11 @@ canvas {
     this.init()
 
     const that = this
+    if (this.contextmenuEventListener) window.removeEventListener('contextmenu', this.contextmenuEventListener)
     this.contextmenuEventListener = window.addEventListener('contextmenu', function (e) {
       e.preventDefault()
     })
+    if (this.keyupEventListener) window.removeEventListener('keyup', this.keyupEventListener)
     this.keyupEventListener = window.addEventListener('keyup', function (event) {
       if (event.code === 'Enter') {
         that.startOrStopOrToggleSlideshow(true)
@@ -232,8 +249,8 @@ canvas {
       const that = this
       waitForFontLoad(this.fontFamily(40)).then(
         document.getElementById('portrait-image').addEventListener('load', function (e) {
+          document.getElementById('swiper').classList.add('animate')
           that.createOrRedrawCanvas(this)
-          document.getElementById('swiper').style.background = 'transparent'
         })
       )
     },
@@ -263,6 +280,17 @@ canvas {
       } else {
         this.cheat = 'cheat'
       }
+    },
+    animateShuffleAndRedraw() {
+      const $swiper = document.getElementById('swiper')
+      // https://betterprogramming.pub/how-to-restart-a-css-animation-with-javascript-and-what-is-the-dom-reflow-a86e8b6df00f
+      // eslint-disable-next-line no-console
+      console.log($swiper)
+      $swiper.classList.remove('animate')
+      // eslint-disable-next-line no-unused-expressions
+      $swiper.offsetWidth // trigger a DOM reflow
+      $swiper.classList.add('animate')
+      this.shuffleAndRedraw()
     },
     shuffleAndRedraw() {
       this.shuffle = this.doShuffle(this.config.factorial)
@@ -648,7 +676,6 @@ body {
   position: relative;
 }
 div#swiper {
-  background: transparent;
   z-index: 123;
 }
 div#swiper,
