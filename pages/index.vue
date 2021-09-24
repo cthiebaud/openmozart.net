@@ -166,9 +166,11 @@ canvas {
         event.preventDefault()
         return
       } else if (event.code === 'Space') {
-        if (this.slideshowID) {
-          that.startOrStopOrToggleSlideshow(false)
-        } else {
+        const wasSlideshowing = typeof this.slideshowID !== "undefined"
+        // try to stop this bloody slideshow in any case
+        that.startOrStopOrToggleSlideshow(false)
+        // if the slide show was not running, re-shuffle
+        if (!wasSlideshowing) {
           that.animateShuffleAndRedraw()
         }
         event.preventDefault()
@@ -316,9 +318,9 @@ canvas {
           2000
         )
       } else if (!start && this.slideshowID) {
-        this.$toast.show('Slideshow stopped', this.toastOptions)
         clearInterval(this.slideshowID)
         this.slideshowID = undefined
+        this.$toast.show('Slideshow stopped', this.toastOptions)
       }
     },
     createOrRedrawCanvas(img) {
