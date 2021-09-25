@@ -54,7 +54,7 @@ export default {
         y: 0,
         cx: 1,
         cy: 0,
-        textSizeAdjustment: -2.4
+        textSizeScalingFactor: .5
       },
 
       style: {
@@ -532,8 +532,8 @@ canvas {
 
       // prettier-ignore
       const textSize = Math.min(
-        (cxCol + this.config.tweaks.textSizeAdjustment/ textWidth) * COSMOLOGICAL_CONSTANT - 1,
-        (cyRow + this.config.tweaks.textSizeAdjustment/ textHeight) * COSMOLOGICAL_CONSTANT - 1)
+        this.config.tweaks.textSizeScalingFactor * (cxCol / textWidth) * COSMOLOGICAL_CONSTANT - 1,
+        this.config.tweaks.textSizeScalingFactor * (cyRow / textHeight) * COSMOLOGICAL_CONSTANT - 1)
       ctx.font = this.fontFamily(textSize)
       return textSize
     },
