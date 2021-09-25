@@ -1,4 +1,4 @@
-# openmozart.cthiebaud.com
+[https://openmozart.cthiebaud.com/](https://openmozart.cthiebaud.com/)
 
 In memoriam openmozart.net 2001* - 2005†. 
 
@@ -49,8 +49,10 @@ The probability that a sorting of these (``719 + 1``) anagrams forms an image im
 
 I have no idea what the probability is that a genius like Mozart could have existed, but I like to think it is of a similar order of magnitude.
 
+[https://openmozart.cthiebaud.com/](https://openmozart.cthiebaud.com/)
+
 ---
 
-*The image below contains five times MOZART (three times horizontally and two times vertically), of which 4 are clearly readable (the fifth, vertical, is in the dark). The jpeg to cheat is in the directory.*
+*The image below contains five times MOZART (three times horizontally and two times vertically), of which four are clearly readable (the fifth, vertical, is in the dark). The jpeg to cheat is in the directory.*
 
 ![5 matches](matches-5.jpg)
