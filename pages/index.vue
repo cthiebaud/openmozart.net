@@ -208,7 +208,6 @@ canvas {
       }
     })
   },
-
   methods: {
     fontFamily(size) {
       return `${size}px ${this.config.fontFamily}, ${this.config.fontFamilyFallback}`
@@ -312,7 +311,7 @@ canvas {
       this.shuffleAndRedraw(target)
     },
     shuffleAndRedraw(target) {
-      target = target || 1
+      target = target || 0
       let matches = 0
       let shuffle
       do {
@@ -358,16 +357,14 @@ canvas {
     createOrRedrawCanvas(img) {
       // const grain = 18
       const options = {
+        cornerFillStyle: this.cornerFillStyle,
+        cornerStrokeStyle: this.cornerStrokeStyle,
         filter: this.config.imageFilter,
-        fontFamily: this.config.fontFamily,
         resolution: this.calcResolution, // { cxCol: grain, cyRow: grain }, // undefined, //
         shape: this.drawLetter, // 'circle', // 'diamond', // undefined, //
-        word: this.config.word,
-        wordAsArray: this.config.wordAsArray,
-        cornerStrokeStyle: this.cornerStrokeStyle,
-        cornerFillStyle: this.cornerFillStyle
+        wordAsArray: this.config.wordAsArray
       }
-      this.textSizeDefault = undefined // triggers text size recalculation
+
       if (img) {
         this.canvas = img.closePixelate(options)
       } else {
@@ -389,11 +386,6 @@ canvas {
         // eslint-disable-next-line no-console
         console.log(`n (${nth}) cannot be larger than factorial (${factorial}) !!!`)
         return []
-        /*
-        throw new Error(
-          `n (${nth}) cannot be larger than factorial (${factorial}) !!!`
-        )}
-        */
       }
       // https://stackoverflow.com/a/44079852/1070215
       /*
@@ -427,7 +419,7 @@ canvas {
       }
       return T
     },
-    horizontal(wordAsArray, factorial, shuffle) {
+    horizontal(shuffle) {
       // horz
       let permutation = []
       const candidate = { boundary: undefined, accumulator: [] }
@@ -437,34 +429,34 @@ canvas {
           const j = i / this.config.wordAsArray.length
           const k = i % this.config.wordAsArray.length
           if (permutation.length === 0) {
-            permutation = this.pickShuffledPermutation(wordAsArray, factorial, shuffle, j)
+            permutation = this.pickShuffledPermutation(this.config.wordAsArray, this.config.factorial, shuffle, j)
           }
           const letter = permutation.shift()
           if (k === 0) {
             candidate.boundary = i - candidate.accumulator.length
           }
-          const matchBoundary = this.testIfMatch(wordAsArray, candidate, letter)
+          const matchBoundary = this.testIfMatch(this.config.wordAsArray, candidate, letter)
           if (matchBoundary) {
             this.matches.horz.push(matchBoundary)
           }
         }
       }
     },
-    vertical(wordAsArray, factorial, shuffle) {
+    vertical(shuffle) {
       const candidate = { boundary: undefined, accumulator: [] }
       for (let col = 0; col < this.box.cols; col++) {
         for (let row = 0; row < this.box.rows; row++) {
           const i = col + row * this.box.cols
           const j = i / this.config.wordAsArray.length
           const k = i % this.config.wordAsArray.length
-          const permutation = this.pickShuffledPermutation(wordAsArray, factorial, shuffle, j)
+          const permutation = this.pickShuffledPermutation(this.config.wordAsArray, this.config.factorial, shuffle, j)
           const letter = permutation[k]
           if (!candidate.boundary) {
             candidate.boundary = [i]
           } else {
             candidate.boundary.push(i)
           }
-          const matchBoundary = this.testIfMatch(wordAsArray, candidate, letter)
+          const matchBoundary = this.testIfMatch(this.config.wordAsArray, candidate, letter)
           if (matchBoundary) {
             this.matches.vert.push(matchBoundary)
           }
@@ -477,10 +469,10 @@ canvas {
       this.matches.vert.splice(0, this.matches.vert.length)
 
       // vert
-      this.vertical(this.config.wordAsArray, this.config.factorial, shuffle)
+      this.vertical(shuffle)
 
       // vert
-      this.horizontal(this.config.wordAsArray, this.config.factorial, shuffle)
+      this.horizontal(shuffle)
 
       return this.matches.vert.length + this.matches.horz.length
     },
@@ -515,21 +507,19 @@ canvas {
       return ret
     },
     // https://stackoverflow.com/a/56922947/1070215
-    getTextRatio(ctx, wW, wH) {
+    getTextRatio(ctx) {
       ctx.save()
-      ctx.font = this.fontFamily(40)
+      ctx.font = this.fontFamily(20) // size should not matter, but 1px does not work on mobile
       const metrics = ctx.measureText(this.config.word)
-      const tW = metrics.width
+      const textWidth = metrics.width
       // https://stackoverflow.com/a/46950087/1070215
       // const fontHeight = metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent
-      const tH = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent
-      const tRatio = tW / tH
-
+      const textHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent
+      const tRatio = textWidth / textHeight
       ctx.restore()
-      // prettier-ignore
       return tRatio
     },
-    getFontSizeToFit (ctx, cxCol, cyRow) {
+    getFontSizeToFit(ctx, cxCol, cyRow) {
       ctx.save()
       const COSMOLOGICAL_CONSTANT = 20
       ctx.font = this.fontFamily(COSMOLOGICAL_CONSTANT)
@@ -538,21 +528,12 @@ canvas {
       })
       */
       const metrics = ctx.measureText(this.config.word)
-      const tW = metrics.width / this.config.word.length
+      const textWidth = metrics.width / this.config.word.length
       // https://stackoverflow.com/a/46950087/1070215
-      const tH = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent
+      const textHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent
       ctx.restore()
 
-      // eslint-disable-next-line no-console
-      console.log('col W', cxCol,'text W', tW, '=>', cxCol / tW)
-      // eslint-disable-next-line no-console
-      console.log('row H', cyRow,'text H', tH, '=>', cyRow / tH)
-      const textSize = Math.min(
-        (cxCol / tW * COSMOLOGICAL_CONSTANT) - 1,
-        (cyRow  / tH * COSMOLOGICAL_CONSTANT) - 1
-      )
-      // eslint-disable-next-line no-console
-      console.log(textSize)
+      const textSize = Math.min((cxCol / textWidth) * COSMOLOGICAL_CONSTANT - 1, (cyRow / textHeight) * COSMOLOGICAL_CONSTANT - 1)
       ctx.font = this.fontFamily(textSize)
       // prettier-ignore
       return textSize
@@ -649,7 +630,7 @@ canvas {
       return anagram
     },
     calcResolution(ctx, wW, wH) {
-      const factorial = this.config.factorial 
+      const factorial = this.config.factorial
       const divisorsList = this.getDivisorsList(factorial)
       const ratios = divisorsList.map((x) => {
         return {
@@ -659,7 +640,7 @@ canvas {
         }
       })
 
-      const wordRatio = this.getTextRatio(ctx, wW, wH)
+      const wordRatio = this.getTextRatio(ctx)
       const targetRatio = wW / wH / wordRatio
 
       const nearest = this.binarySearch(
@@ -676,8 +657,6 @@ canvas {
 
       this.textSizeDefault = this.getFontSizeToFit(ctx, cxCol, cyRow)
 
-      // eslint-disable-next-line no-console
-      console.log(this.box)
       return this.box
     },
     // https://www.freecodecamp.org/news/how-to-factorialize-a-number-in-javascript-9263c89a4b38/
