@@ -1,7 +1,7 @@
 {
   "name": "openmozart",
   "short_name": "openmozart",
-  "description": "In memoriam openmozart.net 2001* - 2005†.",
+  "description": "719 permutations of the name \"MOZART\" colored in such a way as to form the famous portrait by [Joseph Lange](https://en.wikipedia.org/wiki/Joseph_Lange).",
   "icons": [
     {
       "src": "/_nuxt/icons/icon_64x64.20530c.png",
