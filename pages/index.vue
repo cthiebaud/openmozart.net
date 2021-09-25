@@ -512,7 +512,7 @@ canvas {
     // https://stackoverflow.com/a/56922947/1070215
     getTextRatio(ctx, wW, wH) {
       ctx.save()
-      ctx.font = this.fontFamily(1)
+      ctx.font = this.fontFamily(40)
       const metrics = ctx.measureText(this.config.word)
       const tW = metrics.width
       // https://stackoverflow.com/a/46950087/1070215
@@ -526,8 +526,9 @@ canvas {
     },
     getFontSizeToFit(ctx, cxCol, cyRow) {
       ctx.save()
-      ctx.font = this.fontFamily(1)
-      /* TODO
+      const COSMOLOGICAL_CONSTANT = 20
+      ctx.font = this.fontFamily(COSMOLOGICAL_CONSTANT)
+      /*
       text.forEach((letter) => {
       })
       */
@@ -539,8 +540,8 @@ canvas {
 
       // prettier-ignore
       const textSize = Math.min(
-        (cxCol + this.config.tweaks.textSizeAdjustment/ tW) - 1,
-        (cyRow + this.config.tweaks.textSizeAdjustment / tH) - 1
+        (cxCol + this.config.tweaks.textSizeAdjustment/ tW * COSMOLOGICAL_CONSTANT) - 1,
+        (cyRow + this.config.tweaks.textSizeAdjustment / tH * COSMOLOGICAL_CONSTANT) - 1
       )
       ctx.font = this.fontFamily(textSize)
       return textSize
