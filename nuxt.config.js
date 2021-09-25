@@ -135,7 +135,7 @@ export default {
     base64: true,
     inject: true,
     families: {
-      // 'IM+Fell+English+SC': true,
+      'IM+Fell+English+SC': true,
       // 'Roboto+Slab': true,
       // 'Inconsolata': true,
       // 'Birthstone+Bounce': true,

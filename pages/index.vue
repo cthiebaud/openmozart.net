@@ -1,7 +1,7 @@
 <template>
   <main class="vh-100" :style="`background-color: ${config.backgroundColor}`">
     <component :is="'style'">
-      {{ styleCanvas }}
+      {{ style }}
     </component>
     <h1 class="text-center" :style="`font-family: ${fontFamily(config.textSizeDefault)}; z-index: -1; color: ghostwhite; visibility: hidden;`">
       made by christophe thiebaud
@@ -27,16 +27,9 @@
 import * as Vibrant from 'node-vibrant'
 import Vue from 'vue'
 import Vue2TouchEvents from 'vue2-touch-events'
+
 // https://www.npmjs.com/package/vue2-touch-events
-Vue.use(Vue2TouchEvents, {
-  disableClick: false,
-  touchClass: '',
-  tapTolerance: 10,
-  touchHoldTolerance: 400,
-  swipeTolerance: 30,
-  longTapTimeInterval: 400,
-  namespace: 'touch'
-})
+Vue.use(Vue2TouchEvents)
 
 export default {
   data() {
@@ -61,7 +54,7 @@ export default {
         y: 0,
         cx: 1,
         cy: 0,
-        textSize: -6
+        textSizeAdjustment: -2.4
       },
 
       style: {
@@ -74,31 +67,31 @@ export default {
       }
     }
 
-    const toastOptions = { duration: 1000, position: 'top-center', theme: 'outline' }
+    const toastOptions = { duration: 1200, position: 'top-center', theme: 'outline' }
 
     const box = { cols: undefined, rows: undefined }
     const canvas = undefined
+    const cheat = ''
     const hiddenPermutations = new Set()
     const matches = { horz: [], vert: [] }
     const palette = undefined
     const shuffle = undefined
+    const slideshowAverageTimeBetweenSlides = { slides: 1, total: 1500 }
     const slideshowID = undefined
-    const averageTimeBetweenSlides = { slides: 1, total: 1500 }
-    const cheat = ''
     return {
       config,
 
+      toastOptions,
+
       box,
       canvas,
+      cheat,
       hiddenPermutations,
       matches,
       palette,
       shuffle,
-      slideshowID,
-      averageTimeBetweenSlides,
-      toastOptions,
-
-      cheat
+      slideshowAverageTimeBetweenSlides,
+      slideshowID
     }
   },
   computed: {
@@ -112,17 +105,17 @@ export default {
     },
     timeBetweenSlides: {
       get() {
-        return Math.round(this.averageTimeBetweenSlides.total / this.averageTimeBetweenSlides.slides)
+        return Math.round(this.slideshowAverageTimeBetweenSlides.total / this.slideshowAverageTimeBetweenSlides.slides)
       },
       set(newTime) {
-        this.averageTimeBetweenSlides.slides++
-        this.averageTimeBetweenSlides.total += newTime
+        this.slideshowAverageTimeBetweenSlides.slides++
+        this.slideshowAverageTimeBetweenSlides.total += newTime
       }
     },
     cheating() {
       return this.cheat === 'cheat'
     },
-    styleCanvas() {
+    style() {
       // pretty-ignore
       return `div#swiper {
   background: ${this.config.style.canvas.backgroundColor};
@@ -307,7 +300,6 @@ canvas {
       }
     },
     animateShuffleAndRedraw(target) {
-      target = target || 1
       const $swiper = document.getElementById('swiper')
       // https://betterprogramming.pub/how-to-restart-a-css-animation-with-javascript-and-what-is-the-dom-reflow-a86e8b6df00f
       $swiper.classList.remove('animate')
@@ -320,11 +312,9 @@ canvas {
       target = target || 1
       let matches = 0
       let shuffle
-      let iterations = 0
       do {
         shuffle = this.doShuffle(this.config.factorial)
         matches = this.storeMatches(shuffle)
-        iterations++
         // eslint-disable-next-line no-unmodified-loop-condition
       } while (typeof target !== 'undefined' && matches < target)
       this.shuffle = shuffle
@@ -439,11 +429,13 @@ canvas {
       for (let row = 0; row < this.box.rows; row++) {
         for (let col = 0; col < this.box.cols; col++) {
           const i = col + row * this.box.cols
+          const j = i / this.config.wordAsArray.length
+          const k = i % this.config.wordAsArray.length
           if (permutation.length === 0) {
-            permutation = this.pickShuffledPermutation(wordAsArray, factorial, shuffle, i / this.config.wordAsArray.length)
+            permutation = this.pickShuffledPermutation(wordAsArray, factorial, shuffle, j)
           }
           const letter = permutation.shift()
-          if (i % this.config.wordAsArray.length === 0) {
+          if (k === 0) {
             candidate.boundary = i - candidate.accumulator.length
           }
           const matchBoundary = this.testIfMatch(wordAsArray, candidate, letter)
@@ -467,7 +459,7 @@ canvas {
           } else {
             candidate.boundary.push(i)
           }
-          const matchBoundary = this.testIfMatch(this.config.wordAsArray, candidate, letter)
+          const matchBoundary = this.testIfMatch(wordAsArray, candidate, letter)
           if (matchBoundary) {
             this.matches.vert.push(matchBoundary)
           }
@@ -518,38 +510,40 @@ canvas {
       return ret
     },
     // https://stackoverflow.com/a/56922947/1070215
-    getFontSizeToFit: (ctx, text, fontFamily, cx, cy, textSizeFix) => {
+    getTextRatio(ctx, wW, wH) {
       ctx.save()
-      ctx.font = fontFamily
-      let w = 0
-      let actualHeight = 0
-      let fontHeight = 0
-      text.forEach((letter) => {
-        const metrics = ctx.measureText(text)
-        w = Math.max((w = metrics.width))
-        // https://stackoverflow.com/a/46950087/1070215
-        fontHeight = metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent
-        actualHeight = Math.max(actualHeight, metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent)
-        // eslint-disable-next-line no-constant-condition
-        if (false) {
-          // prettier-ignore
-          // eslint-disable-next-line no-console
-          console.log(
-          'fontHeight'                , fontHeight,
-          '= ( fontBoundingBoxAscent' , metrics.fontBoundingBoxAscent,
-          '+ fontBoundingBoxDescent )', metrics.fontBoundingBoxDescent,
-          'actualHeight'              , actualHeight,
-          '= ( fontBoundingBoxAscent' , metrics.actualBoundingBoxAscent,
-          '+ fontBoundingBoxAscent )' , metrics.actualBoundingBoxDescent
-        )
-        }
-      })
+      ctx.font = this.fontFamily(1)
+      const metrics = ctx.measureText(this.config.word)
+      const tW = metrics.width
+      // https://stackoverflow.com/a/46950087/1070215
+      // const fontHeight = metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent
+      const tH = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent
+      const tRatio = tW / tH
+
       ctx.restore()
       // prettier-ignore
-      return Math.min(
-        cx + textSizeFix / w,
-        cy + textSizeFix / actualHeight
+      return tRatio
+    },
+    getFontSizeToFit(ctx, cxCol, cyRow) {
+      ctx.save()
+      ctx.font = this.fontFamily(1)
+      /* TODO
+      text.forEach((letter) => {
+      })
+      */
+      const metrics = ctx.measureText(this.config.word)
+      const tW = metrics.width / this.config.word.length
+      // https://stackoverflow.com/a/46950087/1070215
+      const tH = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent
+      ctx.restore()
+
+      // prettier-ignore
+      const textSize = Math.min(
+        (cxCol + this.config.tweaks.textSizeAdjustment/ tW) - 1,
+        (cyRow + this.config.tweaks.textSizeAdjustment / tH) - 1
       )
+      ctx.font = this.fontFamily(textSize)
+      return textSize
     },
     tweakAndFillRect(ctx, x, y, cx, cy) {
       // prettier-ignore
@@ -589,10 +583,6 @@ canvas {
         ctx.shadowOffsetX = this.config.shadowOffsetX
         // ctx.shadowOffsetY = 0
         // ctx.shadowBlur = .5
-
-        const onePxFontFamily = this.fontFamily(1)
-        this.textSizeDefault = this.getFontSizeToFit(ctx, this.config.wordAsArray, onePxFontFamily, cx, cy, this.config.tweaks.textSize)
-        ctx.font = this.fontFamily(this.textSizeDefault)
       }
 
       // get nearest color from palette
@@ -644,8 +634,8 @@ canvas {
 
       return anagram
     },
-    calcResolution(word, eW, eH, wW, wH) {
-      const factorial = this.factorialize(word.length)
+    calcResolution(ctx, wW, wH) {
+      const factorial = this.config.factorial
       const divisorsList = this.getDivisorsList(factorial)
       const ratios = divisorsList.map((x) => {
         return {
@@ -655,7 +645,7 @@ canvas {
         }
       })
 
-      const wordRatio = eW / eH
+      const wordRatio = this.getTextRatio(ctx, wW, wH)
       const targetRatio = wW / wH / wordRatio
 
       const nearest = this.binarySearch(
@@ -664,11 +654,14 @@ canvas {
       )
       // TODO : may be the next ratio is nearer from the target ratio ?
 
-      const cols = ratios[nearest].x * word.length
+      const cols = ratios[nearest].x * this.config.word.length
       const rows = ratios[nearest].y
       const cxCol = wW / cols
       const cyRow = wH / rows
       this.box = { cols, rows, cxCol, cyRow, factorial }
+
+      this.textSizeDefault = this.getFontSizeToFit(ctx, cxCol, cyRow)
+
       return this.box
     },
     // https://www.freecodecamp.org/news/how-to-factorialize-a-number-in-javascript-9263c89a4b38/
