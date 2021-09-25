@@ -166,7 +166,7 @@
           context.restore()
         }
 
-        if (isFunction(opts.shape) && opts.word) {
+        if (isFunction(opts.shape) && opts.wordAsArray) {
           shapeResult = opts.shape(ctx, opts.wordAsArray, i, x_, y_, size.cx, size.cy, shapeResult)
         } else {
           switch (opts.shape) {
