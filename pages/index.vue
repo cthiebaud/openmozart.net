@@ -13,10 +13,6 @@
         class="vh-100"
         :style="`background-color: ${config.backgroundColor}`"
       ></div>
-      <!-- 
-        v-touch:swipe.left="_toggleSlideshow_"
-        v-touch:swipe.right="_toggleSlideshow_"
-      -->
     </client-only>
   </main>
 </template>
@@ -62,8 +58,7 @@ export default {
   },
   computed: {
     config() {
-      const config = require(`~/configuration.json?raw`)
-      return config
+      return require(`~/configuration.json`)
     },
     slideshow: {
       get() {
@@ -103,14 +98,14 @@ export default {
             }
           }
         }
-        if (newC && !oldC) {
-          this.cheat = 'cheat'
-          this.$toast.show('Now cheating', this.toastOptions)
-          this.createOrRedrawCanvas()
-        }
-        if (!newC && oldC) {
-          this.cheat = ''
-          this.$toast.show('Cheating stopped', this.toastOptions)
+        if (oldC !== newC) {
+          if (newC) {
+            this.cheat = 'cheat'
+            this.$toast.show('Now cheating', this.toastOptions)
+          } else {
+            this.cheat = ''
+            this.$toast.show('Cheating stopped', this.toastOptions)
+          }
           this.createOrRedrawCanvas()
         }
       }
@@ -174,7 +169,6 @@ canvas {
       if (event.code === 'Enter') {
         this.startOrStopOrToggleSlideshow(true)
         event.preventDefault()
-        return
       } else if (event.code === 'Space') {
         const wasSlideshowing = typeof this.slideshow !== 'undefined'
         // try to stop this bloody slideshow in any case
@@ -184,13 +178,10 @@ canvas {
           this.animateShuffleAndRedraw()
         }
         event.preventDefault()
-        return
       } else if (event.code === 'Escape') {
         this.cheating = false
         event.preventDefault()
-        return
-      }
-      if ('cheat'.includes(event.key)) {
+      } else if ('cheat'.includes(event.key)) {
         this.cheating = event.key
         event.preventDefault()
       }
@@ -244,12 +235,12 @@ canvas {
             resolve(this)
           },
           { once: true } // remove event after run once
-        ) 
+        )
       })
 
       // do the whole gamut when font and image are loaded
       const that = this
-      Promise.all([fontLoaded, imageLoaded]).then(data =>  {
+      Promise.all([fontLoaded, imageLoaded]).then((data) => {
         document.getElementById('swiper').classList.add('animate')
         that.createOrRedrawCanvas(data[1])
       })
@@ -259,10 +250,6 @@ canvas {
       return `${size}px ${this.config.fontFamily}, ${this.config.fontFamilyFallback}`
     },
     animateShuffleAndRedrawIfNoSlideshow() {
-      if (this.ignoreTap) {
-        this.ignoreTap = false
-        return
-      }
       if (typeof this.slideshow === 'undefined') {
         this.animateShuffleAndRedraw()
       }
@@ -292,13 +279,19 @@ canvas {
       return shuffleArray([...Array(factorial).keys()])
     },
     animateShuffleAndRedraw(target) {
+      if (this.ignoreTap) {
+        this.ignoreTap = false
+        return
+      }
       const $swiper = document.getElementById('swiper')
       // https://betterprogramming.pub/how-to-restart-a-css-animation-with-javascript-and-what-is-the-dom-reflow-a86e8b6df00f
       $swiper.classList.remove('animate')
       // eslint-disable-next-line no-unused-expressions
       $swiper.offsetWidth // trigger a DOM reflow
       $swiper.classList.add('animate')
-      this.shuffleAndRedraw(target)
+      this.$nextTick(() => {
+          this.shuffleAndRedraw(target)
+		  });
     },
     shuffleAndRedraw(target) {
       target = target || 1
