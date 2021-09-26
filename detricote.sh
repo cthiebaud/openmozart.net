@@ -2,18 +2,21 @@
 set -e
 shopt -s nullglob
 ignore() {
-  	git reset HEAD $1
-	git checkout -- $1
+   git reset HEAD $1
+   git checkout -- $1
 }
 for fname in static/favicon/*; do
    ignore ${fname}
 done
 
 List=(
-	README.md
+   README.md
    package.json
-   static/git.txt 
+   configuration.json
    static/CNAME 
+   static/favicon_package_v0.16.zip
+   static/pure_html/index.html
+   matches-5-cheat.jpg
 )
 for fname2 in ${List[*]}; do
    ignore ${fname2}

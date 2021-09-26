@@ -13,8 +13,9 @@ export default {
 
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    title: 'openricard',
-    meta: [{
+    title: 'openmozart.net',
+    meta: [
+      {
         charset: 'utf-8'
       },
       {
@@ -33,15 +34,15 @@ export default {
       // https://realfavicongenerator.net/
       {
         name: 'apple-mobile-web-app-title',
-        content: 'openricard'
+        content: 'openmozart'
       },
       {
         name: 'application-name',
-        content: 'openricard'
+        content: 'openmozart'
       },
       {
         name: 'msapplication-TileColor',
-        content: '#FBCB16'
+        content: '#160804'
       },
       {
         name: 'msapplication-config',
@@ -49,7 +50,7 @@ export default {
       },
       {
         name: 'theme-color',
-        content: '#FBCB16'
+        content: '#160804'
       }
     ],
     link: [
@@ -78,7 +79,7 @@ export default {
       {
         rel: 'mask-icon',
         href: '/favicon/safari-pinned-tab.svg?v=3',
-        color: '#FBCB16'
+        color: '#160804'
       },
       {
         rel: 'shortcut icon',
