@@ -3,17 +3,15 @@
     <component :is="'style'">
       {{ style }}
     </component>
-    <h1 class="text-center" :style="`font-family: ${fontFamily(config.textSizeDefault)}; z-index: -1; color: ghostwhite; visibility: hidden;`">
-      made by christophe thiebaud
-    </h1>
-    <img id="portrait-image" :src="config.imageURL" />
+    <div :style="`font-family: ${fontFamily()}; visibility: hidden;`">force browser to load font</div>
+    <img id="portrait-image" :src="config.imageSrc" />
     <client-only>
       <div
         id="swiper"
-        v-touch:swipe.left="onSwipe"
-        v-touch:swipe.right="onSwipe"
-        v-touch:tap="onTap"
-        v-touch:touchhold="onPress"
+        v-touch:swipe.left="animateShuffleAndRedrawIfNoSlideshow"
+        v-touch:swipe.right="animateShuffleAndRedrawIfNoSlideshow"
+        v-touch:tap="toggleCheating"
+        v-touch:touchhold="toggleSlideshow"
         class="vh-100"
         :style="`background-color: ${config.backgroundColor}`"
       ></div>
@@ -29,17 +27,22 @@ import Vue from 'vue'
 import Vue2TouchEvents from 'vue2-touch-events'
 
 // https://www.npmjs.com/package/vue2-touch-events
-Vue.use(Vue2TouchEvents)
+Vue.use(Vue2TouchEvents, {
+  disableClick: false
+})
 
 export default {
   data() {
     const config = {
       backgroundColor: 'white',
       fontFamily: 'Arvo',
+      fontFamilyFallback: 'serif', // 'monospace',
       imageFilter: 'brightness(95%)',
-      imageURL: '/jpegs/ricard.jpg',
-      matchBoundaryFillStyle: undefined,
-      matchFillStyle: 'rgba(255, 255, 0, .7)',
+      imageSrc: '/jpegs/ricard.jpg',
+      matchBoundaryFill: undefined,
+      matchFill: '#ffff00a0',
+      mode: 1,
+      modes: ['coloredLettersTransparentBackground', 'adaptiveLettersColoredBackground'],
       shadowColor: '#462310',
       shadowOffsetX: 0.5,
       textSizeDefault: 20,
@@ -54,15 +57,14 @@ export default {
         y: 0,
         cx: 1,
         cy: 0,
-        textSizeScalingFactor: .5
+        textSizeAdjustment: 0.5
       },
 
       style: {
         canvas: {
           objectPositionX: '50%',
           objectPositionY: '50%',
-          scaleTransform: '97%',
-          backgroundColor: 'transparent'
+          scaleTransform: '97%'
         }
       }
     }
@@ -73,6 +75,7 @@ export default {
     const canvas = undefined
     const cheat = ''
     const hiddenPermutations = new Set()
+    const ignoreTap = false
     const matches = { horz: [], vert: [] }
     const palette = undefined
     const shuffle = undefined
@@ -87,6 +90,7 @@ export default {
       canvas,
       cheat,
       hiddenPermutations,
+      ignoreTap,
       matches,
       palette,
       shuffle,
@@ -112,22 +116,52 @@ export default {
         this.slideshowAverageTimeBetweenSlides.total += newTime
       }
     },
-    cheating() {
-      return this.cheat === 'cheat'
+    cheating: {
+      get() {
+        return this.cheat === 'cheat'
+      },
+      set(cheatLetter) {
+        const oldC = this.cheat === 'cheat'
+        let newC = oldC
+        if (typeof cheatLetter === 'boolean') {
+          newC = cheatLetter
+        } else if (typeof cheatLetter === 'string' && cheatLetter.length) {
+          if (!oldC) {
+            const newCheatString = this.cheat + cheatLetter
+            if (newCheatString === 'cheat') {
+              newC = true
+            } else if ('cheat'.startsWith(newCheatString)) {
+              this.cheat = newCheatString
+            } else {
+              newC = false
+            }
+          }
+        }
+        if (newC && !oldC) {
+          this.cheat = 'cheat'
+          this.$toast.show('Now cheating', this.toastOptions)
+          this.createOrRedrawCanvas()
+        }
+        if (!newC && oldC) {
+          this.cheat = ''
+          this.$toast.show('Cheating stopped', this.toastOptions)
+          this.createOrRedrawCanvas()
+        }
+      }
     },
     style() {
       // pretty-ignore
       return `div#swiper {
-  background: ${this.config.style.canvas.backgroundColor};
+  background: ${this.config.backgroundColor};
 }
 .animate {
-  background: ${this.config.style.canvas.backgroundColor};
-  animation: fadeOut 3s forwards;
+  background: ${this.config.backgroundColor};
+  animation: fadeOut 1s forwards;
 }
 @keyframes fadeOut {
     0% {
       backdrop-filter: blur(1rem);
-      background: ${this.config.style.canvas.backgroundColor};
+      background: ${this.config.backgroundColor};
     }
     100% {
       backdrop-filter: blur(0);
@@ -137,7 +171,7 @@ export default {
 canvas {
   object-position: ${this.config.style.canvas.objectPositionX} ${this.config.style.canvas.objectPositionY};
   transform: scale(${this.config.style.canvas.scaleTransform});
-  background-color: ${this.config.style.canvas.backgroundColor};
+  background-color: ${this.config.backgroundColor};
 }`
     }
   },
@@ -154,12 +188,14 @@ canvas {
     this.config.ersatzAsArray = this.config.ersatzAsArray || Array(this.config.word.length).fill('\u2205')
     this.config.factorial = this.factorialize(this.config.wordAsArray.length)
 
-    Vibrant.from(document.getElementById('portrait-image'))
-      .maxColorCount(200)
-      .getPalette()
-      .then((palette) => {
-        this.palette = palette
-      })
+    if (this.config.mode === 1) {
+      Vibrant.from(document.getElementById('portrait-image'))
+        .maxColorCount(200)
+        .getPalette()
+        .then((palette) => {
+          this.palette = palette
+        })
+    }
 
     this.init()
 
@@ -184,49 +220,17 @@ canvas {
         event.preventDefault()
         return
       } else if (event.code === 'Escape') {
-        this.cheat = ''
-        this.createOrRedrawCanvas()
+        this.cheating = false
         event.preventDefault()
         return
       }
       if ('cheat'.includes(event.key)) {
-        if (this.cheat === 'cheat') {
-          return
-        }
-        this.cheat += event.key
-        if (!'cheat'.startsWith(this.cheat)) {
-          this.cheat = ''
-          event.preventDefault()
-        } else if (this.cheat === 'cheat') {
-          this.$toast.show('Now cheating', this.toastOptions)
-          this.createOrRedrawCanvas()
-          event.preventDefault()
-        }
+        this.cheating = event.key
+        event.preventDefault()
       }
     })
   },
   methods: {
-    fontFamily(size) {
-      return `${size}px ${this.config.fontFamily}, ${this.config.fontFamilyFallback}`
-    },
-    onPress() {
-      if (this.cheating) {
-        this.cheat = ''
-        this.$toast.show('Cheating stopped', this.toastOptions)
-      } else {
-        this.cheat = 'cheat'
-        this.$toast.show('Now cheating', this.toastOptions)
-      }
-      this.createOrRedrawCanvas()
-    },
-    onSwipe() {
-      this.startOrStopOrToggleSlideshow()
-    },
-    onTap() {
-      if (typeof this.slideshow === 'undefined') {
-        this.animateShuffleAndRedraw()
-      }
-    },
     init() {
       // calc shuffled array
       this.shuffle = this.doShuffle(this.config.factorial)
@@ -264,12 +268,38 @@ canvas {
 
       // do the whole gamut when image is loaded
       const that = this
-      waitForFontLoad(this.fontFamily(40)).then(
+      console.log('init, waiting for load font')
+      waitForFontLoad(this.fontFamily()).then(() => {
+        console.log('font loaded, waiting for image load')
         document.getElementById('portrait-image').addEventListener('load', function (e) {
           document.getElementById('swiper').classList.add('animate')
+          console.log('image loaded, creating canvas')
           that.createOrRedrawCanvas(this)
         })
-      )
+      })
+    },
+    fontFamily(size) {
+      if (!size) size = 20
+      return `${size}px ${this.config.fontFamily}, ${this.config.fontFamilyFallback}`
+    },
+    animateShuffleAndRedrawIfNoSlideshow() {
+      if (typeof this.slideshow === 'undefined') {
+        this.animateShuffleAndRedraw()
+      }
+    },
+    toggleCheating() {
+      if (this.ignoreTap) {
+        this.ignoreTap = false
+        return
+      }
+      this.toggleCheat()
+    },
+    toggleCheat() {
+      this.cheating = !this.cheating
+    },
+    toggleSlideshow() {
+      this.ignoreTap = true
+      this.startOrStopOrToggleSlideshow()
     },
     doShuffle: (factorial) => {
       // http://stackoverflow.com/questions/20789373/shuffle-array-in-ng-repeat-angular
@@ -291,13 +321,6 @@ canvas {
       }
       return shuffleArray([...Array(factorial).keys()])
     },
-    toggleCheat() {
-      if (this.cheat === 'cheat') {
-        this.cheat = ''
-      } else {
-        this.cheat = 'cheat'
-      }
-    },
     animateShuffleAndRedraw(target) {
       const $swiper = document.getElementById('swiper')
       // https://betterprogramming.pub/how-to-restart-a-css-animation-with-javascript-and-what-is-the-dom-reflow-a86e8b6df00f
@@ -308,7 +331,7 @@ canvas {
       this.shuffleAndRedraw(target)
     },
     shuffleAndRedraw(target) {
-      target = target || 0
+      target = target || 1
       let matches = 0
       let shuffle
       do {
@@ -354,8 +377,8 @@ canvas {
     createOrRedrawCanvas(img) {
       // const grain = 18
       const options = {
-        cornerFillStyle: this.cornerFillStyle,
-        cornerStrokeStyle: this.cornerStrokeStyle,
+        cornerFillStyle: this.cornerFill,
+        cornerStrokeStyle: this.cornerStroke,
         filter: this.config.imageFilter,
         resolution: this.calcResolution, // { cxCol: grain, cyRow: grain }, // undefined, //
         shape: this.drawLetter, // 'circle', // 'diamond', // undefined, //
@@ -506,7 +529,7 @@ canvas {
     // https://stackoverflow.com/a/56922947/1070215
     getTextRatio(ctx) {
       ctx.save()
-      ctx.font = this.fontFamily(20) // size should not matter, but 1px does not work on mobile
+      ctx.font = this.fontFamily()
       const metrics = ctx.measureText(this.config.word)
       const textWidth = metrics.width
       // https://stackoverflow.com/a/46950087/1070215
@@ -520,7 +543,7 @@ canvas {
       ctx.save()
       const COSMOLOGICAL_CONSTANT = 20
       ctx.font = this.fontFamily(COSMOLOGICAL_CONSTANT)
-      /*
+      /* TODO
       text.forEach((letter) => {
       })
       */
@@ -532,8 +555,10 @@ canvas {
 
       // prettier-ignore
       const textSize = Math.min(
-        this.config.tweaks.textSizeScalingFactor * (cxCol / textWidth) * COSMOLOGICAL_CONSTANT - 1,
-        this.config.tweaks.textSizeScalingFactor * (cyRow / textHeight) * COSMOLOGICAL_CONSTANT - 1)
+        (cxCol + this.config.tweaks.textSizeAdjustment/ textWidth * COSMOLOGICAL_CONSTANT) - 1,
+        (cyRow + this.config.tweaks.textSizeAdjustment / textHeight * COSMOLOGICAL_CONSTANT) - 1
+      )
+
       ctx.font = this.fontFamily(textSize)
       return textSize
     },
@@ -578,16 +603,21 @@ canvas {
       }
 
       // get nearest color from palette
-      let mindiff = Number.MAX_SAFE_INTEGER
       let suitableTextColor = ctx.fillStyle
-      for (const color in this.palette) {
-        const diff = Vibrant.Util.hexDiff(this.palette[color].getHex(), ctx.fillStyle)
-        if (diff < mindiff) {
-          mindiff = diff
-          suitableTextColor = this.palette[color].getBodyTextColor()
+      if (this.config.mode === 1) {
+        let mindiff = Number.MAX_SAFE_INTEGER
+        suitableTextColor = ctx.fillStyle
+        for (const color in this.palette) {
+          const diff = Vibrant.Util.hexDiff(this.palette[color].getHex(), ctx.fillStyle)
+          if (diff < mindiff) {
+            mindiff = diff
+            // eslint-disable-next-line no-unused-vars
+            suitableTextColor = this.palette[color].getBodyTextColor()
+          }
         }
+
+        ctx.fillRect(x, y, cx, cy)
       }
-      ctx.fillRect(x, y, cx, cy)
 
       if (this.cheating) {
         if (this.matches.horz.length) {
@@ -595,13 +625,13 @@ canvas {
             const boundary = this.matches.horz[b]
             if (boundary <= i && i < boundary + this.config.wordAsArray.length) {
               ctx.save()
-              ctx.fillStyle = this.config.matchFillStyle
+              ctx.fillStyle = this.config.matchFill
               this.tweakAndFillRect(ctx, x, y, cx, cy)
               ctx.restore()
 
-              if (i % word.length === 0 && this.config.matchBoundaryFillStyle) {
+              if (i % word.length === 0 && this.config.matchBoundaryFill) {
                 ctx.save()
-                ctx.fillStyle = this.config.matchBoundaryFillStyle
+                ctx.fillStyle = this.config.matchBoundaryFill
                 this.tweakAndFillRect(ctx, x, y, 1, cy)
                 ctx.restore()
               }
@@ -614,14 +644,16 @@ canvas {
             const boundary = this.matches.vert[b]
             if (boundary.includes(i)) {
               ctx.save()
-              ctx.fillStyle = this.config.matchFillStyle
+              ctx.fillStyle = this.config.matchFill
               this.tweakAndFillRect(ctx, x, y, cx, cy)
               ctx.restore()
             }
           }
         }
       }
-      ctx.fillStyle = suitableTextColor
+      if (suitableTextColor) {
+        ctx.fillStyle = suitableTextColor
+      }
       ctx.fillText(letter, x + cx / 2, y + cy / 2)
 
       return anagram
