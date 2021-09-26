@@ -1,0 +1,37 @@
+{
+  "backgroundColor": "#160804",
+  "cornerFill": "#ffd70040",
+  "cornerStroke": "#ffd700ff",
+  "fontFamily": "'IM Fell English SC'",
+  "fontFamilyFallback": "serif",
+  "imageFilter": "brightness(120%)",
+  "imageSrc": "/jpegs/Mozart-Lange-darker.jpg",
+  "matchBoundaryFill": "#160804",
+  "matchFill": "#ff000080",
+  "mode": 0,
+  "modes": ["coloredLettersTransparentBackground", "adaptiveLettersColoredBackground"],
+  "shadowColor": "#572010ff",
+  "shadowOffsetX": 0.5,
+  "textSizeDefault": 20,
+
+  "word": "MOZART",
+  "ersatzAsArray": null,
+  "wordAsArray": null,
+  "factorial": null,
+
+  "tweaks": {
+    "x": -1,
+    "y": -2,
+    "cx": 2,
+    "cy": 0,
+    "textSizeAdjustment": 4
+  },
+
+  "style": {
+    "canvas": {
+      "objectPositionX": "50%",
+      "objectPositionY": "50%",
+      "scaleTransform": "97%"
+    }
+  }
+}

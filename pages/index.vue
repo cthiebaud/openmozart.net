@@ -35,46 +35,6 @@ Vue.use(Vue2TouchEvents, {
 
 export default {
   data() {
-    const config = {
-      backgroundColor: '#160804', //  très sombre teinte de couleur rouge-orange
-      cornerFill: '#ffd70040', // gold 75%  transparent
-      cornerStroke: '#ffd700ff', // gold
-      fontFamily: "'IM Fell English SC'", // "'Roboto Mono'",
-      fontFamilyFallback: 'serif', // 'monospace',
-      imageFilter: 'brightness(120%)',
-      imageSrc: '/jpegs/Mozart-Lange-darker.jpg',
-      matchBoundaryFill: '#160804', //  très sombre teinte de couleur rouge-orange
-      matchFill: '#ff000080', // red 50% transparent
-      mode: 0,
-      modes: ['coloredLettersTransparentBackground', 'adaptiveLettersColoredBackground'],
-      shadowColor: '#572010ff', // sombre teinte de couleur rouge-orange
-      shadowOffsetX: 0.5,
-      textSizeDefault: 20,
-
-      word: 'MOZART',
-      ersatzAsArray: undefined,
-      wordAsArray: undefined,
-      factorial: undefined,
-
-      tweaks: {
-        x: -1,
-        y: -2,
-        cx: 2,
-        cy: 0,
-        textSizeAdjustment: 4
-      },
-
-      style: {
-        canvas: {
-          objectPositionX: '50%',
-          objectPositionY: '50%',
-          scaleTransform: '97%'
-        }
-      }
-    }
-
-    const toastOptions = { duration: 1200, position: 'top-center', theme: 'outline' }
-
     const box = { cols: undefined, rows: undefined }
     const canvas = undefined
     const cheat = ''
@@ -85,11 +45,8 @@ export default {
     const shuffle = undefined
     const slideshowAverageTimeBetweenSlides = { slides: 1, total: 1500 }
     const slideshowID = undefined
+    const toastOptions = { duration: 1200, position: 'top-center', theme: 'outline' }
     return {
-      config,
-
-      toastOptions,
-
       box,
       canvas,
       cheat,
@@ -99,10 +56,15 @@ export default {
       palette,
       shuffle,
       slideshowAverageTimeBetweenSlides,
-      slideshowID
+      slideshowID,
+      toastOptions
     }
   },
   computed: {
+    config() {
+      const config = require(`~/configuration.json?raw`)
+      return config
+    },
     slideshow: {
       get() {
         return this.slideshowID
@@ -263,6 +225,8 @@ canvas {
             }
             if (document.fonts.check(font)) {
               clearInterval(poller)
+              // eslint-disable-next-line no-console
+              console.log('font loaded')
               resolve(true)
             }
           }, interval)
@@ -270,19 +234,24 @@ canvas {
         })
       }
 
-      // do the whole gamut when image is loaded
+      const fontLoaded = waitForFontLoad(this.fontFamily(), 2000, 100)
+      const imageLoaded = new Promise(function (resolve, reject) {
+        document.getElementById('portrait-image').addEventListener(
+          'load',
+          function (e) {
+            // eslint-disable-next-line no-console
+            console.log('image loaded')
+            resolve(this)
+          },
+          { once: true } // remove event after run once
+        ) 
+      })
+
+      // do the whole gamut when font and image are loaded
       const that = this
-      // eslint-disable-next-line no-console
-      console.log('init, waiting for load font')
-      waitForFontLoad(this.fontFamily()).then(() => {
-        // eslint-disable-next-line no-console
-        console.log('font loaded, waiting for image load')
-        document.getElementById('portrait-image').addEventListener('load', function (e) {
-          document.getElementById('swiper').classList.add('animate')
-          // eslint-disable-next-line no-console
-          console.log('image loaded, creating canvas')
-          that.createOrRedrawCanvas(this)
-        })
+      Promise.all([fontLoaded, imageLoaded]).then(data =>  {
+        document.getElementById('swiper').classList.add('animate')
+        that.createOrRedrawCanvas(data[1])
       })
     },
     fontFamily(size) {
