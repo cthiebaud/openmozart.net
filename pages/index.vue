@@ -3,7 +3,7 @@
     <component :is="'style'">
       {{ style }}
     </component>
-    <div :style="`font-family: ${fontFamily(config.textSizeDefault)}; visibility: hidden;`">force browser to load font</div>
+    <div :style="`font-family: ${fontFamily()}; visibility: hidden;`">force browser to load font</div>
     <img id="portrait-image" :src="config.imageSrc" />
     <client-only>
       <div
@@ -43,8 +43,8 @@ export default {
       imageSrc: '/jpegs/Mozart-Lange-darker.jpg',
       matchBoundaryFill: '#160804', //  très sombre teinte de couleur rouge-orange
       matchFill: '#ff000080', // red 50% transparent
-      modes: ['coloredLettersTransparentBackground', 'adaptiveLettersColoredBackground'],
       mode: 0,
+      modes: ['coloredLettersTransparentBackground', 'adaptiveLettersColoredBackground'],
       shadowColor: '#572010ff', // sombre teinte de couleur rouge-orange
       shadowOffsetX: 0.5,
       textSizeDefault: 20,
@@ -124,7 +124,7 @@ export default {
       },
       set(cheatLetter) {
         const oldC = this.cheat === 'cheat'
-        let newC = oldC;
+        let newC = oldC
         if (typeof cheatLetter === 'boolean') {
           newC = cheatLetter
         } else if (typeof cheatLetter === 'string' && cheatLetter.length) {
@@ -136,7 +136,7 @@ export default {
               this.cheat = newCheatString
             } else {
               newC = false
-            }  
+            }
           }
         }
         if (newC && !oldC) {
@@ -270,12 +270,18 @@ canvas {
 
       // do the whole gamut when image is loaded
       const that = this
-      waitForFontLoad(this.fontFamily()).then(
+      // eslint-disable-next-line no-console
+      console.log('init, waiting for load font')
+      waitForFontLoad(this.fontFamily()).then(() => {
+        // eslint-disable-next-line no-console
+        console.log('font loaded, waiting for image load')
         document.getElementById('portrait-image').addEventListener('load', function (e) {
           document.getElementById('swiper').classList.add('animate')
+          // eslint-disable-next-line no-console
+          console.log('image loaded, creating canvas')
           that.createOrRedrawCanvas(this)
         })
-      )
+      })
     },
     fontFamily(size) {
       if (!size) size = 20
@@ -528,7 +534,7 @@ canvas {
     // https://stackoverflow.com/a/56922947/1070215
     getTextRatio(ctx) {
       ctx.save()
-      ctx.font = this.fontFamily() 
+      ctx.font = this.fontFamily()
       const metrics = ctx.measureText(this.config.word)
       const textWidth = metrics.width
       // https://stackoverflow.com/a/46950087/1070215
@@ -559,7 +565,7 @@ canvas {
       )
 
       ctx.font = this.fontFamily(textSize)
-      // prettier-ignore
+
       return textSize
     },
     tweakAndFillRect(ctx, x, y, cx, cy) {
