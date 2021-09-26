@@ -38,6 +38,18 @@ Already tedious in itself, this unglamorous task is made even more difficult by 
 ### On a Mobile Phone
 
 * Tap: sets a new random order for the permutations.
-* Horizontal swipe: toggles slideshow.
 * Long press (also known as 'press and hold'): toggles cheating.
+* No slideshow on mobile phone.
+
+## Botched Philosophy
+
+The probability that a sorting of these (``719 + 1``) anagrams forms an image immediately identifiable as being the famous portrait of Mozart by Joseph Lange is thus of the order of ``2.6 E1740`` (``!720`` divided by some billions of billions (guess work) of neighbouring combinations).
+
+I have no idea what the probability is that a genius like Mozart could have existed, but I like to think it is of a similar order of magnitude.
+
+[https://openmozart.cthiebaud.com/](https://openmozart.cthiebaud.com/)
+
+---
+
+*The image below contains five times MOZART (three times horizontally and two times vertically), of which four are clearly readable (the fifth, vertical, is in the dark). The jpeg to cheat is in the directory.*
 

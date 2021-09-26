@@ -8,13 +8,15 @@
     <client-only>
       <div
         id="swiper"
-        v-touch:swipe.left="animateShuffleAndRedrawIfNoSlideshow"
-        v-touch:swipe.right="animateShuffleAndRedrawIfNoSlideshow"
-        v-touch:tap="toggleCheating"
-        v-touch:touchhold="toggleSlideshow"
+        v-touch:tap="animateShuffleAndRedrawIfNoSlideshow"
+        v-touch:touchhold="toggleCheating"
         class="vh-100"
         :style="`background-color: ${config.backgroundColor}`"
       ></div>
+      <!-- 
+        v-touch:swipe.left="_toggleSlideshow_"
+        v-touch:swipe.right="_toggleSlideshow_"
+      -->
     </client-only>
   </main>
 </template>
@@ -286,23 +288,17 @@ canvas {
       return `${size}px ${this.config.fontFamily}, ${this.config.fontFamilyFallback}`
     },
     animateShuffleAndRedrawIfNoSlideshow() {
+      if (this.ignoreTap) {
+        this.ignoreTap = false
+        return
+      }
       if (typeof this.slideshow === 'undefined') {
         this.animateShuffleAndRedraw()
       }
     },
     toggleCheating() {
-      if (this.ignoreTap) {
-        this.ignoreTap = false
-        return
-      }
-      this.toggleCheat()
-    },
-    toggleCheat() {
-      this.cheating = !this.cheating
-    },
-    toggleSlideshow() {
       this.ignoreTap = true
-      this.startOrStopOrToggleSlideshow()
+      this.cheating = !this.cheating
     },
     doShuffle: (factorial) => {
       // http://stackoverflow.com/questions/20789373/shuffle-array-in-ng-repeat-angular
@@ -344,7 +340,7 @@ canvas {
       } while (typeof target !== 'undefined' && matches < target)
       this.shuffle = shuffle
 
-      if (!this.slideshow || !this.cheating) {
+      if (!this.cheating) {
         this.$toast.show(`${this.matches.horz.length} horizontal, ${this.matches.vert.length} vertical`, {
           ...this.toastOptions,
           ...{ duration: this.timeBetweenSlides - 500 }
