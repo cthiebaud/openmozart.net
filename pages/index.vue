@@ -290,8 +290,8 @@ canvas {
       $swiper.offsetWidth // trigger a DOM reflow
       $swiper.classList.add('animate')
       this.$nextTick(() => {
-          this.shuffleAndRedraw(target)
-		  });
+        this.shuffleAndRedraw(target)
+      })
     },
     shuffleAndRedraw(target) {
       target = target || 1

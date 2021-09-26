@@ -12,8 +12,11 @@ done
 List=(
    README.md
    package.json
-   static/git.txt 
+   configuration.json
    static/CNAME 
+   static/favicon_package_v0.16.zip
+   static/pure_html/index.html
+   matches-5-cheat.jpg
 )
 for fname2 in ${List[*]}; do
    ignore ${fname2}
