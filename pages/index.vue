@@ -158,7 +158,7 @@ export default {
 }
 .animate {
   background: ${this.config.backgroundColor};
-  animation: fadeOut 3s forwards;
+  animation: fadeOut 1s forwards;
 }
 @keyframes fadeOut {
     0% {
@@ -233,28 +233,6 @@ canvas {
     })
   },
   methods: {
-    fontFamily(size) {
-      return `${size}px ${this.config.fontFamily}, ${this.config.fontFamilyFallback}`
-    },
-    animateShuffleAndRedrawIfNoSlideshow() {
-      if (typeof this.slideshow === 'undefined') {
-        this.animateShuffleAndRedraw()
-      }
-    },
-    toggleCheating() {
-      if (this.ignoreTap) {
-        this.ignoreTap = false
-        return
-      }
-      this.toggleCheat()
-    },
-    toggleCheat() {
-      this.cheating = !this.cheating
-    },
-    toggleSlideshow() {
-      this.ignoreTap = true
-      this.startOrStopOrToggleSlideshow()
-    },
     init() {
       // calc shuffled array
       this.shuffle = this.doShuffle(this.config.factorial)
@@ -292,12 +270,35 @@ canvas {
 
       // do the whole gamut when image is loaded
       const that = this
-      waitForFontLoad(this.fontFamily(40)).then(
+      waitForFontLoad(this.fontFamily()).then(
         document.getElementById('portrait-image').addEventListener('load', function (e) {
           document.getElementById('swiper').classList.add('animate')
           that.createOrRedrawCanvas(this)
         })
       )
+    },
+    fontFamily(size) {
+      if (!size) size = 20
+      return `${size}px ${this.config.fontFamily}, ${this.config.fontFamilyFallback}`
+    },
+    animateShuffleAndRedrawIfNoSlideshow() {
+      if (typeof this.slideshow === 'undefined') {
+        this.animateShuffleAndRedraw()
+      }
+    },
+    toggleCheating() {
+      if (this.ignoreTap) {
+        this.ignoreTap = false
+        return
+      }
+      this.toggleCheat()
+    },
+    toggleCheat() {
+      this.cheating = !this.cheating
+    },
+    toggleSlideshow() {
+      this.ignoreTap = true
+      this.startOrStopOrToggleSlideshow()
     },
     doShuffle: (factorial) => {
       // http://stackoverflow.com/questions/20789373/shuffle-array-in-ng-repeat-angular
@@ -329,7 +330,7 @@ canvas {
       this.shuffleAndRedraw(target)
     },
     shuffleAndRedraw(target) {
-      target = target || 0
+      target = target || 1
       let matches = 0
       let shuffle
       do {
@@ -527,7 +528,7 @@ canvas {
     // https://stackoverflow.com/a/56922947/1070215
     getTextRatio(ctx) {
       ctx.save()
-      ctx.font = this.fontFamily(20) // size should not matter, but 1px does not work on mobile
+      ctx.font = this.fontFamily() 
       const metrics = ctx.measureText(this.config.word)
       const textWidth = metrics.width
       // https://stackoverflow.com/a/46950087/1070215
@@ -541,7 +542,7 @@ canvas {
       ctx.save()
       const COSMOLOGICAL_CONSTANT = 20
       ctx.font = this.fontFamily(COSMOLOGICAL_CONSTANT)
-      /*
+      /* TODO
       text.forEach((letter) => {
       })
       */
