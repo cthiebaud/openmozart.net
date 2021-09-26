@@ -22,7 +22,7 @@
 </template>
 
 <script>
-/* eslint-disable no-unused-expressions, no-unused-vars, no-sequences, eqeqeq, no-console, node/handle-callback-err, no-constant-condition */
+/* _eslint-disable no-unused-expressions, no-unused-vars, no-sequences, eqeqeq, no-console, node/handle-callback-err, no-constant-condition */
 
 import * as Vibrant from 'node-vibrant'
 import Vue from 'vue'
@@ -59,7 +59,7 @@ export default {
         y: 0,
         cx: 1,
         cy: 0,
-        textSizeAdjustment: 0.5
+        textSizeAdjustment: -2
       },
 
       style: {
