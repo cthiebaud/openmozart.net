@@ -3,17 +3,15 @@
     <component :is="'style'">
       {{ style }}
     </component>
-    <h1 class="text-center" :style="`font-family: ${fontFamily(config.textSizeDefault)}; z-index: -1; color: ghostwhite; visibility: hidden;`">
-      made by christophe thiebaud
-    </h1>
-    <img id="portrait-image" :src="config.imageURL" />
+    <div :style="`font-family: ${fontFamily(config.textSizeDefault)}; visibility: hidden;`">force browser to load font</div>
+    <img id="portrait-image" :src="config.imageSrc" />
     <client-only>
       <div
         id="swiper"
-        v-touch:swipe.left="onSwipe"
-        v-touch:swipe.right="onSwipe"
-        v-touch:tap="onTap"
-        v-touch:touchhold="onPress"
+        v-touch:swipe.left="animateShuffleAndRedrawIfNoSlideshow"
+        v-touch:swipe.right="animateShuffleAndRedrawIfNoSlideshow"
+        v-touch:tap="toggleCheating"
+        v-touch:touchhold="toggleSlideshow"
         class="vh-100"
         :style="`background-color: ${config.backgroundColor}`"
       ></div>
@@ -29,21 +27,25 @@ import Vue from 'vue'
 import Vue2TouchEvents from 'vue2-touch-events'
 
 // https://www.npmjs.com/package/vue2-touch-events
-Vue.use(Vue2TouchEvents)
+Vue.use(Vue2TouchEvents, {
+  disableClick: false
+})
 
 export default {
   data() {
     const config = {
-      backgroundColor: '#160804',
+      backgroundColor: '#160804', //  très sombre teinte de couleur rouge-orange
+      cornerFill: '#ffd70040', // gold 75%  transparent
+      cornerStroke: '#ffd700ff', // gold
       fontFamily: "'IM Fell English SC'", // "'Roboto Mono'",
       fontFamilyFallback: 'serif', // 'monospace',
       imageFilter: 'brightness(120%)',
-      imageURL: '/jpegs/Mozart-Lange-darker.jpg',
-      matchBoundaryFillStyle: 'black',
-      matchFillStyle: '#ff000080',
-      cornerStrokeStyle: '#ffd700ff',
-      cornerFillStyle: '#ffd70040',
-      shadowcolor: '#572010ff',
+      imageSrc: '/jpegs/Mozart-Lange-darker.jpg',
+      matchBoundaryFill: '#160804', //  très sombre teinte de couleur rouge-orange
+      matchFill: '#ff000080', // red 50% transparent
+      modes: ['coloredLettersTransparentBackground', 'adaptiveLettersColoredBackground'],
+      mode: 0,
+      shadowColor: '#572010ff', // sombre teinte de couleur rouge-orange
       shadowOffsetX: 0.5,
       textSizeDefault: 20,
 
@@ -57,15 +59,14 @@ export default {
         y: -2,
         cx: 2,
         cy: 0,
-        textSizeFix: 0
+        textSizeAdjustment: 4
       },
 
       style: {
         canvas: {
           objectPositionX: '50%',
           objectPositionY: '50%',
-          scaleTransform: '97%',
-          backgroundColor: '#160804'
+          scaleTransform: '97%'
         }
       }
     }
@@ -76,6 +77,7 @@ export default {
     const canvas = undefined
     const cheat = ''
     const hiddenPermutations = new Set()
+    const ignoreTap = false
     const matches = { horz: [], vert: [] }
     const palette = undefined
     const shuffle = undefined
@@ -90,6 +92,7 @@ export default {
       canvas,
       cheat,
       hiddenPermutations,
+      ignoreTap,
       matches,
       palette,
       shuffle,
@@ -115,22 +118,52 @@ export default {
         this.slideshowAverageTimeBetweenSlides.total += newTime
       }
     },
-    cheating() {
-      return this.cheat === 'cheat'
+    cheating: {
+      get() {
+        return this.cheat === 'cheat'
+      },
+      set(cheatLetter) {
+        const oldC = this.cheat === 'cheat'
+        let newC = oldC;
+        if (typeof cheatLetter === 'boolean') {
+          newC = cheatLetter
+        } else if (typeof cheatLetter === 'string' && cheatLetter.length) {
+          if (!oldC) {
+            const newCheatString = this.cheat + cheatLetter
+            if (newCheatString === 'cheat') {
+              newC = true
+            } else if ('cheat'.startsWith(newCheatString)) {
+              this.cheat = newCheatString
+            } else {
+              newC = false
+            }  
+          }
+        }
+        if (newC && !oldC) {
+          this.cheat = 'cheat'
+          this.$toast.show('Now cheating', this.toastOptions)
+          this.createOrRedrawCanvas()
+        }
+        if (!newC && oldC) {
+          this.cheat = ''
+          this.$toast.show('Cheating stopped', this.toastOptions)
+          this.createOrRedrawCanvas()
+        }
+      }
     },
     style() {
       // pretty-ignore
       return `div#swiper {
-  background: ${this.config.style.canvas.backgroundColor};
+  background: ${this.config.backgroundColor};
 }
 .animate {
-  background: ${this.config.style.canvas.backgroundColor};
+  background: ${this.config.backgroundColor};
   animation: fadeOut 3s forwards;
 }
 @keyframes fadeOut {
     0% {
       backdrop-filter: blur(1rem);
-      background: ${this.config.style.canvas.backgroundColor};
+      background: ${this.config.backgroundColor};
     }
     100% {
       backdrop-filter: blur(0);
@@ -140,7 +173,7 @@ export default {
 canvas {
   object-position: ${this.config.style.canvas.objectPositionX} ${this.config.style.canvas.objectPositionY};
   transform: scale(${this.config.style.canvas.scaleTransform});
-  background-color: ${this.config.style.canvas.backgroundColor};
+  background-color: ${this.config.backgroundColor};
 }`
     }
   },
@@ -157,12 +190,14 @@ canvas {
     this.config.ersatzAsArray = this.config.ersatzAsArray || Array(this.config.word.length).fill('\u2205')
     this.config.factorial = this.factorialize(this.config.wordAsArray.length)
 
-    Vibrant.from(document.getElementById('portrait-image'))
-      .maxColorCount(200)
-      .getPalette()
-      .then((palette) => {
-        this.palette = palette
-      })
+    if (this.config.mode === 1) {
+      Vibrant.from(document.getElementById('portrait-image'))
+        .maxColorCount(200)
+        .getPalette()
+        .then((palette) => {
+          this.palette = palette
+        })
+    }
 
     this.init()
 
@@ -187,24 +222,13 @@ canvas {
         event.preventDefault()
         return
       } else if (event.code === 'Escape') {
-        this.cheat = ''
-        this.createOrRedrawCanvas()
+        this.cheating = false
         event.preventDefault()
         return
       }
       if ('cheat'.includes(event.key)) {
-        if (this.cheat === 'cheat') {
-          return
-        }
-        this.cheat += event.key
-        if (!'cheat'.startsWith(this.cheat)) {
-          this.cheat = ''
-          event.preventDefault()
-        } else if (this.cheat === 'cheat') {
-          this.$toast.show('Now cheating', this.toastOptions)
-          this.createOrRedrawCanvas()
-          event.preventDefault()
-        }
+        this.cheating = event.key
+        event.preventDefault()
       }
     })
   },
@@ -212,23 +236,24 @@ canvas {
     fontFamily(size) {
       return `${size}px ${this.config.fontFamily}, ${this.config.fontFamilyFallback}`
     },
-    onPress() {
-      if (this.cheating) {
-        this.cheat = ''
-        this.$toast.show('Cheating stopped', this.toastOptions)
-      } else {
-        this.cheat = 'cheat'
-        this.$toast.show('Now cheating', this.toastOptions)
-      }
-      this.createOrRedrawCanvas()
-    },
-    onSwipe() {
-      this.startOrStopOrToggleSlideshow()
-    },
-    onTap() {
+    animateShuffleAndRedrawIfNoSlideshow() {
       if (typeof this.slideshow === 'undefined') {
         this.animateShuffleAndRedraw()
       }
+    },
+    toggleCheating() {
+      if (this.ignoreTap) {
+        this.ignoreTap = false
+        return
+      }
+      this.toggleCheat()
+    },
+    toggleCheat() {
+      this.cheating = !this.cheating
+    },
+    toggleSlideshow() {
+      this.ignoreTap = true
+      this.startOrStopOrToggleSlideshow()
     },
     init() {
       // calc shuffled array
@@ -294,13 +319,6 @@ canvas {
       }
       return shuffleArray([...Array(factorial).keys()])
     },
-    toggleCheat() {
-      if (this.cheat === 'cheat') {
-        this.cheat = ''
-      } else {
-        this.cheat = 'cheat'
-      }
-    },
     animateShuffleAndRedraw(target) {
       const $swiper = document.getElementById('swiper')
       // https://betterprogramming.pub/how-to-restart-a-css-animation-with-javascript-and-what-is-the-dom-reflow-a86e8b6df00f
@@ -357,8 +375,8 @@ canvas {
     createOrRedrawCanvas(img) {
       // const grain = 18
       const options = {
-        cornerFillStyle: this.cornerFillStyle,
-        cornerStrokeStyle: this.cornerStrokeStyle,
+        cornerFillStyle: this.cornerFill,
+        cornerStrokeStyle: this.cornerStroke,
         filter: this.config.imageFilter,
         resolution: this.calcResolution, // { cxCol: grain, cyRow: grain }, // undefined, //
         shape: this.drawLetter, // 'circle', // 'diamond', // undefined, //
@@ -533,7 +551,12 @@ canvas {
       const textHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent
       ctx.restore()
 
-      const textSize = Math.min((cxCol / textWidth) * COSMOLOGICAL_CONSTANT - 1, (cyRow / textHeight) * COSMOLOGICAL_CONSTANT - 1)
+      // prettier-ignore
+      const textSize = Math.min(
+        (cxCol + this.config.tweaks.textSizeAdjustment/ textWidth * COSMOLOGICAL_CONSTANT) - 1,
+        (cyRow + this.config.tweaks.textSizeAdjustment / textHeight * COSMOLOGICAL_CONSTANT) - 1
+      )
+
       ctx.font = this.fontFamily(textSize)
       // prettier-ignore
       return textSize
@@ -579,18 +602,21 @@ canvas {
       }
 
       // get nearest color from palette
-      let mindiff = Number.MAX_SAFE_INTEGER
       let suitableTextColor = ctx.fillStyle
-      for (const color in this.palette) {
-        const diff = Vibrant.Util.hexDiff(this.palette[color].getHex(), ctx.fillStyle)
-        if (diff < mindiff) {
-          mindiff = diff
-          // eslint-disable-next-line no-unused-vars
-          suitableTextColor = this.palette[color].getBodyTextColor()
+      if (this.config.mode === 1) {
+        let mindiff = Number.MAX_SAFE_INTEGER
+        suitableTextColor = ctx.fillStyle
+        for (const color in this.palette) {
+          const diff = Vibrant.Util.hexDiff(this.palette[color].getHex(), ctx.fillStyle)
+          if (diff < mindiff) {
+            mindiff = diff
+            // eslint-disable-next-line no-unused-vars
+            suitableTextColor = this.palette[color].getBodyTextColor()
+          }
         }
-      }
 
-      // ctx.fillRect(x, y, cx, cy)
+        ctx.fillRect(x, y, cx, cy)
+      }
 
       if (this.cheating) {
         if (this.matches.horz.length) {
@@ -598,13 +624,13 @@ canvas {
             const boundary = this.matches.horz[b]
             if (boundary <= i && i < boundary + this.config.wordAsArray.length) {
               ctx.save()
-              ctx.fillStyle = this.config.matchFillStyle
+              ctx.fillStyle = this.config.matchFill
               this.tweakAndFillRect(ctx, x, y, cx, cy)
               ctx.restore()
 
-              if (i % word.length === 0 && this.config.matchBoundaryFillStyle) {
+              if (i % word.length === 0 && this.config.matchBoundaryFill) {
                 ctx.save()
-                ctx.fillStyle = this.config.matchBoundaryFillStyle
+                ctx.fillStyle = this.config.matchBoundaryFill
                 this.tweakAndFillRect(ctx, x, y, 1, cy)
                 ctx.restore()
               }
@@ -617,14 +643,16 @@ canvas {
             const boundary = this.matches.vert[b]
             if (boundary.includes(i)) {
               ctx.save()
-              ctx.fillStyle = this.config.matchFillStyle
+              ctx.fillStyle = this.config.matchFill
               this.tweakAndFillRect(ctx, x, y, cx, cy)
               ctx.restore()
             }
           }
         }
       }
-      // ctx.fillStyle = suitableTextColor
+      if (suitableTextColor) {
+        ctx.fillStyle = suitableTextColor
+      }
       ctx.fillText(letter, x + cx / 2, y + cy / 2)
 
       return anagram
