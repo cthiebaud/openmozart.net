@@ -1,0 +1,35 @@
+{
+  "backgroundColor": "white",
+  "fontFamily": "Arvo",
+  "fontFamilyFallback": "serif",
+  "imageFilter": "brightness(95%)",
+  "imageSrc": "/jpegs/ricard.jpg",
+  "matchBoundaryFill": null,
+  "matchFill": "#ffff00df",
+  "mode": 1,
+  "modes": ["coloredLettersTransparentBackground", "adaptiveLettersColoredBackground"],
+  "shadowColor": "#462310",
+  "shadowOffsetX": 0.5,
+  "textSizeDefault": 20,
+
+  "word": "ricard",
+  "ersatzAsArray": null,
+  "wordAsArray": null,
+  "factorial": null,
+
+  "tweaks": {
+    "x": 0,
+    "y": 0,
+    "cx": 1,
+    "cy": 0,
+    "textSizeAdjustment": -2
+  },
+
+  "style": {
+    "canvas": {
+      "objectPositionX": "50%",
+      "objectPositionY": "50%",
+      "scaleTransform": "97%"
+    }
+  }
+}

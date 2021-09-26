@@ -8,12 +8,13 @@ ignore() {
 for fname in static/favicon/*; do
    ignore ${fname}
 done
+
 List=(
-	  README.md
-	  package.json
-      static/git.txt 
-      static/CNAME 
-     )
+	README.md
+   package.json
+   static/git.txt 
+   static/CNAME 
+)
 for fname2 in ${List[*]}; do
    ignore ${fname2}
 done 
