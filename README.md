@@ -40,9 +40,9 @@ Already tedious in itself, this unglamorous task is made even more difficult by 
 
 ### On a Mobile Phone
 
-* Horizontal swipe: sets a new random order for the permutations.
-* Long press (also known as 'press and hold'): toggles slideshow.
-* Tap: toggles cheating.
+* Tap: sets a new random order for the permutations.
+* Long press (also known as 'press and hold'): toggles cheating.
+* No slideshow on mobile phone.
 
 ## Botched Philosophy
 
