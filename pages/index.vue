@@ -268,11 +268,14 @@ canvas {
 
       // do the whole gamut when image is loaded
       const that = this
+      // eslint-disable-next-line no-console
       console.log('init, waiting for load font')
       waitForFontLoad(this.fontFamily()).then(() => {
+        // eslint-disable-next-line no-console
         console.log('font loaded, waiting for image load')
         document.getElementById('portrait-image').addEventListener('load', function (e) {
           document.getElementById('swiper').classList.add('animate')
+          // eslint-disable-next-line no-console
           console.log('image loaded, creating canvas')
           that.createOrRedrawCanvas(this)
         })
@@ -560,6 +563,7 @@ canvas {
       )
 
       ctx.font = this.fontFamily(textSize)
+      
       return textSize
     },
     tweakAndFillRect(ctx, x, y, cx, cy) {
