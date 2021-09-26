@@ -9,7 +9,6 @@
   "matchBoundaryFill": "#160804",
   "matchFill": "#ff000080",
   "mode": 0,
-  "modes": ["coloredLettersTransparentBackground", "adaptiveLettersColoredBackground"],
   "shadowColor": "#572010ff",
   "shadowOffsetX": 0.5,
   "textSizeDefault": 20,
