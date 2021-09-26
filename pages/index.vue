@@ -22,7 +22,7 @@
 </template>
 
 <script>
-/* eslint-disable no-unused-expressions, no-unused-vars, no-sequences, eqeqeq, no-console, node/handle-callback-err, no-constant-condition */
+/* _eslint-disable no-unused-expressions, no-unused-vars, no-sequences, eqeqeq, no-console, node/handle-callback-err, no-constant-condition */
 
 import * as Vibrant from 'node-vibrant'
 import Vue from 'vue'
@@ -559,7 +559,7 @@ canvas {
       )
 
       ctx.font = this.fontFamily(textSize)
-      
+
       return textSize
     },
     tweakAndFillRect(ctx, x, y, cx, cy) {
