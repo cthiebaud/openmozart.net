@@ -11,7 +11,6 @@
         v-touch:tap="animateShuffleAndRedrawIfNoSlideshow"
         v-touch:touchhold="toggleCheating"
         class="vh-100"
-        :style="`background-color: ${config.backgroundColor}`"
       ></div>
     </client-only>
   </main>
@@ -35,8 +34,9 @@ export default {
     const canvas = undefined
     const cheat = ''
     const hiddenPermutations = new Set()
-    const ignoreTap = false
+    const ignoreNextTap = false
     const matches = { horz: [], vert: [] }
+    const modes = ["coloredLettersTransparentBackground", "adaptiveLettersColoredBackground"]
     const palette = undefined
     const shuffle = undefined
     const slideshowAverageTimeBetweenSlides = { slides: 1, total: 1500 }
@@ -47,8 +47,9 @@ export default {
       canvas,
       cheat,
       hiddenPermutations,
-      ignoreTap,
+      ignoreNextTap,
       matches,
+      modes,
       palette,
       shuffle,
       slideshowAverageTimeBetweenSlides,
@@ -104,7 +105,7 @@ export default {
             this.$toast.show('Now cheating', this.toastOptions)
           } else {
             this.cheat = ''
-            this.$toast.show('Cheating stopped', this.toastOptions)
+            this.$toast.show('Stopped cheating', this.toastOptions)
           }
           this.createOrRedrawCanvas()
         }
@@ -151,7 +152,6 @@ canvas {
 
     if (this.config.mode === 1) {
       Vibrant.from(document.getElementById('portrait-image'))
-        .maxColorCount(200)
         .getPalette()
         .then((palette) => {
           this.palette = palette
@@ -160,10 +160,13 @@ canvas {
 
     this.init()
 
+    // remove context menu
     if (this.contextmenuEventListener) window.removeEventListener('contextmenu', this.contextmenuEventListener)
     this.contextmenuEventListener = window.addEventListener('contextmenu', function (e) {
       e.preventDefault()
     })
+
+    // keyboard
     if (this.keyupEventListener) window.removeEventListener('keyup', this.keyupEventListener)
     this.keyupEventListener = window.addEventListener('keyup', (event) => {
       if (event.code === 'Enter') {
@@ -255,7 +258,7 @@ canvas {
       }
     },
     toggleCheating() {
-      this.ignoreTap = true
+      this.ignoreNextTap = true
       this.cheating = !this.cheating
     },
     doShuffle: (factorial) => {
@@ -279,8 +282,8 @@ canvas {
       return shuffleArray([...Array(factorial).keys()])
     },
     animateShuffleAndRedraw(target) {
-      if (this.ignoreTap) {
-        this.ignoreTap = false
+      if (this.ignoreNextTap) {
+        this.ignoreNextTap = false
         return
       }
       const $swiper = document.getElementById('swiper')
@@ -300,8 +303,7 @@ canvas {
       do {
         shuffle = this.doShuffle(this.config.factorial)
         matches = this.storeMatches(shuffle)
-        // eslint-disable-next-line no-unmodified-loop-condition
-      } while (typeof target !== 'undefined' && matches < target)
+      } while (matches < target)
       this.shuffle = shuffle
 
       if (!this.cheating) {
