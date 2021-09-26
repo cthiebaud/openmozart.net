@@ -559,7 +559,7 @@ canvas {
       )
 
       ctx.font = this.fontFamily(textSize)
-      
+
       return textSize
     },
     tweakAndFillRect(ctx, x, y, cx, cy) {
