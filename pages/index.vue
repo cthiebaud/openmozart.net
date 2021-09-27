@@ -4,15 +4,7 @@
       {{ style }}
     </component>
     <div :style="`font-family: ${fontFamily()}; visibility: hidden;`">force browser to load font</div>
-    <img id="portrait-image" :src="config.imageSrc" />
-    <client-only>
-      <div
-        id="swiper"
-        v-touch:tap="animateShuffleAndRedrawIfNoSlideshow"
-        v-touch:touchhold="toggleCheating"
-        class="vh-100"
-      ></div>
-    </client-only>
+    <img id="portrait-image" v-touch:tap="animateShuffleAndRedrawIfNoSlideshow" v-touch:touchhold="toggleCheating" class="invisible" :src="config.imageSrc" />
   </main>
 </template>
 
@@ -36,7 +28,7 @@ export default {
     const hiddenPermutations = new Set()
     const ignoreNextTap = false
     const matches = { horz: [], vert: [] }
-    const modes = ["coloredLettersTransparentBackground", "adaptiveLettersColoredBackground"]
+    const modes = ['coloredLettersTransparentBackground', 'adaptiveLettersColoredBackground']
     const palette = undefined
     const shuffle = undefined
     const slideshowAverageTimeBetweenSlides = { slides: 1, total: 1500 }
@@ -113,27 +105,10 @@ export default {
     },
     style() {
       // pretty-ignore
-      return `div#swiper {
-  background: ${this.config.backgroundColor};
-}
-.animate {
-  background: ${this.config.backgroundColor};
-  animation: fadeOut 1s forwards;
-}
-@keyframes fadeOut {
-    0% {
-      backdrop-filter: blur(1rem);
-      background: ${this.config.backgroundColor};
-    }
-    100% {
-      backdrop-filter: blur(0);
-      background: transparent;
-    }
-}
-canvas {
+      return `
+img, canvas {
   object-position: ${this.config.style.canvas.objectPositionX} ${this.config.style.canvas.objectPositionY};
   transform: scale(${this.config.style.canvas.scaleTransform});
-  background-color: ${this.config.backgroundColor};
 }`
     }
   },
@@ -244,8 +219,14 @@ canvas {
       // do the whole gamut when font and image are loaded
       const that = this
       Promise.all([fontLoaded, imageLoaded]).then((data) => {
-        document.getElementById('swiper').classList.add('animate')
         that.createOrRedrawCanvas(data[1])
+        const canvasClassList = document.getElementById('portrait-image-canvas').classList
+        canvasClassList.add('cover')
+        canvasClassList.remove('invisible')
+        const imageClassList = document.getElementById('portrait-image').classList
+        imageClassList.add('cover')
+        imageClassList.remove('invisible')
+        imageClassList.add('animate')
       })
     },
     fontFamily(size) {
@@ -286,12 +267,12 @@ canvas {
         this.ignoreNextTap = false
         return
       }
-      const $swiper = document.getElementById('swiper')
+      const animated = document.getElementById('portrait-image')
       // https://betterprogramming.pub/how-to-restart-a-css-animation-with-javascript-and-what-is-the-dom-reflow-a86e8b6df00f
-      $swiper.classList.remove('animate')
+      animated.classList.remove('animate')
       // eslint-disable-next-line no-unused-expressions
-      $swiper.offsetWidth // trigger a DOM reflow
-      $swiper.classList.add('animate')
+      animated.offsetWidth // trigger a DOM reflow
+      animated.classList.add('animate')
       this.$nextTick(() => {
         this.shuffleAndRedraw(target)
       })
@@ -353,8 +334,9 @@ canvas {
       if (img) {
         this.canvas = img.closePixelate(options)
       } else {
-        this.canvas.render(options)
+        this.canvas.renderClosePixels(options)
       }
+      return this.canvas
     },
     pickShuffledPermutation(wordAsArray, factorial, shuffle, nth) {
       nth = Math.floor(nth)
@@ -557,7 +539,8 @@ canvas {
       }
       const letter = anagram.shift()
 
-      if (!this.textSize) {
+      // eslint-disable-next-line no-constant-condition
+      if (true) {
         ctx.textAlign = 'center'
         ctx.textBaseline = 'middle'
 
@@ -569,7 +552,7 @@ canvas {
       }
 
       // get nearest color from palette
-      let suitableTextColor = ctx.fillStyle
+      let suitableTextColor
       if (this.config.mode === 1) {
         let mindiff = Number.MAX_SAFE_INTEGER
         suitableTextColor = ctx.fillStyle
@@ -699,16 +682,35 @@ canvas {
 </script>
 
 <style>
-body {
+main {
   position: relative;
 }
-div#swiper {
-  z-index: 123;
+.animate {
+  animation: fadeOut 3s forwards;
 }
-div#swiper,
-canvas {
+@keyframes fadeOut {
+  0% {
+    filter: blur(20px);
+    opacity: 1;
+  }
+  100% {
+    filter: blur(0);
+    opacity: 0;
+  }
+}
+
+img {
+  filter: blur(12px);
+}
+
+.invisible {
+    opacity: 0;
+}
+
+.cover {
   display: block;
   position: absolute;
+
   top: 0;
   left: 0;
   right: 0;

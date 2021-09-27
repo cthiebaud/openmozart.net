@@ -41,13 +41,13 @@
     const canvas = (this.canvas = document.createElement('canvas'))
     this.ctx = canvas.getContext('2d')
     // copy attributes from img to canvas
-    canvas.className = img.className
-    canvas.id = img.id
+    // canvas.className = img.className
+    canvas.id = img.id + "-canvas"
 
     this.render(options)
 
     // replace image with canvas
-    img.parentNode.replaceChild(canvas, img)
+    img.parentNode.insertBefore(canvas, img)
   }
 
   ClosePixelation.prototype.render = function (options) {
@@ -73,8 +73,6 @@
       return
     }
 
-    this.ctx.clearRect(0, 0, w, h)
-
     this.renderClosePixels(options)
   }
 
@@ -83,6 +81,8 @@
     const h = this.height
     const ctx = this.ctx
     const imgData = this.imgData
+
+    ctx.clearRect(0, 0, w, h)
 
     let res
     if (isFunction(opts.resolution)) {
