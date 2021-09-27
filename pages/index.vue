@@ -1,5 +1,6 @@
 <template>
-  <main class="vh-100" :style="`background-color: ${config.backgroundColor}`">
+  <main id="main" class="vh-100" :style="`background-color: ${config.backgroundColor}`">
+    <!-- -->
     <component :is="'style'">
       {{ style }}
     </component>
@@ -231,7 +232,7 @@ img, canvas {
     },
     fontFamily(size) {
       if (!size) size = 20
-      return `${size}px ${this.config.fontFamily}, ${this.config.fontFamilyFallback}`
+      return `bold ${size}px ${this.config.fontFamily}, ${this.config.fontFamilyFallback}`
     },
     animateShuffleAndRedrawIfNoSlideshow() {
       if (typeof this.slideshow === 'undefined') {
@@ -328,7 +329,9 @@ img, canvas {
         filter: this.config.imageFilter,
         resolution: this.calcResolution, // { cxCol: grain, cyRow: grain }, // undefined, //
         shape: this.drawLetter, // 'circle', // 'diamond', // undefined, //
-        wordAsArray: this.config.wordAsArray
+        wordAsArray: this.config.wordAsArray,
+        windowWidth: document.getElementById('main').clientWidth,
+        windowHeight: document.getElementById('main').clientHeight
       }
 
       if (img) {
@@ -502,8 +505,8 @@ img, canvas {
 
       // prettier-ignore
       const textSize = Math.min(
-        (cxCol + this.config.tweaks.textSizeAdjustment/ textWidth * COSMOLOGICAL_CONSTANT) - 1,
-        (cyRow + this.config.tweaks.textSizeAdjustment / textHeight * COSMOLOGICAL_CONSTANT) - 1
+        (cxCol + this.config.tweaks.textSizeAdjustment/ textWidth * COSMOLOGICAL_CONSTANT),
+        (cyRow + this.config.tweaks.textSizeAdjustment / textHeight * COSMOLOGICAL_CONSTANT)
       )
 
       ctx.font = this.fontFamily(textSize)
@@ -574,6 +577,7 @@ img, canvas {
             const boundary = this.matches.horz[b]
             if (boundary <= i && i < boundary + this.config.wordAsArray.length) {
               ctx.save()
+              ctx.filter = "blur(3px)";
               ctx.fillStyle = this.config.matchFill
               this.tweakAndFillRect(ctx, x, y, cx, cy)
               ctx.restore()
@@ -593,6 +597,7 @@ img, canvas {
             const boundary = this.matches.vert[b]
             if (boundary.includes(i)) {
               ctx.save()
+              ctx.filter = "blur(3px)";
               ctx.fillStyle = this.config.matchFill
               this.tweakAndFillRect(ctx, x, y, cx, cy)
               ctx.restore()
@@ -603,11 +608,11 @@ img, canvas {
       if (suitableTextColor) {
         ctx.fillStyle = suitableTextColor
       }
-      ctx.fillText(letter, x + cx / 2, y + cy / 2)
+      ctx.fillText(letter, x + cx / 2, y + cy / 2 + 3)
 
       return anagram
     },
-    calcResolution(ctx, wW, wH) {
+    calcResolution(ctx, containerWidth, containerHeight) {
       const factorial = this.config.factorial
       const divisorsList = this.getDivisorsList(factorial)
       const ratios = divisorsList.map((x) => {
@@ -619,7 +624,7 @@ img, canvas {
       })
 
       const wordRatio = this.getTextRatio(ctx)
-      const targetRatio = wW / wH / wordRatio
+      const targetRatio = containerWidth / containerHeight / wordRatio
 
       const nearest = this.binarySearch(
         ratios.map((r) => r.ratio),
@@ -629,8 +634,8 @@ img, canvas {
 
       const cols = ratios[nearest].x * this.config.word.length
       const rows = ratios[nearest].y
-      const cxCol = wW / cols
-      const cyRow = wH / rows
+      const cxCol = containerWidth / cols
+      const cyRow = containerHeight / rows
       this.box = { cols, rows, cxCol, cyRow, factorial }
 
       this.textSizeDefault = this.getFontSizeToFit(ctx, cxCol, cyRow)
@@ -698,13 +703,13 @@ main {
     opacity: 0;
   }
 }
-
+/* 
 img {
-  filter: blur(12px);
+  filter: blur(20px); 
 }
-
+*/
 .invisible {
-    opacity: 0;
+  opacity: 0;
 }
 
 .cover {

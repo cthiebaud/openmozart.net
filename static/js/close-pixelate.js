@@ -28,7 +28,7 @@
     canvas.getContext &&
     canvas.getContext('2d', {
       alpha: false
-    }) // https://stackoverflow.com/a/28161474/1070215
+    }) // sub-pixel font rendering, cf. https://stackoverflow.com/a/28161474/1070215
 
   // don't proceed if canvas is no supported
   if (!isCanvasSupported) {
@@ -42,31 +42,57 @@
     this.ctx = canvas.getContext('2d')
     // copy attributes from img to canvas
     // canvas.className = img.className
-    canvas.id = img.id + "-canvas"
+    canvas.id = img.id + '-canvas'
 
     this.render(options)
 
-    // replace image with canvas
+    // insert canvas just before image
     img.parentNode.insertBefore(canvas, img)
   }
 
   ClosePixelation.prototype.render = function (options) {
     this.options = options
 
+    // https://github.com/agilie/canvas-image-cover-position
+    // eslint-disable-next-line no-unused-vars
+    const calcCoverPosition = function (contentWidth, contentHeight, containerWidth, containerHeight, offsetLeft, offsetTop) {
+      const contentRatio = contentWidth / contentHeight
+      const containerRatio = containerWidth / containerHeight
+      let resultHeight
+      let resultWidth
+      offsetLeft = typeof offsetLeft === 'undefined' ? 0.5 : offsetLeft
+      offsetTop = typeof offsetTop === 'undefined' ? 0.5 : offsetTop
+      if (contentRatio > containerRatio) {
+        resultHeight = containerHeight
+        resultWidth = containerHeight * contentRatio
+      } else {
+        resultWidth = containerWidth
+        resultHeight = containerWidth / contentRatio
+      }
+      return {
+        width: resultWidth,
+        height: resultHeight,
+        offsetLeft: (containerWidth - resultWidth) * offsetLeft,
+        offsetTop: (containerHeight - resultHeight) * offsetTop
+      }
+    }
     // set size
-    const w = (this.width = this.canvas.width = this.img.width)
-    const h = (this.height = this.canvas.height = this.img.height)
+    const w = (this.width  = this.img.width)
+    const h = (this.height = this.img.height)
+    const coverPosition = calcCoverPosition(w, h, options.windowWidth, options.windowHeight)
+    this.canvas.width  = coverPosition.width
+    this.canvas.height = coverPosition.height
     // draw image on canvas
     this.ctx.save()
     if (options.filter) {
       this.ctx.filter = options.filter
     }
-    this.ctx.drawImage(this.img, 0, 0, w, h)
+    this.ctx.drawImage(this.img, 0, 0, w, h, 0, 0, this.canvas.width, this.canvas.height)
     this.ctx.restore()
     // get imageData
 
     try {
-      this.imgData = this.ctx.getImageData(0, 0, w, h).data
+      this.imgData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height).data
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error(error)
@@ -77,8 +103,8 @@
   }
 
   ClosePixelation.prototype.renderClosePixels = function (opts) {
-    const w = this.width
-    const h = this.height
+    const w = this.canvas.width
+    const h = this.canvas.height
     const ctx = this.ctx
     const imgData = this.imgData
 
@@ -167,7 +193,7 @@
         }
 
         if (isFunction(opts.shape) && opts.wordAsArray) {
-          shapeResult = opts.shape(ctx, opts.wordAsArray, i, x_, y_, size.cx, size.cy, shapeResult)
+          shapeResult = opts.shape(ctx, opts.wordAsArray, i, x_, y_, res.cxCol, res.cyRow, shapeResult)
         } else {
           switch (opts.shape) {
             case 'circle':

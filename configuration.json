@@ -19,18 +19,18 @@
   "factorial": null,
 
   "tweaks": {
-    "x": -1,
-    "y": -2,
-    "cx": 1,
+    "x": 0,
+    "y": 0,
+    "cx": 0,
     "cy": 0,
-    "textSizeAdjustment": 4
+    "textSizeAdjustment": 0
   },
 
   "style": {
     "canvas": {
       "objectPositionX": "50%",
       "objectPositionY": "50%",
-      "scaleTransform": "97%"
+      "scaleTransform": "100%"
     }
   }
 }
