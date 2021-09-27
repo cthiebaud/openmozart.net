@@ -140,8 +140,8 @@ export default {
       // 'Roboto+Slab': true,
       // 'Inconsolata': true,
       // 'Birthstone+Bounce': true,
-      'Roboto+Mono:wght@700': true,
-      Arvo: true
+      // 'Roboto+Mono:wght@700': true,
+      // Arvo: true
     }
   },
 
