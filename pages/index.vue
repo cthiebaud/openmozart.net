@@ -290,7 +290,7 @@ img, canvas {
       if (!this.cheating) {
         this.$toast.show(`${this.matches.horz.length} horizontal, ${this.matches.vert.length} vertical`, {
           ...this.toastOptions,
-          ...{ duration: this.timeBetweenSlides - 500 }
+          ...{ duration: Math.max(1500, this.timeBetweenSlides - 500) }
         })
       }
       this.createOrRedrawCanvas()
