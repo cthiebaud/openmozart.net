@@ -239,9 +239,11 @@ img, canvas {
         this.animateShuffleAndRedraw()
       }
     },
-    toggleCheating() {
+    toggleCheating(e) {
       this.ignoreNextTap = true
       this.cheating = !this.cheating
+      e.preventDefault()
+      e.stopPropagation()
     },
     doShuffle: (factorial) => {
       // http://stackoverflow.com/questions/20789373/shuffle-array-in-ng-repeat-angular
