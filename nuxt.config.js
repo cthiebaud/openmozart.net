@@ -137,6 +137,7 @@ export default {
     inject: true,
     families: {
       'IM+Fell+English+SC': true,
+      'Montserrat:wght@900': true
       // 'Roboto+Slab': true,
       // 'Inconsolata': true,
       // 'Birthstone+Bounce': true,
@@ -184,6 +185,5 @@ export default {
     packageName: name,
     packageVersion: version
   },
-  privateRuntimeConfig: {
-  }
+  privateRuntimeConfig: {}
 }
