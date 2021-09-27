@@ -567,8 +567,14 @@ img, canvas {
             suitableTextColor = this.palette[color].getBodyTextColor()
           }
         }
-
+      }
+      if (this.config.mode === 1) {
         ctx.fillRect(x, y, cx, cy)
+      } else if (this.config.mode === 2) {
+        ctx.save()
+        ctx.globalAlpha = this.config.globalAlpha
+        ctx.fillRect(x, y, cx, cy)
+        ctx.restore()
       }
 
       if (this.cheating) {
@@ -577,7 +583,7 @@ img, canvas {
             const boundary = this.matches.horz[b]
             if (boundary <= i && i < boundary + this.config.wordAsArray.length) {
               ctx.save()
-              ctx.filter = "blur(3px)";
+              ctx.filter = 'blur(3px)'
               ctx.fillStyle = this.config.matchFill
               this.tweakAndFillRect(ctx, x, y, cx, cy)
               ctx.restore()
@@ -597,7 +603,7 @@ img, canvas {
             const boundary = this.matches.vert[b]
             if (boundary.includes(i)) {
               ctx.save()
-              ctx.filter = "blur(3px)";
+              ctx.filter = 'blur(3px)'
               ctx.fillStyle = this.config.matchFill
               this.tweakAndFillRect(ctx, x, y, cx, cy)
               ctx.restore()
@@ -608,7 +614,7 @@ img, canvas {
       if (suitableTextColor) {
         ctx.fillStyle = suitableTextColor
       }
-      ctx.fillText(letter, x + cx / 2, y + cy / 2 + 3)
+      ctx.fillText(letter, x + cx / 2, y + cy / 2 + 2)
 
       return anagram
     },

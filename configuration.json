@@ -1,13 +1,14 @@
 {
   "backgroundColor": "white",
-  "fontFamily": "'Helvetica'",
+  "fontFamily": "'Montserrat'",
   "fontFamilyFallback": "sans serif",
+  "globalAlpha": 0.5,
   "imageFilter": "brightness(95%)",
   "imageSrc": "/jpegs/ricard.jpg",
   "matchBoundaryFill": null,
   "matchFill": "#ffd301",
-  "mode": 1,
-  "modes": ["coloredLettersTransparentBackground", "adaptiveLettersColoredBackground"],
+  "mode": 2,
+  "modes": ["coloredLettersTransparentBackground", "adaptiveLettersColoredBackground", "both"],
   "shadowColor": "#c6c7c8",
   "shadowOffsetX": 0.5,
   "textSizeDefault": 20,
@@ -20,9 +21,9 @@
   "tweaks": {
     "x": 0,
     "y": 0,
-    "cx": 1,
+    "cx": 0,
     "cy": 0,
-    "textSizeAdjustment": -6
+    "textSizeAdjustment": 0
   },
 
   "style": {
