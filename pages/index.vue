@@ -26,6 +26,7 @@ export default {
     const box = { cols: undefined, rows: undefined }
     const canvas = undefined
     const cheat = ''
+    const doToast = true
     const hiddenPermutations = new Set()
     const ignoreNextTap = false
     const matches = { horz: [], vert: [] }
@@ -39,6 +40,7 @@ export default {
       box,
       canvas,
       cheat,
+      doToast,
       hiddenPermutations,
       ignoreNextTap,
       matches,
@@ -95,10 +97,10 @@ export default {
         if (oldC !== newC) {
           if (newC) {
             this.cheat = 'cheat'
-            this.$toast.show('Now cheating', this.toastOptions)
+            if (this.doToast) this.$toast.show('Now cheating', this.toastOptions)
           } else {
             this.cheat = ''
-            this.$toast.show('Stopped cheating', this.toastOptions)
+            if (this.doToast) this.$toast.show('Stopped cheating', this.toastOptions)
           }
           this.createOrRedrawCanvas()
         }
@@ -291,7 +293,7 @@ img, canvas {
       this.shuffle = shuffle
 
       if (!this.cheating) {
-        this.$toast.show(`${this.matches.horz.length} horizontal, ${this.matches.vert.length} vertical`, {
+        if (this.doToast) this.$toast.show(`${this.matches.horz.length} horizontal, ${this.matches.vert.length} vertical`, {
           ...this.toastOptions,
           ...{ duration: Math.max(1500, this.timeBetweenSlides - 500) }
         })
@@ -303,7 +305,7 @@ img, canvas {
         start = typeof this.slideshow === 'undefined' // toggle
       }
       if (start && typeof this.slideshow === 'undefined') {
-        this.$toast.show('Starting slideshow', this.toastOptions)
+        if (this.doToast) this.$toast.show('Starting slideshow', this.toastOptions)
         this.shuffleAndRedraw()
         let slideshowLastredraw = new Date()
         this.slideshow = setInterval(
@@ -320,7 +322,7 @@ img, canvas {
       } else if (!start && typeof this.slideshow !== 'undefined') {
         clearInterval(this.slideshow)
         this.slideshow = undefined
-        this.$toast.show('Slideshow stopped', this.toastOptions)
+        if (this.doToast) this.$toast.show('Slideshow stopped', this.toastOptions)
       }
     },
     createOrRedrawCanvas(img) {
