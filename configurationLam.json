@@ -1,0 +1,37 @@
+{
+  "backgroundColor": "#160804",
+  "cornerFill": "#ffd70040",
+  "cornerStroke": "#ffd700ff",
+  "fontFamily": "'IM Fell English SC'",
+  "fontFamilyFallback": "serif",
+  "globalAlpha": 0.25,
+  "imageFilter": "brightness(120%)",
+  "imageSrc": "/jpegs/lam2.jpg",
+  "matchBoundaryFill": "#160804",
+  "matchFill": "#89001e",
+  "mode": 2,
+  "shadowColor": "#572010ff",
+  "shadowOffsetX": 0.5,
+  "textSizeDefault": 20,
+
+  "word": "KITTYL",
+  "ersatzAsArray": null,
+  "wordAsArray": null,
+  "factorial": null,
+
+  "tweaks": {
+    "x": 0,
+    "y": 0,
+    "cx": 0,
+    "cy": 0,
+    "textSizeAdjustment": 0
+  },
+
+  "style": {
+    "canvas": {
+      "objectPositionX": "50%",
+      "objectPositionY": "50%",
+      "scaleTransform": "100%"
+    }
+  }
+}
