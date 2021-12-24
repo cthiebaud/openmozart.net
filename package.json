@@ -17,7 +17,7 @@
     "@nuxtjs/axios": "^5.13.6",
     "@nuxtjs/pwa": "^3.3.5",
     "@nuxtjs/toast": "^3.3.1",
-    "core-js": "^3.18.0",
+    "core-js": "^3.20.1",
     "node-vibrant": "3.1.6",
     "nuxt": "^2.15.7",
     "vue2-touch-events": "^3.2.2"
