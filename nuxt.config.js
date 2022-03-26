@@ -51,7 +51,30 @@ export default {
       {
         name: 'theme-color',
         content: '#160804'
-      }
+      },
+
+      // Open Graph general (Facebook, Pinterest & Google+)
+      { hid: "og:title", name: "og:title", content: "openmozart" },
+      {
+        hid: "og:description",
+        name: "og:description",
+        content:
+          "719 permutations of the name \"TRAZOM\" colored in such a way as to form the famous portrait by Joseph Lange."
+      },
+      {
+        hid: "og:image",
+        name: "og:image",
+        content: "https://openmozart.cthiebaud.com/screenshot_1600x1200.jpg"
+      },
+      {
+        hid: "og:site_name",
+        name: "og:site_name",
+        content: "https://openmozart.cthiebaud.com/"
+      },
+      { hid: "og:type", name: "og:type", content: "website" },
+      { hid: "og:image:type", name: "og:image:type", content: "image/jpeg" },
+      { hid: "og:image:width", name: "og:image:width", content: "1600" },
+      { hid: "og:image:height", name: "og:image:height", content: "1200" }
     ],
     link: [
       // https://realfavicongenerator.net/
